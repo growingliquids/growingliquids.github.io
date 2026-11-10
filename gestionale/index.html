@@ -132,9 +132,10 @@ button.lnk{border:0;background:none;color:var(--mut);text-decoration:underline;p
 #nav{display:flex;flex-direction:column}
 #nav .gh{margin-top:14px;padding:6px 14px;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);font-weight:600;border-radius:999px}
 #nav .gh span:first-child{flex:1}#nav .gh .ic{width:14px;height:14px;transition:transform .15s;transform:rotate(-90deg)}#nav .gh.open .ic{transform:none}#nav .gh:hover{color:var(--ink)}
-#nav .gi.closed{display:none}#nav .foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+#nav .gi.closed{display:none}#nav .navnew{justify-content:center;margin:4px 0 10px}#nav .navnew .ic{stroke:#fff}
+.qn{display:grid;grid-template-columns:1fr 1fr;gap:8px}.qn button{justify-content:flex-start;padding:12px 14px}.guida h3{margin:18px 0 6px}.guida p,.guida li{line-height:1.55}.guida ol{padding-left:20px;margin:0}#nav .foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
 #nav .who{padding:10px 14px 0;font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
-@media(max-width:760px){#nav{flex-direction:row}#nav .who,#nav .gh{display:none!important}#nav .gi,#nav .gi.closed,#nav .foot{display:contents}.auth{margin-top:4vh}}
+@media(max-width:760px){.qn{grid-template-columns:1fr}#nav .navnew{margin:0}#nav{flex-direction:row}#nav .who,#nav .gh{display:none!important}#nav .gi,#nav .gi.closed,#nav .foot{display:contents}.auth{margin-top:4vh}}
 </style>
 </head>
 <body>
@@ -357,16 +358,19 @@ const NAVG=[[null,[['dashboard','Plancia','dash'],['ordini','Ordini','ord']]],
 const NAV=[...NAVG.flatMap(g=>g[1]),['impostazioni','Impostazioni','gear']];
 const VALIAS={prodotti:'magazzino',mandati:'fornitori'};   /* vecchi indirizzi: la vista confluita */
 const navOpen=(()=>{try{return JSON.parse(localStorage.getItem(_lsKey('nav')))||{}}catch{return{}}})();
+/* sezioni facoltative nascondibili da Impostazioni (preferenza di questo browser) */
+const NAVOPT=[['privatelabel','Private label'],['prezzi','Calcolo prezzi'],['fallate','Fallate'],['agenti','Agenti']];
+const navHide=(()=>{try{return new Set(JSON.parse(localStorage.getItem(_lsKey('navhide')))||[])}catch{return new Set()}})();
 const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori',ptab:'mandati'};
 function render(){if(!AUTH.prof)return;
   if(st.view==='mandati')st.fotab='mandati';if(VALIAS[st.view])st.view=VALIAS[st.view];
   const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length,badge={amministrazione:nUrg,fallate:nFl};
   const item=([k,l,ic])=>`<button data-view="${k}" class="${st.view===k?'on':''}">${I(ic)}<span>${l}</span>${badge[k]?`<span class="nb">${badge[k]}</span>`:''}</button>`;
   $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`
-    +NAVG.map(([g,items])=>{if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
+    +`<button class="pri navnew" data-act="q-new">${I('plus')}<span>Nuovo</span></button>`+NAVG.map(([g,all])=>{const items=all.filter(x=>!navHide.has(x[0]));if(!items.length)return'';if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
       return `<button class="gh${open?' open':''}" data-navg="${g}" aria-expanded="${open}"><span>${g}</span>${!open&&n?`<span class="nb">${n}</span>`:''}${I('chev')}</button><div class="gi${open?'':' closed'}">${items.map(item).join('')}</div>`}).join('')
-    +`<div class="foot">${item(['impostazioni','Impostazioni','gear'])}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst></span></div></div>`;
-  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);tblHint=st.view==='magazzino'&&st.mtab!=='giac'?'':EMPTY[st.view]||'';$('#app').innerHTML=remBanner(SC)+v();tblHint='';if(st.view==='prezzi')pcUpdate();DB.status()}
+    +`<div class="foot">${item(['guida','Guida','doc'])}${item(['impostazioni','Impostazioni','gear'])}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst></span></div></div>`;
+  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);tblHint=st.view==='magazzino'&&st.mtab!=='giac'?'':EMPTY[st.view]||'';$('#app').innerHTML=remBanner(SC)+v()+(st.view==='dashboard'?PLANCIA_AIUTO:'');tblHint='';if(st.view==='prezzi')pcUpdate();DB.status()}
 /* pagine vuote: la prima tabella della pagina spiega cosa fare invece di "Nessun dato" */
 const EMPTY={ordini:'Nessun ordine qui. Crea il primo con «Nuovo ordine»; gli ordini Wine Alchemist arrivano da soli dal CRM.',magazzino:'Nessuna referenza. Aggiungine una con «Nuova referenza» o importale dal Cantina Manager.',documenti:'Nessun documento. Fatture e DDT si creano dai pulsanti di un ordine di vendita, oppure con «Nuovo documento».',provvigioni:'Nessuna provvigione con questi filtri. Arrivano dagli ordini in agenzia (CRM Wine Alchemist) e dagli ordini con un agente.',privatelabel:'Nessuna etichetta. Crea la scheda del primo vino a marchio con «Nuova etichetta».',fallate:'Nessuna fallata aperta. Quando un cliente segnala una bottiglia difettosa, registrala con «Nuova segnalazione».',clienti:'Nessun cliente. Aggiungilo con «Nuovo»; i clienti del CRM si creano da soli con i loro ordini.',fornitori:'Nessun elemento. Aggiungilo con «Nuovo».',agenti:'Nessun agente. Aggiungilo con «Nuovo agente», poi assegnalo ai suoi clienti.'};
 let tblHint='';
@@ -514,13 +518,30 @@ provvigioni(){if(st.ptab==='agenti')return VIEWS.agenti();const f=st.pf,rows=pro
 
 impostazioni(){const a=DB.settings().azienda||{};
   return `<div class="bar"><h2>Impostazioni</h2></div><form id="setf" class="card"><h3>Dati di fatturazione (intestazione documenti)</h3><div class="grid">${AZF.map(f=>fieldHTML(f,a[f[0]])).join('')}</div><p><button class="pri">${I('ok')}Salva</button></p></form>
-  ${waCard()}<div class="card" style="margin-top:14px"><h3>Dati e backup</h3><p class="muted">I dati stanno su Supabase (progetto Growing Liquids), condivisi tra tutte le postazioni, con backup automatico ogni notte. Questo browser ne tiene una copia per lavorare anche senza rete: <b data-dbst></b>.</p>
+  ${waCard()}<div class="card" style="margin-top:14px"><h3>Sezioni del menù</h3><p class="muted">Nascondi le sezioni che non usi: restano disponibili e si riattivano da qui. Vale per questo browser.</p>${NAVOPT.map(([k,l])=>`<label class="chk"><input type="checkbox" data-navhide="${k}"${navHide.has(k)?'':' checked'}> ${l}</label>`).join(' ')}</div><div class="card" style="margin-top:14px"><h3>Dati e backup</h3><p class="muted">I dati stanno su Supabase (progetto Growing Liquids), condivisi tra tutte le postazioni, con backup automatico ogni notte. Questo browser ne tiene una copia per lavorare anche senza rete: <b data-dbst></b>.</p>
   ${DB.vecchi()&&!localStorage.getItem(_lsKey('db_v1_caricato'))?`<p class="rem" style="border-radius:16px"><span>In questo browser ci sono ${DB.vecchi()} record del vecchio gestionale, salvati solo qui.</span>${B('db-import',I('ul')+'Carica su Supabase','','pri')}</p>`:''}
   ${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('x')+'Svuota la copia locale','','','','Ricarica tutto dal server')}</div>`}
 };
 const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA'],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
 function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
 
+/* testi d'aiuto: statici, nessun dato */
+const PLANCIA_AIUTO=`<details class="card" style="margin-top:14px"><summary><b>Come leggere la plancia</b></summary><ul class="guida">
+<li><b>Venduto diretto</b>: imponibile delle vendite di Growing Liquids evase nel periodo. <b>Margine lordo</b>: venduto meno il costo delle bottiglie uscite, al costo registrato quando sono uscite.</li>
+<li><b>Venduto in agenzia</b>: ordini presi su mandato (per esempio Wine Alchemist): la merce non passa da noi, guadagniamo la provvigione.</li>
+<li><b>Provvigioni su ordini del periodo</b>: quanto vale la provvigione degli ordini con data nel periodo scelto.</li>
+<li><b>Provvigioni mandati da incassare</b>: tutto ciò che i mandanti ci devono, di qualsiasi periodo. Sotto: quanto è già maturato (il cliente ha pagato) e quanto aspetta il pagamento del cliente.</li>
+<li><b>Acquisti</b>: costo pieno della merce comprata, comprese le spese di trasporto e dogana ripartite sulle bottiglie.</li>
+<li><b>Valore magazzino</b>: bottiglie in giacenza al loro costo d'acquisto, consumando prima i lotti più vecchi (FIFO).</li>
+<li><b>Da incassare / da pagare</b>: fatture emesse e ricevute non ancora saldate, per scadenza.</li></ul></details>`;
+VIEWS.guida=()=>`<div class="bar"><h2>Guida rapida</h2></div><div class="card guida">
+<h3>Vendere a un cliente</h3><ol><li>Nuovo, Ordine di vendita: scegli il cliente, aggiungi i vini. Il prezzo arriva dal listino del cliente (HoReCa, ingrosso o gruppo).</li><li>Quando la merce parte premi Evadi: le bottiglie escono dal magazzino e il costo resta registrato.</li><li>Dai pulsanti dell'ordine crei DDT e fattura (copia di cortesia: l'originale va allo SDI dal vostro programma di fatturazione).</li><li>Quando incassi, in Fatture e DDT premi Incassata.</li></ol>
+<h3>Comprare da un produttore</h3><ol><li>Nuovo, Ordine d'acquisto: fornitore, vini, prezzi. Per l'estero indica valuta, cambio e costi accessori (trasporto, dogana, accise) se non sono già nel prezzo.</li><li>Quando la merce arriva premi Ricevi: entra in magazzino al costo pieno per bottiglia.</li><li>Registra la fattura del fornitore (Nuovo, Fattura ricevuta): la trovi in Scadenze finché non la segni pagata.</li></ol>
+<h3>Ordini Wine Alchemist e provvigioni</h3><ol><li>Gli ordini del CRM arrivano da soli quando Wine Alchemist li conferma (Impostazioni, Collegamento CRM).</li><li>La provvigione matura quando il cliente paga: lo stato si aggiorna dal CRM.</li><li>In Provvigioni, scheda Da incassare, stampi l'estratto conto e segni quando Wine Alchemist ha liquidato.</li></ol>
+<h3>Magazzino</h3><p>Ogni carico, scarico, reso o rottura è un movimento. I movimenti non si modificano: se sbagli, annulli e ne registri uno nuovo. Così i numeri per il commercialista restano coerenti.</p>
+<h3>Fallate</h3><p>Il cliente segnala una bottiglia difettosa: Nuovo, Fallata. Da lì mandi la segnalazione al fornitore e registri la sostituzione.</p>
+<h3>Private label</h3><p>Ogni vino a marchio ha una scheda con ingredienti, valori nutrizionali e QR della pagina e-label. Quando l'etichetta va in stampa spunta «QR già in stampa»: l'indirizzo non potrà più cambiare.</p>
+<h3>Dati e sicurezza</h3><p>I dati stanno sul server di Growing Liquids e si vedono da ogni postazione dopo l'accesso. Senza rete si continua a lavorare: le modifiche partono appena torna la connessione (lo stato è in fondo al menù). Ogni notte c'è un backup automatico.</p></div>`;
 /* fornitori, mandanti e contratti nella stessa voce, su due schede */
 VIEWS.fornitori=()=>crudView(st.fotab==='mandati'?'mandati':'fornitori',tabs('fotab',[['fornitori','Fornitori e mandanti'],['mandati','Contratti e mandati']]));
 function crudView(c,tb=''){const s=S[c];let rows=DB.all(c).filter(o=>match(c,c==='prodotti'?{...o,_p:DB.get('fornitori',o.produttore_id)?.rag_soc}:o));
@@ -946,6 +967,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
     'cm-imp':cmImport,'inv-scheda':()=>invScheda(DB.get('prodotti',id)),'inv-reset':()=>{st.inv={sort:st.inv.sort};render()},
     'mv-new':()=>crudForm('movimenti',{data:today(),prodotto_id:id,tipo:b.dataset.t}),
     'rem-x':()=>{st.hideRem=true;render()},
+    'q-new':()=>{const Q=[['ov','Ordine di vendita','ord'],['oa','Ordine d\'acquisto','trk'],['doc','Fattura o DDT','doc'],['pas','Fattura ricevuta','wal'],['mov','Movimento di magazzino','box'],['prod','Referenza (vino)','btl'],['cli','Cliente','usr'],['for','Fornitore o mandante','trk'],['fal','Fallata','flag']].filter(q=>!(q[0]==='fal'&&navHide.has('fallate')));
+      modal('Nuovo',`<div class="qn">${Q.map(([k,l,ic])=>B('q-go',I(ic)+l,k,'','type="button"')).join('')}</div>`,()=>true,'Chiudi');
+      $('#dlg .qn').onclick=e=>{const k=e.target.closest('[data-id]')?.dataset.id;if(!k)return;$('#dlg').close();const T=today();({ov:()=>{st.otipo='vendita';orderForm()},oa:()=>{st.otipo='acquisto';orderForm()},doc:newDoc,pas:()=>crudForm('passive',{data:T}),mov:()=>crudForm('movimenti',{data:T,tipo:'Carico'}),prod:()=>crudForm('prodotti'),cli:()=>crudForm('clienti'),for:()=>crudForm('fornitori'),fal:()=>crudForm('fallate',{data:T})})[k]?.()}},
     logout:()=>{if(confirm('Uscire dal gestionale?'))AUTH.sb?.auth.signOut()},
     'rem-mail':()=>{const d=dc(),c=DB.get('clienti',d.cliente_id)||{},a=DB.settings().azienda||{},t=totals(d.righe);
       const body=`Gentili ${c.referente||c.rag_soc},\n\nda un controllo risulta ancora aperta la fattura n. ${d.numero}/${d.anno} del ${dIT(d.data)}, di ${eur(t.tot)}, scaduta il ${dIT(d.scadenza)}.\nVi chiediamo cortesemente di provvedere al saldo${a.iban?` tramite bonifico all'IBAN ${a.iban}`:''}, o di ignorare questo messaggio se il pagamento è già stato effettuato.\n\nGrazie e buona giornata,\n${a.rag_soc||CONFIG.nome}`;
@@ -960,6 +984,7 @@ document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))r
   if(t.closest('#pcalc'))return pcUpdate();
   /* nei campi data il ridisegno aspetta l'uscita dal campo: altrimenti mentre si scrive l'anno il cursore si perde */
   const rr=()=>{if(t.type==='date'&&document.activeElement===t){t.onblur=()=>{t.onblur=null;render()};return}render()};
+  if(t.dataset.navhide){t.checked?navHide.delete(t.dataset.navhide):navHide.add(t.dataset.navhide);try{localStorage.setItem(_lsKey('navhide'),JSON.stringify([...navHide]))}catch{}render();return}
   if(t.dataset.s){st[t.dataset.s]=t.value;rr()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;rr()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;rr()}
   else if(t.id==='restore'&&t.files[0])t.files[0].text().then(j=>{if(!confirm('Ripristinare il backup? I record del file sostituiscono quelli con lo stesso codice sul server, per tutte le postazioni.'))return;try{toast(DB.load(j)+' record in ripristino');render()}catch(err){alert(err.message)}})});
 document.addEventListener('submit',e=>{if(e.target.id!=='setf')return;e.preventDefault();const s=DB.settings();s.azienda=readForm(e.target,AZF,s.azienda||{});DB.saveSettings();toast('Dati salvati');render()});
