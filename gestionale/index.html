@@ -160,21 +160,89 @@ const IC={dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>
 const I=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
 
 /* ================= DATA LAYER =================
-   localStorage ora; migrazione Supabase: una tabella per collection (righe -> jsonb),
-   'movimenti' = ledger append-only con tombstone (deleted_at), come cm_movements_ledger. */
-const DB=(()=>{const KEY=_lsKey('db_v1'),LEDGER=new Set(['movimenti']);let d;try{d=JSON.parse(localStorage.getItem(KEY))||{}}catch{d={}}
-  const persist=()=>localStorage.setItem(KEY,JSON.stringify(d)),raw=c=>d[c]||(d[c]=[]);
+   Supabase (schema gl, progetto Growing Liquids). Il resto del codice usa la stessa interfaccia di prima:
+   lettura sincrona dalla memoria; ogni scrittura aggiorna subito la memoria e va in una coda verso il server,
+   svuotata appena c'è rete (copia locale + coda in localStorage: si lavora anche offline).
+   Aggiornamento in tempo reale dalle altre postazioni. 'movimenti' = registro: remove imposta deleted_at.
+   Le righe degli ordini stanno in gl.ordini_righe; i campi senza colonna dedicata in extra (o dati). */
+const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH={documenti:'dati',pl:'dati'},KC=_lsKey('cache_v2'),KQ=_lsKey('coda_v2');
+  const C_=s=>Object.fromEntries(s.split(',').map(x=>x.split(':')));
+  const COLS={fornitori:C_('id:u,rag_soc:t,tipo:t,paese:t,piva:t,eori:t,accisa:t,valuta:t,incoterm:t,pagamento:t,iban:t,email:t,tel:t,referente:t,indirizzo:t,citta:t,note:t,created_at:ts'),
+    agenti:C_('id:u,nome:t,tipo:t,zona:t,piva:t,cf:t,email:t,tel:t,indirizzo:t,iban:t,pct_vendita:n,quota_mandati:n,maturazione:t,liquidazione:t,enasarco:b,enasarco_pct:n,ritenuta_pct:n,data_inizio:d,data_fine:d,attivo:b,doc_url:t,note:t,created_at:ts'),
+    clienti:C_('id:u,rag_soc:t,tipo:t,gruppo:t,agente_id:u,piva:t,cf:t,sdi:t,indirizzo:t,cap:t,citta:t,prov:t,paese:t,dest:t,orari:t,email:t,tel:t,referente:t,listino:t,sconto:n,pagamento:t,fido:n,wa_id:t,note:t,created_at:ts'),
+    mandati:C_('id:u,mandante_id:u,tipo:t,data_inizio:d,data_fine:d,rinnovo_auto:b,preavviso_gg:n,esclusiva:b,zona:t,canali:t,provv_pct:n,provv_base:t,liquidazione:t,minimo:n,enasarco:b,pag_clienti:t,doc_url:t,condizioni:t,created_at:ts'),
+    prodotti:C_('id:u,sku:t,nome:t,produttore_id:u,distributore_id:u,canale:t,mandato_id:u,annata:t,tipologia:t,formato:t,vitigni:t,paese:t,regione:t,zona:t,denominazione:t,ean:t,costo:n,prezzo:n,prezzo_ingr:n,prezzo_int:n,iva:n,provv_pct:n,cartone:n,scorta_min:n,attivo:b,descr:t,note:t,created_at:ts'),
+    ordini:C_('id:u,numero:t,tipo:t,data:d,data_evasione:d,stato:t,cliente_id:u,fornitore_id:u,mandato_id:u,agente_id:u,agente_pct:n,provv_pct:n,valuta:t,cambio:n,costi_acc:n,consegna:d,rif_esterno:t,note:t,mov:b,provv_liq:d,agente_liq:d,fonte:t,ext_id:t,wa_sig:t,manifest_id:u,created_at:ts'),
+    movimenti:C_('id:u,data:d,prodotto_id:u,tipo:t,qta:n,lotto:t,costo_unit:n,prezzo_unit:n,rif:t,das:t,ordine_id:u,note:t,deleted_at:ts,created_at:ts'),
+    documenti:C_('id:u,tipo:t,numero:n,anno:n,data:d,cliente_id:u,ordine_id:u,righe:j,pagamento:t,scadenza:d,pagata:b,data_incasso:d,created_at:ts'),
+    passive:C_('id:u,fornitore_id:u,numero:t,data:d,rif_ordine:t,ordine_id:u,valuta:t,imponibile:n,iva:n,totale:n,pagamento:t,scadenza:d,pagata:b,data_pag:d,note:t,created_at:ts'),
+    pl:C_('id:u,nome:t,prodotto_id:u,slug:t,qr_stampato:b,created_at:ts'),
+    fallate:C_('id:u,num:t,data:d,cliente_id:u,prodotto_id:u,fornitore_id:u,lotto:t,qta:n,difetto:t,descr:t,rif:t,stato:t,stato_forn:t,data_segn:d,credito:n,note:t,created_at:ts')};
+  const COLL=Object.keys(COLS),SHARED=['azienda','pricing'],WASH=['mandato_id','da','agenti','map'];
+  let d={},seq={},q=[],shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
+  try{const c=JSON.parse(localStorage.getItem(KC));if(c){d=c.d||{};seq=c.seq||{};shared=c.shared||''}}catch{}try{q=JSON.parse(localStorage.getItem(KQ))||[]}catch{q=[]}
+  const raw=c=>d[c]||(d[c]=[]),save=()=>{try{localStorage.setItem(KC,JSON.stringify({d,seq,shared}));localStorage.setItem(KQ,JSON.stringify(q))}catch(e){console.warn('Copia locale non salvata',e)}};
+  const conv=(t,v)=>t==='n'?(v===''||v==null||isNaN(+v)?null:+v):t==='d'?(v?String(v).slice(0,10):null):t==='u'||t==='ts'?(v||null):t==='b'?!!v:t==='j'?v:(v==null?null:String(v));
+  function toRow(c,o){const cols=COLS[c],k=CATCH[c]||'extra',row={},ex={};
+    for(const[f,v]of Object.entries(o)){if(f==='updated_at'||(c==='ordini'&&f==='righe'))continue;const t=cols[f];if(!t){if(v!==undefined)ex[f]=v;continue}if(t==='b'&&v==null)continue;row[f]=conv(t,v)}
+    row[k]=ex;return row}
+  function fromRow(c,r){const k=CATCH[c]||'extra',o={...(r[k]||{}),...r};delete o[k];delete o.creato_da;return o}
+  const sharedOf=s=>JSON.stringify({...Object.fromEntries(SHARED.map(k=>[k,s[k]||null])),wa:Object.fromEntries(WASH.map(k=>[k,s.wa?.[k]??null]))});
+  const put=(c,o)=>{const a=raw(c),i=a.findIndex(x=>x.id===o.id);i<0?a.push(o):a[i]=o};
+  const status=()=>{for(const el of document.querySelectorAll('[data-dbst]'))el.textContent=q.length?`${q.length} ${q.length>1?'modifiche':'modifica'} da inviare`:(ready?'Dati sincronizzati':'Caricamento dati…')};
+  const enqueue=op=>{q.push(op);save();status();clearTimeout(tFl);tFl=setTimeout(flush,300)};
+  const sb=()=>AUTH.sb;
+  async function fetchAll(t,sel='*'){const out=[];for(let i=0;;i+=1000){const{data,error}=await sb().from(t).select(sel).range(i,i+999);if(error)throw error;out.push(...data);if(data.length<1000)return out}}
+  async function flush(){if(busy||!q.length||!sb()||!AUTH.prof)return;busy=true;
+    try{while(q.length){const op=q[0];let r;
+        if(op.op==='up'){r=await sb().from(TB[op.c]||op.c).upsert(toRow(op.c,op.o));if(!r.error&&op.c==='ordini')r=await sb().rpc('sostituisci_righe',{p_ordine:op.o.id,p_righe:(op.o.righe||[]).map(x=>({prodotto_id:x.prodotto_id||'',descr:x.descr||'',qta:x.qta,prezzo:x.prezzo,sconto:x.sconto,iva:x.iva}))})}
+        else if(op.op==='canc')r=await sb().from(TB[op.c]||op.c).update({deleted_at:op.at}).eq('id',op.id);
+        else if(op.op==='del')r=await sb().from(TB[op.c]||op.c).delete().eq('id',op.id);
+        else if(op.op==='num')r=await sb().rpc('allinea_contatore',{p_chiave:op.k,p_valore:op.v});
+        else if(op.op==='set')r=await sb().from('impostazioni').upsert({chiave:'app',valore:JSON.parse(op.v)});
+        if(r?.error){const m=r.error.message||'';if(/fetch|network|Failed|timeout/i.test(m)||!r.error.code)break;
+          q.shift();save();alert('Il server ha rifiutato una modifica e i dati sono stati ricaricati.\n\n'+(r.error.code==='23505'?'Numero o codice già usato da un\'altra postazione.':m));await sync();continue}
+        q.shift();save()}}
+    catch(e){console.warn('Coda non svuotata',e)}finally{busy=false;status()}}
+  /* carica tutto dal server, poi riapplica le modifiche ancora in coda */
+  async function sync(){if(!sb())return;const res=await Promise.all([...COLL.map(c=>fetchAll(TB[c]||c)),fetchAll('ordini_righe'),fetchAll('contatori'),sb().from('impostazioni').select('*').eq('chiave','app').maybeSingle()]);
+    const nd={settings:d.settings||{}};COLL.forEach((c,i)=>nd[c]=res[i].map(r=>fromRow(c,r)));
+    const rg={};for(const r of res[COLL.length].sort((a,b)=>(a.pos||0)-(b.pos||0)))(rg[r.ordine_id]||=[]).push({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva});
+    for(const o of nd.ordini)o.righe=rg[o.id]||[];
+    seq={};for(const r of res[COLL.length+1])seq[r.chiave]=r.valore;
+    const st=res[COLL.length+2].data?.valore;if(st){for(const k of SHARED)if(st[k])nd.settings[k]=st[k];if(st.wa){nd.settings.wa=Object.assign(nd.settings.wa||{},st.wa)}shared=sharedOf(nd.settings)}
+    d=nd;for(const op of q){if(op.op==='up')put(op.c,structuredClone(op.o));else if(op.op==='del')d[op.c]=raw(op.c).filter(x=>x.id!==op.id);else if(op.op==='canc'){const x=raw(op.c).find(x=>x.id===op.id);if(x)x.deleted_at=op.at}else if(op.op==='num')seq[op.k]=Math.max(seq[op.k]||0,op.v)}
+    ready=true;save();status()}
+  const later=()=>{clearTimeout(tRe);tRe=setTimeout(()=>{if(!$('#dlg').open)render()},400)};
+  function live(){if(ch||!sb())return;const pend=id=>q.some(op=>op.o?.id===id||op.id===id);
+    ch=sb().channel('gl-dati').on('postgres_changes',{event:'*',schema:'gl'},async ev=>{const t=ev.table,c=Object.keys(TB).find(k=>TB[k]===t)||t,n=ev.new||{},o=ev.old||{};
+      if(t==='contatori'){if(n.chiave)seq[n.chiave]=n.valore}
+      else if(t==='impostazioni'){if(n.valore){const s=DB.settings();for(const k of SHARED)if(n.valore[k])s[k]=n.valore[k];if(n.valore.wa)s.wa=Object.assign(s.wa||{},n.valore.wa);shared=sharedOf(s)}}
+      else if(t==='ordini_righe'){const oid=n.ordine_id||o.ordine_id;if(oid&&!pend(oid)){const{data}=await sb().from('ordini_righe').select('*').eq('ordine_id',oid).order('pos');const x=raw('ordini').find(x=>x.id===oid);if(x&&data)x.righe=data.map(r=>({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva}))}}
+      else if(COLS[c]){const id=n.id||o.id;if(!id||pend(id))return;if(ev.eventType==='DELETE')d[c]=raw(c).filter(x=>x.id!==id);else{const x=fromRow(c,n),p=raw(c).find(y=>y.id===id);if(c==='ordini')x.righe=p?.righe||[];put(c,x)}}
+      save();later()}).subscribe()}
   return{
     all:c=>LEDGER.has(c)?raw(c).filter(x=>!x.deleted_at):raw(c),
     get:(c,id)=>id?raw(c).find(x=>x.id===id&&!x.deleted_at):undefined,
-    upsert(c,o){const a=raw(c),now=new Date().toISOString();o.id||=uid();o.created_at||=now;o.updated_at=now;const i=a.findIndex(x=>x.id===o.id);i<0?a.push(o):a[i]=o;persist();return o},
-    remove(c,id){if(LEDGER.has(c)){const x=raw(c).find(x=>x.id===id);if(x)x.deleted_at=new Date().toISOString()}else d[c]=raw(c).filter(x=>x.id!==id);persist()},
+    upsert(c,o){const now=new Date().toISOString();o.id||=uid();o.created_at||=now;o.updated_at=now;put(c,o);enqueue({op:'up',c,o:structuredClone(o)});return o},
+    remove(c,id){const x=raw(c).find(x=>x.id===id);if(LEDGER.has(c)){if(x){x.deleted_at=new Date().toISOString();enqueue({op:'canc',c,id,at:x.deleted_at})}return}
+      if(c==='documenti'&&x&&seq[x.tipo+x.anno]===+x.numero)seq[x.tipo+x.anno]--;d[c]=raw(c).filter(y=>y.id!==id);enqueue({op:'del',c,id})},
     settings:()=>d.settings||(d.settings={}),
-    saveSettings:persist,
-    nextNum(key,y=''){const s=this.settings();s.seq||={};const k=key+y;s.seq[k]=(s.seq[k]||0)+1;persist();return s.seq[k]},
+    saveSettings(){save();const s=sharedOf(this.settings());if(s!==shared&&AUTH.prof?.ruolo==='admin'){shared=s;enqueue({op:'set',v:s})}},
+    nextNum(key,y=''){const k=key+y,v=(seq[k]||0)+1;seq[k]=v;enqueue({op:'num',k,v});return v},
+    seqOf:k=>seq[k]||0,
+    async start(){await flush();await sync();live();await flush();render();setInterval(flush,30000);addEventListener('online',flush)},
+    pending:()=>q.length,ready:()=>ready,status,
+    /* dati del vecchio gestionale (solo browser, chiave gl_db_v1) da caricare su Supabase */
+    vecchi(){try{const x=JSON.parse(localStorage.getItem(_lsKey('db_v1')))||{};return COLL.reduce((s,c)=>s+(x[c]||[]).length,0)}catch{return 0}},
+    importaVecchi(){const x=JSON.parse(localStorage.getItem(_lsKey('db_v1'))||'{}');let n=0;
+      for(const c of ['fornitori','agenti','clienti','mandati','prodotti','ordini','movimenti','documenti','passive','pl','fallate'])for(const o of x[c]||[]){if(raw(c).some(y=>y.id===o.id))continue;put(c,o);enqueue({op:'up',c,o:structuredClone(o)});n++}
+      for(const[k,v]of Object.entries(x.settings?.seq||{}))if(v>(seq[k]||0)){seq[k]=v;enqueue({op:'num',k,v})}
+      const s=this.settings();for(const k of SHARED)if(x.settings?.[k]&&!s[k])s[k]=x.settings[k];if(x.settings?.wa)s.wa=Object.assign({},x.settings.wa,s.wa||{});this.saveSettings();
+      localStorage.setItem(_lsKey('db_v1_caricato'),new Date().toISOString());return n},
     dump:()=>JSON.stringify(d),
-    load(j){const x=JSON.parse(j);if(typeof x!=='object'||!x)throw Error('JSON non valido');d=x;persist()},
-    reset(){d={};persist()}
+    load(j){const x=JSON.parse(j);if(typeof x!=='object'||!x)throw Error('JSON non valido');let n=0;for(const c of COLL)for(const o of x[c]||[]){put(c,o);enqueue({op:'up',c,o:structuredClone(o)});n++}return n},
+    reset(){localStorage.removeItem(KC);localStorage.removeItem(KQ);location.reload()}
   }})();
 
 /* ================= DOMINIO ================= */
@@ -262,6 +330,8 @@ const avgCost=(p,s)=>s&&s.q>0?s.val/s.q:(+p?.costo||0);
 function fifoTake(s,qty,p){let r=qty,c=0;for(const L of s?.lots||[]){if(r<=0)break;const t=Math.min(r,L.q);c+=t*L.c;L.q-=t;r-=t}if(s)s.lots=s.lots.filter(L=>L.q>0);c+=r*(+p?.costo||0);return qty?Math.round(c/qty*1e4)/1e4:0}
 function provvRows(f={}){return DB.all('ordini').filter(o=>o.tipo==='agenzia'&&['Confermato','Evaso'].includes(o.stato)&&(!f.m||o.mandato_id===f.m)&&(!f.da||o.data>=f.da)&&(!f.a||o.data<=f.a)&&(!f.st||(f.st==='liq')===!!o.provv_liq))
   .map(o=>({o,...ourProvv(o)})).sort((a,b)=>b.o.data.localeCompare(a.o.data))}
+/* ordini dal CRM Wine Alchemist: la provvigione matura quando il cliente paga (wa_pagato) */
+const provvAttesa=o=>o.fonte==='CRM Wine Alchemist'&&!o.wa_pagato&&!o.provv_liq;
 function ourProvv(o){const m=DB.get('mandati',o.mandato_id)||{};let imp=0,pv=0;for(const r of o.righe){const t=lineTot(r);const pct=o.provv_pct??DB.get('prodotti',r.prodotto_id)?.provv_pct??m.provv_pct??0;imp+=t;pv+=t*pct/100}return{m,imp:r2(imp),pv:r2(pv)}}
 /* provvigioni agenti: vendite dirette = % su imponibile; mandati = quota della nostra provvigione (o % override su imponibile).
    Maturazione all'incasso: vendite = fatture dell'ordine incassate; mandati = nostra provvigione liquidata dal mandante. */
@@ -279,8 +349,8 @@ const NAV=[['dashboard','Plancia','dash'],['ordini','Ordini','ord'],['magazzino'
 const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:''};
 function render(){if(!AUTH.prof)return;
   const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length;
-  $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`+NAV.map(([k,l,ic])=>`<button data-view="${k}" class="${st.view===k?'on':''}">${I(ic)}${l}${(k==='amministrazione'?nUrg:k==='fallate'?nFl:0)?`<span class="nb">${k==='amministrazione'?nUrg:nFl}</span>`:''}</button>`).join('')+`<div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}</div><button data-act="logout">${I('x')}Esci</button>`;
-  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);$('#app').innerHTML=remBanner(SC)+v();if(st.view==='prezzi')pcUpdate()}
+  $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`+NAV.map(([k,l,ic])=>`<button data-view="${k}" class="${st.view===k?'on':''}">${I(ic)}${l}${(k==='amministrazione'?nUrg:k==='fallate'?nFl:0)?`<span class="nb">${k==='amministrazione'?nUrg:nFl}</span>`:''}</button>`).join('')+`<div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst></span></div><button data-act="logout">${I('x')}Esci</button>`;
+  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);$('#app').innerHTML=remBanner(SC)+v();if(st.view==='prezzi')pcUpdate();DB.status()}
 const tbl=(cols,rows,rowAttr=()=>'',grpBy)=>{let last;return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th class="${c.n?'n':''}">${c.h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(o=>{let g='';if(grpBy){const k=grpBy(o);if(k!==last){last=k;g=`<tr class="grp"><td colspan="${cols.length}">${esc(k)}</td></tr>`}}return g+`<tr ${rowAttr(o)}>${cols.map(c=>`<td class="${c.n?'n':''}${c.a?' act':''}" data-l="${esc(c.h)}">${c.v(o)}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${cols.length}" class="muted">Nessun dato</td></tr>`}</tbody></table></div>`};
 const search=k=>`<input type="search" placeholder="Cerca…" value="${esc(st.q[k]||'')}" data-q="${k}" style="max-width:220px">`;
 const match=(k,o)=>{const q=(st.q[k]||'').toLowerCase();return!q||JSON.stringify(o).toLowerCase().includes(q)};
@@ -421,11 +491,13 @@ provvigioni(){const f=st.pf,rows=provvRows(f),imp=rows.reduce((s,r)=>s+r.imp,0),
   <select data-pf="st" style="width:auto"><option value="">Tutte</option><option value="mat"${f.st==='mat'?' selected':''}>Da liquidare</option><option value="liq"${f.st==='liq'?' selected':''}>Liquidate</option></select>
   <span class="muted">Venduto: <b>${eur(imp)}</b> · Provvigioni: <b>${eur(pv)}</b></span></div>
   ${tbl([{h:'Data',v:r=>dIT(r.o.data)},{h:'Ordine',v:r=>esc(r.o.numero)+(r.o.fonte?` <span class="muted">${esc(r.o.fonte)}</span>`:'')},{h:'Cliente',v:r=>esc(DB.get('clienti',r.o.cliente_id)?.rag_soc)},{h:'Mandante',v:r=>esc(DB.get('fornitori',r.m.mandante_id)?.rag_soc)},{h:'Imponibile',n:1,v:r=>eur(r.imp)},{h:'%',n:1,v:r=>num(r.imp?r.pv/r.imp*100:0)},{h:'Provvigione',n:1,v:r=>`<b>${eur(r.pv)}</b>`},
-    {h:'Stato',v:r=>r.o.provv_liq?`<span class="badge b-ok">Liquidata ${dIT(r.o.provv_liq)}</span>`:'<span class="badge b-warn">Maturata</span>'},{h:'',a:1,v:r=>B('p-liq',r.o.provv_liq?'Annulla liq.':I('ok')+'Liquidata',r.o.id)}],rows)}`},
+    {h:'Stato',v:r=>r.o.provv_liq?`<span class="badge b-ok">Liquidata ${dIT(r.o.provv_liq)}</span>`:provvAttesa(r.o)?'<span class="badge">In attesa pagamento cliente</span>':'<span class="badge b-warn">Maturata</span>'},{h:'',a:1,v:r=>B('p-liq',r.o.provv_liq?'Annulla liq.':I('ok')+'Liquidata',r.o.id)}],rows)}`},
 
 impostazioni(){const a=DB.settings().azienda||{};
   return `<div class="bar"><h2>Impostazioni</h2></div><form id="setf" class="card"><h3>Dati di fatturazione (intestazione documenti)</h3><div class="grid">${AZF.map(f=>fieldHTML(f,a[f[0]])).join('')}</div><p><button class="pri">${I('ok')}Salva</button></p></form>
-  ${waCard()}<div class="card" style="margin-top:14px"><h3>Backup</h3><p class="muted">Dati salvati in questo browser (prefisso <code>${esc(CONFIG.lsPrefix)}</code>). Esporta un backup regolarmente finché non c'è Supabase.</p>${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('del')+'Cancella tutti i dati','','')}</div>`}
+  ${waCard()}<div class="card" style="margin-top:14px"><h3>Dati e backup</h3><p class="muted">I dati stanno su Supabase (progetto Growing Liquids), condivisi tra tutte le postazioni, con backup automatico ogni notte. Questo browser ne tiene una copia per lavorare anche senza rete: <b data-dbst></b>.</p>
+  ${DB.vecchi()&&!localStorage.getItem(_lsKey('db_v1_caricato'))?`<p class="rem" style="border-radius:16px"><span>In questo browser ci sono ${DB.vecchi()} record del vecchio gestionale, salvati solo qui.</span>${B('db-import',I('ul')+'Carica su Supabase','','pri')}</p>`:''}
+  ${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('x')+'Svuota la copia locale','','','','Ricarica tutto dal server')}</div>`}
 };
 const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA'],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
 function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
@@ -653,14 +725,14 @@ function scad(){const T=today(),y=+T.slice(0,4),m=+T.slice(5,7),e7=addDays(T,7),
 function remBanner(SC){if(st.hideRem)return'';const s=SC.B.scad,w=SC.B.w;if(!s.n&&!w.n)return'';
   const parts=[s.n?`<b>${s.n} ${s.n>1?'fatture scadute':'fattura scaduta'}</b> (${s.in?eur(s.in)+' da incassare':''}${s.in&&s.out?' · ':''}${s.out?eur(s.out)+' da pagare':''})`:'',w.n?`${w.n} in scadenza nei prossimi 7 giorni (${w.in?eur(w.in)+' in entrata':''}${w.in&&w.out?' · ':''}${w.out?eur(w.out)+' in uscita':''})`:''].filter(Boolean).join(' · ');
   return `<div class="rem${s.n?' bad':''}">${I('warn')}<p>${parts}</p>${st.view!=='amministrazione'?'<button class="sm" data-view="amministrazione">Apri scadenzario</button>':''}<button class="sm" data-act="rem-x" title="Nascondi fino al prossimo avvio">${I('x')}</button></div>`}
-function cashBoxes(){const{B,fm,fmn}=scad(),inM=B.scad.in+B.w.in+B.fm.in,outM=B.scad.out+B.w.out+B.fm.out,pv=provvRows({st:'mat'}).reduce((s,r)=>s+r.pv,0);
+function cashBoxes(){const{B,fm,fmn}=scad(),inM=B.scad.in+B.w.in+B.fm.in,outM=B.scad.out+B.w.out+B.fm.out,pvR=provvRows({st:'mat'}),pv=pvR.filter(r=>!provvAttesa(r.o)).reduce((s,r)=>s+r.pv,0),pvA=pvR.filter(r=>provvAttesa(r.o)).reduce((s,r)=>s+r.pv,0);
   const C=(cls,t,v,sub)=>`<div class="cb ${cls}"><span>${t}</span><b>${eur(v)}</b><small>${sub}</small></div>`;
   return `<div class="cash">${C('in','Da incassare entro il '+dIT(fm).slice(0,5),inM,`${eur(B.w.in)} nei prossimi 7 gg${B.scad.in?` · <span class="d-dn">${eur(B.scad.in)} già scaduti</span>`:''}`)}
   ${C('out','Da pagare entro il '+dIT(fm).slice(0,5),outM,`${eur(B.w.out)} nei prossimi 7 gg${B.scad.out?` · <span class="d-dn">${eur(B.scad.out)} già scaduti</span>`:''}`)}
   ${C('tot','Saldo previsto a fine mese',inM-outM,'incassi − pagamenti, scaduti compresi')}
   ${C(B.scad.n?'bad':'','Scaduto',B.scad.in+B.scad.out,`${eur(B.scad.in)} crediti · ${eur(B.scad.out)} debiti`)}
   ${C('','Mese prossimo (al '+dIT(fmn).slice(0,5)+')',B.nm.in-B.nm.out,`+${eur(B.nm.in)} incassi · −${eur(B.nm.out)} pagamenti`)}
-  ${C('in','Provvigioni mandati da incassare',pv,'maturate, da fatturare ai mandanti')}${C('out','Provvigioni agenti da pagare',agentRows({st:'mat'}).reduce((s,r)=>s+r.pv,0),'maturate, non ancora liquidate')}</div>`}
+  ${C('in','Provvigioni mandati da incassare',pv,`maturate, da fatturare ai mandanti${pvA?` · ${eur(pvA)} in attesa del pagamento dei clienti`:''}`)}${C('out','Provvigioni agenti da pagare',agentRows({st:'mat'}).reduce((s,r)=>s+r.pv,0),'maturate, non ancora liquidate')}</div>`}
 function remList(){const SC=scad(),rows=SC.items.filter(i=>i.b==='scad'||i.b==='w');if(!rows.length)return'<p class="muted">Nessuna fattura scaduta o in scadenza nei prossimi 7 giorni.</p>';
   return `<h3 style="margin:8px 0 10px;font-size:15px">Promemoria scadenze</h3>${tbl([{h:'',v:i=>`<span class="badge ${i.k==='in'?'b-ok':'b-warn'}">${i.k==='in'?'Incasso':'Pagamento'}</span>`},{h:'Controparte',v:i=>esc(i.c?.rag_soc)},{h:'Rif.',v:i=>esc(i.rif)},{h:'Scadenza',v:i=>`${dIT(i.s)} <span class="${i.g<0?'d-dn':'muted'}">${i.g<0?`scaduta da ${-i.g} gg`:i.g===0?'oggi':`tra ${i.g} gg`}</span>`},{h:'Importo',n:1,v:i=>i.val?num(i.v)+' '+i.val:eur(i.v)},
     {h:'',a:1,v:i=>i.k==='in'?(i.c?.email&&i.g<=0?B('rem-mail',I('inb')+'Sollecita',i.id):'')+B('d-pay',I('ok')+'Incassata',i.id):B('a-pay',I('ok')+'Pagata',i.id)}],rows)}`}
@@ -721,7 +793,7 @@ function waCliente(c,waId){const all=DB.all('clienti');let x=all.find(k=>k.wa_id
   const nm=(c?.ragione_sociale||c?.insegna||'Cliente WA '+String(waId).slice(0,6)).trim(),lc=s=>String(s||'').trim().toLowerCase();
   x=all.find(k=>lc(k.rag_soc)===lc(nm)||(c?.insegna&&lc(k.rag_soc)===lc(c.insegna)));if(x){x.wa_id=waId;return DB.upsert('clienti',x)}
   return DB.upsert('clienti',{rag_soc:nm,tipo:'Ristorante',gruppo:'Esterno',wa_id:waId,piva:c?.p_iva||'',cf:c?.codice_fiscale||'',indirizzo:c?.indirizzo||'',cap:c?.cap||'',citta:c?.citta||'',email:c?.email||'',sdi:c?.codice_sdi||c?.pec||'',tel:c?.telefono||'',note:(c?.insegna&&c.insegna!==nm?'Insegna: '+c.insegna+'. ':'')+'Dal CRM Wine Alchemist'})}
-async function waSync(manual){const cfg=waCfg();if(WA.busy||!WA.ok)return;if(!cfg.mandato_id){WA.err='Scegli il mandato Wine Alchemist in Impostazioni';return waStatus()}
+async function waSync(manual){const cfg=waCfg();if(WA.busy||!WA.ok||!DB.ready())return;if(!cfg.mandato_id){WA.err='Scegli il mandato Wine Alchemist in Impostazioni';return waStatus()}
   WA.busy=true;waStatus();
   try{const da=cfg.da||DB.get('mandati',cfg.mandato_id)?.data_inizio||'';let q=WA.sb.from('v_ordini').select('*').in('stato',['confermato','evaso','annullato']).order('created_at',{ascending:false}).limit(2000);if(da)q=q.gte('created_at',da);
     const {data:ords,error}=await q;if(error)throw error;
@@ -730,16 +802,20 @@ async function waSync(manual){const cfg=waCfg();if(WA.busy||!WA.ok)return;if(!cf
     const items=await waIn('order_items','order_id,wine_id,qty,qty_omaggio,prezzo_unitario,sconto_pct',list.filter(o=>o.dettaglio!==false).map(o=>o.id));
     const wines=new Map((await waIn('wines','id,nome,produttore,annata,prezzo_listino',[...new Set(items.map(i=>i.wine_id))])).map(w=>[w.id,w]));
     const clis=new Map((await waIn('clients','id,ragione_sociale,insegna,p_iva,codice_fiscale,indirizzo,cap,citta,email,pec,codice_sdi,telefono',[...new Set(list.map(o=>o.client_id))])).map(c=>[c.id,c]));
+    /* dalla tabella orders (la vista v_ordini non li espone): sconto per pagamento anticipato (importo), data di pagamento, provvigione liquidata */
+    const ox=new Map((await waIn('orders','id,pagamento,sconto_pagamento,imponibile,pagato_at,provvigione_pagata_at',list.map(o=>o.id))).map(x=>[x.id,x]));
     let nNew=0,nUpd=0;
     for(const o of list){const eid='wa:'+o.id,ex=byExt.get(eid)||byNum.get(o.numero),stato={confermato:'Confermato',evaso:'Evaso',annullato:'Annullato'}[o.stato];
-      const righe=o.dettaglio===false?[{descr:`Ordine ${o.numero} (dettaglio riservato all'agente)`,qta:1,prezzo:r2(+(o.imponibile??o.totale)||0),sconto:0,iva:22}]
+      const X=ox.get(o.id)||{},fp=+X.sconto_pagamento>0&&+X.imponibile>0?(+X.imponibile-+X.sconto_pagamento)/+X.imponibile:1;
+      const righe=o.dettaglio===false?[{descr:`Ordine ${o.numero} (dettaglio riservato all'agente)`,qta:1,prezzo:r2(+o.totale||0),sconto:0,iva:22}]
         :items.filter(i=>i.order_id===o.id).flatMap(i=>{const w=wines.get(i.wine_id)||{},d=[w.produttore,w.nome,w.annata].filter(Boolean).join(' ')||'Referenza WA',om=+i.qty_omaggio||0,paid=(+i.qty||0)-om,out=[];
-          if(paid>0)out.push({descr:d,qta:paid,prezzo:+(i.prezzo_unitario??w.prezzo_listino)||0,sconto:+i.sconto_pct||0,iva:22});if(om>0)out.push({descr:d+' (omaggio)',qta:om,prezzo:0,sconto:0,iva:22});return out});
-      const cli=waCliente(clis.get(o.client_id),o.client_id),data=String(o.inviato_at||o.created_at||today()).slice(0,10),agente_id=cfg.map?.[o.agent_id]||cli.agente_id||null,sig=JSON.stringify([stato,righe,cli.id,agente_id,data]);
-      if(ex){if(ex.wa_sig===sig&&ex.ext_id===eid)continue;ex.ext_id=eid;
+          if(paid>0)out.push({descr:d,qta:paid,prezzo:+(i.prezzo_unitario??w.prezzo_listino)||0,sconto:Math.round((1-(1-(+i.sconto_pct||0)/100)*fp)*1e6)/1e4,iva:22});if(om>0)out.push({descr:d+' (omaggio)',qta:om,prezzo:0,sconto:0,iva:22});return out});
+      const cli=waCliente(clis.get(o.client_id),o.client_id),data=String(o.inviato_at||o.created_at||today()).slice(0,10),agente_id=cfg.map?.[o.agent_id]||cli.agente_id||null;
+      const wa_pagato=X.pagato_at?String(X.pagato_at).slice(0,10):X.pagamento==='anticipato'?data:null,liq=X.provvigione_pagata_at?String(X.provvigione_pagata_at).slice(0,10):null,sig=JSON.stringify([stato,righe,cli.id,agente_id,data,wa_pagato,liq]);
+      if(ex){if(ex.wa_sig===sig&&ex.ext_id===eid)continue;ex.ext_id=eid;ex.wa_pagato=wa_pagato;if(liq&&!ex.provv_liq)ex.provv_liq=liq;
         if(ex.provv_liq){ex.stato=stato}else Object.assign(ex,{stato,righe,cliente_id:cli.id,agente_id,data,rif_esterno:o.numero});
         if(stato==='Evaso'&&!ex.data_evasione)ex.data_evasione=data;ex.wa_sig=sig;DB.upsert('ordini',ex);nUpd++}
-      else if(stato!=='Annullato'){const y=data.slice(0,4);DB.upsert('ordini',{tipo:'agenzia',numero:`AG-${y}-${String(DB.nextNum('ordagenzia',y)).padStart(4,'0')}`,data,data_evasione:stato==='Evaso'?data:null,stato,cliente_id:cli.id,mandato_id:cfg.mandato_id,agente_id,righe,fonte:'CRM Wine Alchemist',ext_id:eid,rif_esterno:o.numero,wa_sig:sig});nNew++}}
+      else if(stato!=='Annullato'){const y=data.slice(0,4);DB.upsert('ordini',{tipo:'agenzia',numero:`AG-${y}-${String(DB.nextNum('ordagenzia',y)).padStart(4,'0')}`,data,data_evasione:stato==='Evaso'?data:null,stato,cliente_id:cli.id,mandato_id:cfg.mandato_id,agente_id,righe,fonte:'CRM Wine Alchemist',ext_id:eid,rif_esterno:o.numero,wa_sig:sig,wa_pagato,provv_liq:liq});nNew++}}
     cfg.last=new Date().toISOString();WA.err='';DB.saveSettings();
     if(nNew||nUpd){toast(`CRM Wine Alchemist: ${nNew} nuovi, ${nUpd} aggiornati`);if(!$('#dlg').open)render()}else if(manual)toast('CRM Wine Alchemist: tutto allineato')}
   catch(e){WA.err=e.message||String(e)}finally{WA.busy=false;waStatus()}}
@@ -780,7 +856,7 @@ async function authReady(){const sb=await glClient(),{data:{session}}=await sb.a
   if(error){AUTH.err='Impossibile verificare l\'account: '+authMsg(error);return authScreen()}
   if(!data?.attivo){AUTH.err='Questo account non è abilitato al gestionale. Chiedi a un amministratore di Growing Liquids.';AUTH.mode='login';return sb.auth.signOut()}
   AUTH.prof=data;$('#nav').hidden=false;if(!VIEWS[st.view]&&!S[st.view])st.view='dashboard';if(location.hash.slice(1)!==st.view)history.replaceState(null,'',location.pathname+location.search+'#'+st.view);
-  render();if(waCfg().enabled)waInit()}
+  render();try{await DB.start()}catch(x){toast('Server non raggiungibile: lavori sulla copia locale')}if(waCfg().enabled)waInit()}
 async function authStart(){const h=location.hash;
   if(/error_description=/.test(h)){const d=decodeURIComponent((/error_description=([^&]+)/.exec(h)||[])[1]||'').replace(/\+/g,' '),scad=/expired|invalid/i.test(d);history.replaceState(null,'',location.pathname+location.search);
     AUTH.mode=scad?'reset':'login';AUTH.err=scad?'Il link è scaduto o è già stato usato: chiedine uno nuovo qui sotto.':d;return authScreen()}
@@ -814,7 +890,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
     'o-del':()=>{const x=o(),mv=DB.all('movimenti').filter(m=>m.ordine_id===id);if(DB.all('documenti').some(d=>d.ordine_id===id)||DB.all('passive').some(p=>p.ordine_id===id))return alert('Ordine con documenti collegati: impostalo come Annullato invece di eliminarlo.');
       if(confirm(`Eliminare ${x.numero}?${mv.length?` I ${mv.length} movimenti collegati verranno annullati nel ledger.`:''}`)){mv.forEach(m=>DB.remove('movimenti',m.id));DB.remove('ordini',id);render()}},
     'd-new':newDoc,'d-edit':()=>docForm(dc()),'d-print':()=>printDoc(dc()),'d-pay':()=>{const d=dc();d.pagata=true;d.data_incasso=today();DB.upsert('documenti',d);render()},
-    'd-del':()=>{const d=dc(),seq=DB.settings().seq||{},last=seq[d.tipo+d.anno]===d.numero;if(!confirm(last?'Eliminare il documento?':'Non è l\'ultimo numero emesso: eliminarlo crea un buco nella numerazione. Procedere?'))return;if(last)seq[d.tipo+d.anno]--;DB.remove('documenti',id);DB.saveSettings();render()},
+    'd-del':()=>{const d=dc();if(DB.seqOf(d.tipo+d.anno)!==+d.numero)return alert(`Si può eliminare solo l'ultimo numero emesso (${DB.seqOf(d.tipo+d.anno)}/${d.anno}). Per correggere questo documento emetti una nota di credito o un nuovo documento.`);if(!confirm('Eliminare il documento?'))return;DB.remove('documenti',id);render()},
+    'db-import':()=>{const n=DB.vecchi();if(!confirm(`Caricare su Supabase i ${n} record salvati in questo browser dal vecchio gestionale? Quelli già presenti vengono saltati.`))return;toast(DB.importaVecchi()+' record in caricamento');render()},
     'a-pay':()=>{const x=DB.get('passive',id);x.pagata=true;x.data_pag=today();DB.upsert('passive',x);render()},
     'pl-qr':()=>plQR(DB.get('pl',id)),'pl-files':()=>filesModal('pl',DB.get('pl',id)),'fl-files':()=>filesModal('fallate',DB.get('fallate',id)),
     'pl-prev':()=>{const p=DB.get('pl',id),w=plCheck(p);modal('Anteprima · '+p.nome,`${w?`<p><span class="badge b-warn">${esc(w)}</span></p>`:''}<iframe srcdoc="${esc(elabelHTML(p))}" style="width:100%;max-width:420px;height:70vh;border:1px solid var(--line);border-radius:10px;display:block;margin:0 auto;background:#fff"></iframe>`,()=>{},'Chiudi')},
@@ -841,14 +918,14 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
       location.href=`mailto:${encodeURIComponent(c.email)}?subject=${encodeURIComponent(`Promemoria pagamento fattura ${d.numero}/${d.anno}`)}&body=${encodeURIComponent(body)}`},
     'p-liq':()=>{const x=o();x.provv_liq=x.provv_liq?null:today();DB.upsert('ordini',x);render()},'p-print':printProvv,
     backup:()=>download(`${CONFIG.lsPrefix}backup-${today()}.json`,DB.dump(),'application/json'),
-    reset:()=>{if(prompt('Scrivi CANCELLA per eliminare tutti i dati')==='CANCELLA'){DB.reset();render()}}
+    reset:()=>{if(DB.pending())return alert('Ci sono modifiche non ancora inviate al server: aspetta che la connessione torni prima di svuotare la copia locale.');if(confirm('Svuotare la copia locale e ricaricare tutto dal server? I dati sul server non vengono toccati.'))DB.reset()}
   })[b.dataset.act]?.()});
 document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpdate();const k=e.target.dataset.q;if(k===undefined)return;st.q[k]=e.target.value;const pos=e.target.selectionStart;render();const n=$(`[data-q="${k}"]`);n.focus();n.setSelectionRange(pos,pos)});
 document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))return;
   if(t.id==='pc-pid'){const p=DB.get('prodotti',t.value),r=$('#pcalc');r.querySelector('[data-pc="pf"]').value='';r.querySelector('[data-pc="base"]').value=p?r4(avgCost(p,stockMap()[p.id])):'';return pcUpdate()}
   if(t.closest('#pcalc'))return pcUpdate();
   if(t.dataset.s){st[t.dataset.s]=t.value;render()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;render()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;render()}
-  else if(t.id==='restore'&&t.files[0])t.files[0].text().then(j=>{if(!confirm('Sovrascrivere tutti i dati con il backup?'))return;try{DB.load(j);toast('Backup ripristinato');render()}catch(err){alert(err.message)}})});
+  else if(t.id==='restore'&&t.files[0])t.files[0].text().then(j=>{if(!confirm('Ripristinare il backup? I record del file sostituiscono quelli con lo stesso codice sul server, per tutte le postazioni.'))return;try{toast(DB.load(j)+' record in ripristino');render()}catch(err){alert(err.message)}})});
 document.addEventListener('submit',e=>{if(e.target.id!=='setf')return;e.preventDefault();const s=DB.settings();s.azienda=readForm(e.target,AZF,s.azienda||{});DB.saveSettings();toast('Dati salvati');render()});
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==st.view&&!/=/.test(h)){st.view=h;render()}});
 authStart();
