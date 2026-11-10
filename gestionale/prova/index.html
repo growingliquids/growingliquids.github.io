@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Growing Liquids — Gestionale</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:wght@400;700&display=swap">
+<script>
+/* Config host (stesso pattern di window.CM_CONFIG del Cantina Manager) */
+window.GL_CONFIG={nome:'Growing Liquids',sub:'Distribuzione & agenzia vini',skuPrefix:'GL-',lsPrefix:'gl_',accent:'#0d0d0d',logo:'',elabelBase:''};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';document.head.appendChild(s)"></script>
+<style>
+:root{--bg:#f4f3f0;--card:#fff;--ink:#1c1c1a;--mut:#73716b;--line:#e2dfd8;--acc:#5b2333;--acc2:#f2e8ea;--ok:#2f7d4f;--warn:#a96a12;--bad:#b42318;--side:#1c1c1a}
+*{box-sizing:border-box}[hidden]{display:none!important}em,i{font-style:normal}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+.ic{width:16px;height:16px;vertical-align:-3px;flex:none}
+#nav{width:220px;flex:none;background:var(--side);color:#fff;padding:18px 10px;position:sticky;top:0;height:100vh;overflow:auto}
+#nav h1{font-size:15px;margin:0 8px 18px;letter-spacing:.06em;font-weight:700}#nav h1 small{display:block;font-weight:400;opacity:.55;font-size:11px;letter-spacing:0;margin-top:2px}
+#nav img{max-width:150px;max-height:48px;display:block;margin:0 8px 16px}
+#nav button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:#d8d6d0;padding:8px 10px;border-radius:6px;cursor:pointer;font:inherit}
+#nav button:hover{background:#ffffff12}#nav button.on{background:var(--acc);color:#fff}
+main{flex:1;padding:22px;min-width:0}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.bar h2{margin:0 auto 0 0;font-size:20px}
+button,.btn{font:inherit;border:1px solid var(--line);background:var(--card);padding:6px 11px;border-radius:6px;cursor:pointer;color:var(--ink);display:inline-flex;gap:6px;align-items:center}
+button:hover,.btn:hover{border-color:var(--mut)}button.pri{background:var(--acc);border-color:var(--acc);color:#fff}button.sm{padding:3px 7px;font-size:12px}
+input,select,textarea{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;width:100%;color:var(--ink)}
+textarea{min-height:70px}input[type=checkbox]{width:auto}
+.tw{overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%}th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:12px;color:var(--mut);font-weight:600;background:#faf9f7;position:sticky;top:0}td.n,th.n{text-align:right}
+tr:last-child td{border-bottom:0}td.act{text-align:right}td.act button{margin-left:3px}
+.grp td{background:#f7f5f1;font-weight:600;font-size:12px;color:var(--mut)}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:var(--acc2);color:var(--acc)}
+.b-ok{background:#e6f4ea;color:var(--ok)}.b-warn{background:#fdf3e1;color:var(--warn)}.b-bad{background:#fde8e6;color:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 14px}.kpi b{display:block;font-size:21px}.kpi span{color:var(--mut);font-size:12px}
+.d-up{color:var(--ok);font-size:12px}.d-dn{color:var(--bad);font-size:12px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}.card h3{font-size:14px;margin:0 0 10px}
+.card .tw{border:0;border-radius:0}
+.pie{display:flex;gap:18px;align-items:center}.pie svg{width:130px;flex:none}.pie ul{list-style:none;margin:0;padding:0;font-size:13px}.pie li{display:flex;gap:6px;align-items:center;margin:3px 0}.pie li i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.bars div{display:grid;grid-template-columns:130px 1fr 90px;gap:8px;align-items:center;font-size:13px;margin:5px 0}.bars span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bars u{display:block;height:9px;background:var(--acc);border-radius:3px;text-decoration:none}.bars b{text-align:right;font-weight:600}
+.muted{color:var(--mut)}.tabs{display:flex;gap:4px;flex-wrap:wrap}.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+dialog{border:0;border-radius:12px;padding:0;width:min(1000px,96vw);max-height:92vh}dialog::backdrop{background:#0006}
+.mf{display:flex;flex-direction:column;max-height:92vh}.mf header,.mf footer{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.mf footer{border:0;border-top:1px solid var(--line);justify-content:flex-end}.mf header h3{margin:0 auto 0 0}.mb{padding:16px;overflow:auto}
+.x{border:0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.grid label{display:flex;flex-direction:column;gap:3px}.grid label span{font-size:12px;color:var(--mut)}.grid .full{grid-column:1/-1}
+.grid .chk{flex-direction:row;align-items:center;gap:8px;padding-top:18px}
+.lines td{padding:3px}.lines input,.lines select{padding:4px 6px}.lines td:nth-child(1){min-width:220px}.lines td:nth-child(2){min-width:180px}
+.lines td:nth-child(n+3):nth-child(-n+6) input{width:80px}.tots{text-align:right;margin-top:8px}
+#toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;opacity:0;transition:.2s;pointer-events:none;z-index:9}#toast.on{opacity:1}
+.warnrow td{background:#fffaf0}
+.lines tr.under td{background:#fde8e6}
+.cash{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;margin-bottom:14px}
+.cb{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--mut);border-radius:10px;padding:14px 16px}
+.cb.in{border-left-color:var(--ok)}.cb.out{border-left-color:var(--warn)}.cb.bad{border-left-color:var(--bad)}.cb.tot{border-left-color:var(--acc)}
+.cb span{display:block;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}.cb b{display:block;font-size:26px;margin:4px 0 2px;letter-spacing:-.01em}.cb small{color:var(--mut);font-size:12px}
+.rem{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fdf3e1;border:1px solid #f0d49b;color:#6b4708;border-radius:10px;padding:10px 14px;margin-bottom:14px}.rem.bad{background:#fde8e6;border-color:#f3b8b1;color:#7a1a12}.rem p{margin:0;flex:1;min-width:200px}
+.nb{margin-left:auto;background:var(--bad);color:#fff;border-radius:10px;font-size:11px;padding:0 7px;line-height:18px;font-weight:600}
+/* ===== Stile Growing Liquids: bianco e nero, serif del logo, forme a pillola ===== */
+:root{--bg:#f7f7f5;--card:#fff;--ink:#0d0d0d;--mut:#6d6c67;--line:#e4e3de;--acc:#0d0d0d;--acc2:#efeeea;--side:#fff;--ok:#2d6a47;--warn:#99630f;--bad:#a12a1e;--serif:Tinos,'Times New Roman',Times,serif}
+body{background:var(--bg);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,.kpi b,.cb b,.mf header h3{font-family:var(--serif);font-weight:400;letter-spacing:-.01em}
+.bar h2{font-size:32px;line-height:1.1}.card h3{font-size:18px}h4{font-size:16px;margin:18px 0 8px}.mf header h3{font-size:22px}
+#nav{background:#fff;color:var(--ink);border-right:1px solid var(--line);padding:22px 12px}
+#nav .brand{padding:2px 10px 22px;margin-bottom:10px;border-bottom:1px solid var(--line)}#nav .brand img{width:150px;height:auto;max-height:none;max-width:none;display:block;margin:0}#nav .brand small{display:block;color:var(--mut);font-size:11px;margin-top:10px;letter-spacing:.04em}
+#nav button{color:#3b3a37;border-radius:999px;padding:8px 14px;margin:1px 0}#nav button:hover{background:#f1f0ec}#nav button.on{background:var(--ink);color:#fff}
+button,.btn{border-radius:999px;padding:7px 15px;border-color:#d7d5cf;background:#fff}button.sm{padding:4px 11px}
+button:hover,.btn:hover{border-color:var(--ink)}button.pri{background:var(--ink);border-color:var(--ink);color:#fff}button.pri:hover{background:#2b2b29}
+input,select,textarea{border-radius:12px;border-color:#dcdad4}input:focus,select:focus,textarea:focus{outline:2px solid var(--ink);outline-offset:-1px}
+.tw,.card,.kpi,.cb{border-radius:20px;border-color:var(--line)}.card{padding:18px}
+th{background:#fafaf8;text-transform:uppercase;letter-spacing:.07em;font-size:10.5px}
+.grp td{background:#f4f3ef;color:var(--ink);font-family:var(--serif);font-size:14px;font-weight:400;letter-spacing:.02em}
+.badge{border-radius:999px;background:#efeeea;color:#2b2b29;padding:2px 10px}
+.badge.b-ok{background:#e5f1e9;color:var(--ok)}.badge.b-warn{background:#f9efdc;color:var(--warn)}.badge.b-bad{background:#f8e3df;color:var(--bad)}
+.tabs{background:#efeeea;border-radius:999px;padding:3px;gap:2px}.tabs button{border:0;background:none;padding:5px 13px}.tabs button.on{background:var(--ink);color:#fff}
+.kpis{grid-template-columns:repeat(auto-fill,minmax(165px,1fr))}.kpi{padding:16px 18px}.kpi b{font-size:28px;margin-bottom:2px}
+.cb,.cb.in,.cb.out,.cb.bad,.cb.tot{border-left:1px solid var(--line);padding:16px 18px}.cb b{font-size:32px}
+.cb::before{content:'';display:block;width:30px;height:9px;border-radius:999px;background:#d7d5cf;margin-bottom:12px}
+.cb.in::before{background:var(--ok)}.cb.out::before{background:var(--warn)}.cb.bad::before{background:var(--bad)}.cb.tot::before{background:var(--ink)}
+.bars u{background:var(--ink);border-radius:999px;height:9px}
+dialog{border-radius:24px}.mf header{padding:16px 20px}.mf footer{padding:12px 20px}
+.rem{border-radius:999px;padding:10px 12px 10px 18px}
+#toast{border-radius:999px;padding:10px 18px}
+.pie li i{border-radius:999px;width:16px;height:8px}
+@media(max-width:760px){
+#nav{border-right:0;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(8px)}#nav .brand{display:none}
+main .bar h2{font-size:26px}.cb b{font-size:21px}.kpis{grid-template-columns:1fr 1fr}.kpi b{font-size:20px}.rem{border-radius:16px}
+.tw tr{border-radius:16px}dialog{border-radius:0}.tabs{border-radius:999px}
+}
+
+@media(max-width:760px){
+.cash{grid-template-columns:1fr 1fr;gap:8px}.cb{padding:10px 12px}.cb b{font-size:19px}
+body{flex-direction:column}
+#nav{width:auto;height:auto;position:sticky;top:0;z-index:5;display:flex;overflow-x:auto;padding:6px;gap:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#nav h1,#nav img{display:none}#nav button{white-space:nowrap;width:auto;padding:9px 11px;font-size:13px}
+main{padding:12px 12px 40px}
+.bar{gap:6px}.bar h2{flex-basis:100%;font-size:18px}.bar input[type=search]{max-width:none!important;flex:1 1 100%}
+.bar select,.bar input[type=date]{flex:1 1 45%}
+.tabs{overflow-x:auto;flex-wrap:nowrap;max-width:100%;scrollbar-width:none}.tabs button{white-space:nowrap}
+.kpis{grid-template-columns:1fr 1fr;gap:8px}.kpi{padding:10px}.kpi b{font-size:17px}
+.cols{grid-template-columns:1fr}
+.tw{overflow:visible;background:none;border:0}
+.tw table,.tw tbody,.tw tr,.tw td{display:block;width:100%}
+.tw thead{display:none}
+.tw tr{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:8px;padding:6px 12px}
+.tw tr.grp{background:none;border:0;padding:10px 2px 2px;margin:0}.tw tr.grp td{background:none}
+.tw td{border:0;padding:4px 0;white-space:normal;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right;min-height:26px}
+.tw td::before{content:attr(data-l);color:var(--mut);font-size:12px;text-align:left;flex:none}
+.tw td:not([data-l])::before,.tw td[data-l=""]::before{display:none}
+.tw td:not([data-l]){justify-content:flex-start;text-align:left}
+.tw td.act{justify-content:flex-end;flex-wrap:wrap;gap:5px;padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
+.tw td.act button{margin:0;padding:7px 10px}
+.warnrow{border-color:#e9c98a!important}.warnrow td{background:none}
+.card{padding:12px}.card .tw tr{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:6px 0;margin:0}
+.lines td input,.lines td select{width:62%!important;max-width:62%}.lines td:nth-child(1),.lines td:nth-child(2){min-width:0}
+dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0}
+.mf{height:100dvh;max-height:100dvh}.mb{flex:1;padding:12px}
+.grid{grid-template-columns:1fr}
+.bars div{grid-template-columns:96px 1fr 84px}
+.pie{flex-direction:column;align-items:flex-start}
+input,select,textarea{font-size:16px}
+}
+/* accesso */
+.auth{width:100%;max-width:400px;margin:8vh auto 0;display:flex;flex-direction:column;gap:24px}.auth img{width:190px;margin:0 auto;display:block}
+.auth form{display:flex;flex-direction:column;gap:12px}.auth form h2{margin:0;font-size:26px}.auth form p{margin:0}
+.auth label{display:flex;flex-direction:column;gap:4px}.auth label span{font-size:12px;color:var(--mut)}.auth button{justify-content:center}
+button.lnk{border:0;background:none;color:var(--mut);text-decoration:underline;padding:4px}button.lnk:hover{color:var(--ink)}
+#nav{display:flex;flex-direction:column}
+#nav .gh{margin-top:14px;padding:6px 14px;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);font-weight:600;border-radius:999px}
+#nav .gh span:first-child{flex:1}#nav .gh .ic{width:14px;height:14px;transition:transform .15s;transform:rotate(-90deg)}#nav .gh.open .ic{transform:none}#nav .gh:hover{color:var(--ink)}
+#nav .gi.closed{display:none}#nav .foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+#nav .who{padding:10px 14px 0;font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){#nav{flex-direction:row}#nav .who,#nav .gh{display:none!important}#nav .gi,#nav .gi.closed,#nav .foot{display:contents}.auth{margin-top:4vh}}
+</style>
+</head>
+<body>
+<nav id="nav"></nav><main id="app"></main><dialog id="dlg"></dialog><div id="toast"></div>
+<script>
+'use strict';
+/* ================= CONFIG ================= */
+const CONFIG=Object.freeze({nome:'Growing Liquids',sub:'',skuPrefix:'GL-',lsPrefix:'gl_',accent:'#0d0d0d',logo:'',elabelBase:'',...(window.GL_CONFIG||{})});
+const _lsKey=k=>CONFIG.lsPrefix+k;
+const LOGO='data:image/png;base64,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';
+document.documentElement.style.setProperty('--acc',CONFIG.accent);
+
+/* ================= UTIL ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>crypto.randomUUID();
+const iso=(Y,M,D)=>new Date(Y,M-1,D,12).toLocaleDateString('sv');
+const today=()=>new Date().toLocaleDateString('sv');
+const addDays=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return x.toLocaleDateString('sv')};
+const r2=n=>Math.round((+n||0)*100)/100;
+const eur=n=>(+n||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+const num=n=>n==null||n===''?'':(+n).toLocaleString('it-IT',{maximumFractionDigits:2});
+const dIT=d=>d?d.split('-').reverse().join('/'):'';
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._);t._=setTimeout(()=>t.classList.remove('on'),2200)};
+const download=(name,txt,type)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3)};
+const IC={dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',ord:'<path d="M9 3h6v3H9zM7 4.5H5V21h14V4.5h-2M8.5 11h7M8.5 15h7"/>',box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/>',doc:'<path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8"/>',eur:'<path d="M17 6a7 7 0 1 0 0 12M4 10h9M4 14h9"/>',wal:'<path d="M3 6h17v14H3zM3 6l13-3v3M15.5 13h4.5"/>',btl:'<path d="M10 2h4v4l2 4v12H8V10l2-4zM8 14h8"/>',usr:'<path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a7 7 0 0 1 14 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a6 6 0 0 0-4-5.6"/>',trk:'<path d="M1 4h14v12H1zM15 9h4l4 4v3h-8M5 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM18 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>',ctr:'<path d="M6 2h12v20H6zM9 7h6M9 11h6M9 15h3"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',del:'<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>',prt:'<path d="M6 9V3h12v6M6 18H3v-8h18v8h-3M6 14h12v7H6z"/>',ok:'<path d="M4 12l5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',dl:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',ul:'<path d="M12 15V3M7 8l5-5 5 5M4 21h16"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',inb:'<path d="M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6H3v-6z"/>',tag:'<path d="M3 3h8l10 10-8 8L3 11zM7.5 7.5h.01"/>',qr:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 18v3"/>',agt:'<path d="M3 7h18v13H3zM9 7V4h6v3M3 12h18"/>',flag:'<path d="M5 21V4h11l-1.5 4L16 12H5"/>',warn:'<path d="M12 3 2 21h20zM12 10v5M12 18h.01"/>',calc:'<path d="M5 2h14v20H5zM8 5.5h8v3.5H8zM8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',chev:'<path d="M6 9l6 6 6-6"/>',out:'<path d="M15 4h4v16h-4M10 17l5-5-5-5M15 12H3"/>'};
+const I=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
+
+/* ================= DATA LAYER =================
+   Supabase (schema gl, progetto Growing Liquids). Il resto del codice usa la stessa interfaccia di prima:
+   lettura sincrona dalla memoria; ogni scrittura aggiorna subito la memoria e va in una coda verso il server,
+   svuotata appena c'è rete (copia locale + coda in localStorage: si lavora anche offline).
+   Aggiornamento in tempo reale dalle altre postazioni. 'movimenti' = registro: remove imposta deleted_at.
+   Le righe degli ordini stanno in gl.ordini_righe; i campi senza colonna dedicata in extra (o dati). */
+const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH={documenti:'dati',pl:'dati'},KC=_lsKey('cache_v2'),KQ=_lsKey('coda_v2');
+  const C_=s=>Object.fromEntries(s.split(',').map(x=>x.split(':')));
+  const COLS={fornitori:C_('id:u,rag_soc:t,tipo:t,paese:t,piva:t,eori:t,accisa:t,valuta:t,incoterm:t,pagamento:t,iban:t,email:t,tel:t,referente:t,indirizzo:t,citta:t,note:t,created_at:ts'),
+    agenti:C_('id:u,nome:t,tipo:t,zona:t,piva:t,cf:t,email:t,tel:t,indirizzo:t,iban:t,pct_vendita:n,quota_mandati:n,maturazione:t,liquidazione:t,enasarco:b,enasarco_pct:n,ritenuta_pct:n,data_inizio:d,data_fine:d,attivo:b,doc_url:t,note:t,created_at:ts'),
+    clienti:C_('id:u,rag_soc:t,tipo:t,gruppo:t,agente_id:u,piva:t,cf:t,sdi:t,indirizzo:t,cap:t,citta:t,prov:t,paese:t,dest:t,orari:t,email:t,tel:t,referente:t,listino:t,sconto:n,pagamento:t,fido:n,wa_id:t,note:t,created_at:ts'),
+    mandati:C_('id:u,mandante_id:u,tipo:t,data_inizio:d,data_fine:d,rinnovo_auto:b,preavviso_gg:n,esclusiva:b,zona:t,canali:t,provv_pct:n,provv_base:t,liquidazione:t,minimo:n,enasarco:b,pag_clienti:t,doc_url:t,condizioni:t,created_at:ts'),
+    prodotti:C_('id:u,sku:t,nome:t,produttore_id:u,distributore_id:u,canale:t,mandato_id:u,annata:t,tipologia:t,formato:t,vitigni:t,paese:t,regione:t,zona:t,denominazione:t,ean:t,costo:n,prezzo:n,prezzo_ingr:n,prezzo_int:n,iva:n,provv_pct:n,cartone:n,scorta_min:n,attivo:b,descr:t,note:t,created_at:ts'),
+    ordini:C_('id:u,numero:t,tipo:t,data:d,data_evasione:d,stato:t,cliente_id:u,fornitore_id:u,mandato_id:u,agente_id:u,agente_pct:n,provv_pct:n,valuta:t,cambio:n,costi_acc:n,consegna:d,rif_esterno:t,note:t,mov:b,provv_liq:d,agente_liq:d,fonte:t,ext_id:t,wa_sig:t,manifest_id:u,created_at:ts'),
+    movimenti:C_('id:u,data:d,prodotto_id:u,tipo:t,qta:n,lotto:t,costo_unit:n,prezzo_unit:n,rif:t,das:t,ordine_id:u,note:t,deleted_at:ts,created_at:ts'),
+    documenti:C_('id:u,tipo:t,numero:n,anno:n,data:d,cliente_id:u,ordine_id:u,righe:j,pagamento:t,scadenza:d,pagata:b,data_incasso:d,created_at:ts'),
+    passive:C_('id:u,fornitore_id:u,numero:t,data:d,rif_ordine:t,ordine_id:u,valuta:t,imponibile:n,iva:n,totale:n,pagamento:t,scadenza:d,pagata:b,data_pag:d,note:t,created_at:ts'),
+    pl:C_('id:u,nome:t,prodotto_id:u,slug:t,qr_stampato:b,created_at:ts'),
+    fallate:C_('id:u,num:t,data:d,cliente_id:u,prodotto_id:u,fornitore_id:u,lotto:t,qta:n,difetto:t,descr:t,rif:t,stato:t,stato_forn:t,data_segn:d,credito:n,note:t,created_at:ts')};
+  const COLL=Object.keys(COLS),SHARED=['azienda','pricing'],WASH=['mandato_id','da','agenti','map'];
+  let d={},seq={},q=[],shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
+  try{const c=JSON.parse(localStorage.getItem(KC));if(c){d=c.d||{};seq=c.seq||{};shared=c.shared||''}}catch{}try{q=JSON.parse(localStorage.getItem(KQ))||[]}catch{q=[]}
+  const raw=c=>d[c]||(d[c]=[]),save=()=>{try{localStorage.setItem(KC,JSON.stringify({d,seq,shared}));localStorage.setItem(KQ,JSON.stringify(q))}catch(e){console.warn('Copia locale non salvata',e)}};
+  const conv=(t,v)=>t==='n'?(v===''||v==null||isNaN(+v)?null:+v):t==='d'?(v?String(v).slice(0,10):null):t==='u'||t==='ts'?(v||null):t==='b'?!!v:t==='j'?v:(v==null?null:String(v));
+  function toRow(c,o){const cols=COLS[c],k=CATCH[c]||'extra',row={},ex={};
+    for(const[f,v]of Object.entries(o)){if(f==='updated_at'||(c==='ordini'&&f==='righe'))continue;const t=cols[f];if(!t){if(v!==undefined)ex[f]=v;continue}if(t==='b'&&v==null)continue;row[f]=conv(t,v)}
+    row[k]=ex;return row}
+  function fromRow(c,r){const k=CATCH[c]||'extra',o={...(r[k]||{}),...r};delete o[k];delete o.creato_da;return o}
+  const sharedOf=s=>JSON.stringify({...Object.fromEntries(SHARED.map(k=>[k,s[k]||null])),wa:Object.fromEntries(WASH.map(k=>[k,s.wa?.[k]??null]))});
+  const put=(c,o)=>{const a=raw(c),i=a.findIndex(x=>x.id===o.id);i<0?a.push(o):a[i]=o};
+  const status=()=>{for(const el of document.querySelectorAll('[data-dbst]'))el.textContent=q.length?`${q.length} ${q.length>1?'modifiche':'modifica'} da inviare`:(ready?'Dati sincronizzati':'Caricamento dati…')};
+  const enqueue=op=>{q.push(op);save();status();clearTimeout(tFl);tFl=setTimeout(flush,300)};
+  const sb=()=>AUTH.sb;
+  async function fetchAll(t,sel='*'){const out=[];for(let i=0;;i+=1000){const{data,error}=await sb().from(t).select(sel).range(i,i+999);if(error)throw error;out.push(...data);if(data.length<1000)return out}}
+  async function flush(){if(busy||!q.length||!sb()||!AUTH.prof)return;busy=true;
+    try{while(q.length){const op=q[0];let r;
+        if(op.op==='up'){r=await sb().from(TB[op.c]||op.c).upsert(toRow(op.c,op.o));if(!r.error&&op.c==='ordini')r=await sb().rpc('sostituisci_righe',{p_ordine:op.o.id,p_righe:(op.o.righe||[]).map(x=>({prodotto_id:x.prodotto_id||'',descr:x.descr||'',qta:x.qta,prezzo:x.prezzo,sconto:x.sconto,iva:x.iva}))})}
+        else if(op.op==='canc')r=await sb().from(TB[op.c]||op.c).update({deleted_at:op.at}).eq('id',op.id);
+        else if(op.op==='del')r=await sb().from(TB[op.c]||op.c).delete().eq('id',op.id);
+        else if(op.op==='num')r=await sb().rpc('allinea_contatore',{p_chiave:op.k,p_valore:op.v});
+        else if(op.op==='set')r=await sb().from('impostazioni').upsert({chiave:'app',valore:JSON.parse(op.v)});
+        if(r?.error){const m=r.error.message||'';if(/fetch|network|Failed|timeout/i.test(m)||!r.error.code)break;
+          q.shift();save();alert('Il server ha rifiutato una modifica e i dati sono stati ricaricati.\n\n'+(r.error.code==='23505'?'Numero o codice già usato da un\'altra postazione.':m));await sync();continue}
+        q.shift();save()}}
+    catch(e){console.warn('Coda non svuotata',e)}finally{busy=false;status()}}
+  /* carica tutto dal server, poi riapplica le modifiche ancora in coda */
+  async function sync(){if(!sb())return;const res=await Promise.all([...COLL.map(c=>fetchAll(TB[c]||c)),fetchAll('ordini_righe'),fetchAll('contatori'),sb().from('impostazioni').select('*').eq('chiave','app').maybeSingle()]);
+    const nd={settings:d.settings||{}};COLL.forEach((c,i)=>nd[c]=res[i].map(r=>fromRow(c,r)));
+    const rg={};for(const r of res[COLL.length].sort((a,b)=>(a.pos||0)-(b.pos||0)))(rg[r.ordine_id]||=[]).push({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva});
+    for(const o of nd.ordini)o.righe=rg[o.id]||[];
+    seq={};for(const r of res[COLL.length+1])seq[r.chiave]=r.valore;
+    const st=res[COLL.length+2].data?.valore;if(st){for(const k of SHARED)if(st[k])nd.settings[k]=st[k];if(st.wa){nd.settings.wa=Object.assign(nd.settings.wa||{},st.wa)}shared=sharedOf(nd.settings)}
+    d=nd;for(const op of q){if(op.op==='up')put(op.c,structuredClone(op.o));else if(op.op==='del')d[op.c]=raw(op.c).filter(x=>x.id!==op.id);else if(op.op==='canc'){const x=raw(op.c).find(x=>x.id===op.id);if(x)x.deleted_at=op.at}else if(op.op==='num')seq[op.k]=Math.max(seq[op.k]||0,op.v)}
+    ready=true;save();status()}
+  const later=()=>{clearTimeout(tRe);tRe=setTimeout(()=>{if(!$('#dlg').open)render()},400)};
+  function live(){if(ch||!sb())return;const pend=id=>q.some(op=>op.o?.id===id||op.id===id);
+    ch=sb().channel('gl-dati').on('postgres_changes',{event:'*',schema:'gl'},async ev=>{const t=ev.table,c=Object.keys(TB).find(k=>TB[k]===t)||t,n=ev.new||{},o=ev.old||{};
+      if(t==='contatori'){if(n.chiave)seq[n.chiave]=n.valore}
+      else if(t==='impostazioni'){if(n.valore){const s=DB.settings();for(const k of SHARED)if(n.valore[k])s[k]=n.valore[k];if(n.valore.wa)s.wa=Object.assign(s.wa||{},n.valore.wa);shared=sharedOf(s)}}
+      else if(t==='ordini_righe'){const oid=n.ordine_id||o.ordine_id;if(oid&&!pend(oid)){const{data}=await sb().from('ordini_righe').select('*').eq('ordine_id',oid).order('pos');const x=raw('ordini').find(x=>x.id===oid);if(x&&data)x.righe=data.map(r=>({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva}))}}
+      else if(COLS[c]){const id=n.id||o.id;if(!id||pend(id))return;if(ev.eventType==='DELETE')d[c]=raw(c).filter(x=>x.id!==id);else{const x=fromRow(c,n),p=raw(c).find(y=>y.id===id);if(c==='ordini')x.righe=p?.righe||[];put(c,x)}}
+      save();later()}).subscribe()}
+  return{
+    all:c=>LEDGER.has(c)?raw(c).filter(x=>!x.deleted_at):raw(c),
+    get:(c,id)=>id?raw(c).find(x=>x.id===id&&!x.deleted_at):undefined,
+    upsert(c,o){const now=new Date().toISOString();o.id||=uid();o.created_at||=now;o.updated_at=now;put(c,o);enqueue({op:'up',c,o:structuredClone(o)});return o},
+    remove(c,id){const x=raw(c).find(x=>x.id===id);if(LEDGER.has(c)){if(x){x.deleted_at=new Date().toISOString();enqueue({op:'canc',c,id,at:x.deleted_at})}return}
+      if(c==='documenti'&&x&&seq[x.tipo+x.anno]===+x.numero)seq[x.tipo+x.anno]--;d[c]=raw(c).filter(y=>y.id!==id);enqueue({op:'del',c,id})},
+    settings:()=>d.settings||(d.settings={}),
+    saveSettings(){save();const s=sharedOf(this.settings());if(s!==shared&&AUTH.prof?.ruolo==='admin'){shared=s;enqueue({op:'set',v:s})}},
+    nextNum(key,y=''){const k=key+y,v=(seq[k]||0)+1;seq[k]=v;enqueue({op:'num',k,v});return v},
+    seqOf:k=>seq[k]||0,
+    async start(){await flush();await sync();live();await flush();render();setInterval(flush,30000);addEventListener('online',flush)},
+    pending:()=>q.length,ready:()=>ready,status,
+    /* dati del vecchio gestionale (solo browser, chiave gl_db_v1) da caricare su Supabase */
+    vecchi(){try{const x=JSON.parse(localStorage.getItem(_lsKey('db_v1')))||{};return COLL.reduce((s,c)=>s+(x[c]||[]).length,0)}catch{return 0}},
+    importaVecchi(){const x=JSON.parse(localStorage.getItem(_lsKey('db_v1'))||'{}');let n=0;
+      for(const c of ['fornitori','agenti','clienti','mandati','prodotti','ordini','movimenti','documenti','passive','pl','fallate'])for(const o of x[c]||[]){if(raw(c).some(y=>y.id===o.id))continue;put(c,o);enqueue({op:'up',c,o:structuredClone(o)});n++}
+      for(const[k,v]of Object.entries(x.settings?.seq||{}))if(v>(seq[k]||0)){seq[k]=v;enqueue({op:'num',k,v})}
+      const s=this.settings();for(const k of SHARED)if(x.settings?.[k]&&!s[k])s[k]=x.settings[k];if(x.settings?.wa)s.wa=Object.assign({},x.settings.wa,s.wa||{});this.saveSettings();
+      localStorage.setItem(_lsKey('db_v1_caricato'),new Date().toISOString());return n},
+    dump:()=>JSON.stringify(d),
+    load(j){const x=JSON.parse(j);if(typeof x!=='object'||!x)throw Error('JSON non valido');let n=0;for(const c of COLL)for(const o of x[c]||[]){put(c,o);enqueue({op:'up',c,o:structuredClone(o)});n++}return n},
+    reset(){localStorage.removeItem(KC);localStorage.removeItem(KQ);location.reload()}
+  }})();
+
+/* ================= DOMINIO ================= */
+const PAG=['Rimessa diretta','Anticipato','Bonifico 30gg','Bonifico 30gg FM','Bonifico 60gg','Bonifico 60gg FM','Bonifico 90gg FM','RiBa 60gg FM'];
+const VAL=['EUR','USD','GBP','CHF','AUD','ZAR','NZD'];
+const STATI=['Bozza','Confermato','Evaso','Annullato'];
+const GRUPPI=['Balance F&B','Palinurobar','Furia','Esterno'];
+const MOVT=['Carico','Scarico','Reso da cliente','Reso a fornitore','Campionatura/omaggio','Rottura/perdita','Rettifica +','Rettifica −','Sostituzione fallata'];
+const SIGN={'Carico':1,'Reso da cliente':1,'Rettifica +':1};
+const TIPOL=['Rosso','Bianco','Rosato','Champagne','Metodo Classico','Metodo Classico Rosato','Rifermentato','Rifermentato Rosso','Rifermentato Rosato','Col Fondo','Ancestrale','Macerato','Orange','Passito','Dolce','Liquoroso','Distillato','Altro'];
+const FORMATI=[['0.375','0,375 L Mezza'],['0.5','0,50 L'],['0.75','0,75 L Standard'],['1.0','1 L Litro'],['1.5','1,5 L Magnum'],['2.0','2 L Jeroboam'],['3.0','3 L Doppia Magnum'],['4.5','4,5 L Rehoboam'],['6.0','6 L Mathusalem']];
+const fmtNorm=f=>{const v=parseFloat(f)||0.75;return(FORMATI.find(x=>parseFloat(x[0])===v)||[String(v)])[0]};
+const fmtLbl=f=>{const v=parseFloat(f)||0.75;return(FORMATI.find(x=>parseFloat(x[0])===v)||[0,v+' L'])[1]};
+const TCOL={Rosso:'#7a1f2b',Bianco:'#d6c15e',Rosato:'#e39aa4',Champagne:'#c9b26f','Metodo Classico':'#bfb08a','Metodo Classico Rosato':'#e0aeb4',Rifermentato:'#a9b56c','Rifermentato Rosso':'#9b4a55','Rifermentato Rosato':'#d79aa0','Col Fondo':'#8f9a5a',Ancestrale:'#b7a26a',Macerato:'#c9772e',Orange:'#e09a4a',Passito:'#9c6a26',Dolce:'#b98a3a',Liquoroso:'#5a3a2a',Distillato:'#6f7f8f',Altro:'#a7a7a7'};
+const REGIONI={Italia:["Valle d'Aosta","Piemonte","Liguria","Lombardia","Valtellina","Trentino Alto Adige","Veneto","Friuli Venezia Giulia","Emilia-Romagna","Toscana","Umbria","Marche","Lazio","Abruzzo","Molise","Campania","Puglia","Basilicata","Calabria","Sicilia","Sardegna"],
+  Francia:["Champagne","Alsazia","Loira","Borgogna","Chablis","Beaujolais","Jura","Savoia","Rodano","Ardeche","Auvergne","Provenza","Languedoc","Roussillon","Cotes Catalanes","Sud Ouest","Bordeaux","Corsica"],
+  Spagna:['Galizia','Rioja','Ribera del Duero','Catalogna','Jerez','Canarie'],Portogallo:['Vinho Verde','Douro','Dão','Alentejo','Madeira'],Germania:['Mosella','Nahe','Rheingau','Rheinhessen','Pfalz','Baden','Franken'],Austria:['Wachau','Kamptal','Kremstal','Burgenland','Steiermark'],
+  Svizzera:['Vallese','Vaud','Ticino'],Slovenia:['Brda','Vipava','Kras'],Croazia:['Istria','Dalmazia'],Ungheria:['Tokaj'],Serbia:[],Romania:[],Bulgaria:[],Grecia:['Santorini','Macedonia','Peloponneso'],Georgia:['Kakheti'],Libano:['Bekaa'],
+  'Stati Uniti':['California','Oregon','Washington'],Argentina:['Mendoza'],Cile:['Maule','Itata'],Australia:['Barossa','Adelaide Hills','Margaret River'],'Nuova Zelanda':['Marlborough','Central Otago'],Sudafrica:['Swartland','Stellenbosch']};
+const PAESE_ORD=Object.keys(REGIONI);
+const REG2P=Object.fromEntries(Object.entries(REGIONI).flatMap(([p,rs])=>rs.map(r=>[r.toLowerCase(),p])));
+const SEED={paese:PAESE_ORD,regione:Object.values(REGIONI).flat()};
+const AC=new Set(['paese','regione','denominazione','vitigni','zona','canali','citta','prov','aspetto','destinazione','referente']);
+
+const S={
+  clienti:{t:'Clienti',t1:'cliente',f:[['rag_soc','Ragione sociale','text',1],['tipo','Tipo','sel',0,['Ristorante','Bar','Enoteca','Distributore','Hotel','Privato']],['gruppo','Gruppo','sel',1,GRUPPI],['agente_id','Agente','ref:agenti'],['piva','P.IVA'],['cf','Codice fiscale'],['sdi','Codice SDI / PEC'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['prov','Prov.'],['paese','Paese'],['dest','Indirizzo consegna (se diverso)'],['orari','Orari consegna'],['email','Email'],['tel','Telefono'],['referente','Referente'],['listino','Listino','sel',0,['Base','Gruppo interno','HoReCa','Ingrosso']],['sconto','Sconto default %','num'],['pagamento','Pagamento','sel',0,PAG],['fido','Fido €','num'],['note','Note','area']],list:['rag_soc','gruppo','agente_id','citta','piva','pagamento']},
+  fornitori:{t:'Fornitori & Mandanti',t1:'fornitore/mandante',f:[['rag_soc','Ragione sociale','text',1],['tipo','Tipo','sel',0,['Produttore IT','Produttore estero','Distributore / Mandante','Produttore private label','Trasportatore / Spedizioniere','Servizi']],['paese','Paese'],['piva','P.IVA / VAT'],['eori','EORI (extra-UE)'],['accisa','Codice accisa / SEED'],['indirizzo','Indirizzo'],['citta','Città'],['email','Email'],['tel','Telefono'],['referente','Referente'],['valuta','Valuta','sel',0,VAL],['incoterm','Incoterm','sel',0,['EXW','FCA','FOB','CIF','DAP','DDP']],['pagamento','Pagamento','sel',0,PAG],['iban','IBAN'],['note','Note','area']],list:['rag_soc','tipo','paese','valuta','pagamento']},
+  prodotti:{t:'Prodotti / Referenze',t1:'referenza',f:[['nome','Nome vino','text',1],['produttore_id','Produttore','ref:fornitori'],['distributore_id','Distributore (se acquistato da terzi)','ref:fornitori'],['canale','Canale','sel',1,['Import diretto','Acquisto Italia','Mandato agenzia','Private label']],['mandato_id','Mandato collegato','ref:mandati'],['annata','Annata'],['tipologia','Tipologia','sel',0,TIPOL],['formato','Formato','sel',0,FORMATI],['vitigni','Vitigni'],['paese','Nazione'],['regione','Regione'],['zona','Zona / sottozona / cru'],['denominazione','Denominazione'],['sku','SKU (auto)'],['ean','EAN'],['costo','Costo acquisto € (std)','num'],['prezzo','Prezzo listino HoReCa €','num'],['prezzo_ingr','Prezzo ingrosso €','num'],['prezzo_int','Prezzo gruppo interno €','num'],['iva','IVA %','num'],['provv_pct','Provvigione % (override)','num'],['cartone','Bott./cartone','num'],['scorta_min','Soglia giacenza bassa (auto al primo carico)','num'],['attivo','Attivo','chk'],['descr','Descrizione (due righe)','area'],['note','Note','area']],list:['sku','nome','produttore_id','regione','annata','canale','prezzo']},
+  mandati:{t:'Contratti & Mandati',t1:'mandato',f:[['mandante_id','Mandante / Controparte','ref:fornitori',1],['tipo','Tipo','sel',1,['Agenzia (provvigione)','Distribuzione (acquisto e rivendita)','Private label / produzione','Esclusiva import']],['data_inizio','Inizio','date'],['data_fine','Scadenza','date'],['rinnovo_auto','Rinnovo tacito','chk'],['preavviso_gg','Preavviso disdetta (gg)','num'],['esclusiva','Esclusiva','chk'],['zona','Zona / territorio'],['canali','Canali (HoReCa, GDO…)'],['provv_pct','Provvigione % default','num'],['provv_base','Base provvigione','sel',0,['Imponibile fatturato','Incassato']],['liquidazione','Liquidazione','sel',0,['Mensile','Trimestrale','Semestrale','Annuale']],['minimo','Minimo annuo €','num'],['enasarco','Iscrizione Enasarco','chk'],['pag_clienti','Condizioni pagamento clienti'],['doc_url','Link contratto (Drive/PDF)'],['condizioni','Condizioni / note','area']],list:['mandante_id','tipo','zona','provv_pct','data_fine']},
+  movimenti:{t:'Movimenti',t1:'movimento',f:[['data','Data','date',1],['prodotto_id','Prodotto','ref:prodotti',1],['tipo','Tipo','sel',1,MOVT],['qta','Quantità (bott.)','num',1],['lotto','Lotto'],['costo_unit','Costo unitario € (carichi)','num'],['rif','Riferimento doc.'],['das','e-AD / DAS / MVV-E'],['note','Note','area']]},
+  passive:{t:'Fatture ricevute',t1:'fattura ricevuta',f:[['fornitore_id','Fornitore','ref:fornitori',1],['numero','N° fattura','text',1],['data','Data fattura','date',1],['rif_ordine','Rif. ordine'],['valuta','Valuta','sel',0,VAL],['imponibile','Imponibile','num'],['iva','IVA','num'],['totale','Totale (auto se vuoto)','num'],['pagamento','Pagamento (default fornitore)','sel',0,PAG],['scadenza','Scadenza (auto se vuota)','date'],['pagata','Pagata','chk'],['data_pag','Data pagamento','date'],['note','Note','area']],list:[],
+    onSave:o=>{if(o.totale==null)o.totale=r2((+o.imponibile||0)+(+o.iva||0));if(!o.pagamento)o.pagamento=DB.get('fornitori',o.fornitore_id)?.pagamento||'';if(!o.scadenza)o.scadenza=dueDate(o.data,o.pagamento);if(o.pagata&&!o.data_pag)o.data_pag=today();if(!o.pagata)o.data_pag=''}}
+};
+S.pl={t:'Private label',t1:'private label',f:[['nome','Nome etichetta','text',1],['prodotto_id','Referenza a magazzino','ref:prodotti'],['produttore_id','Produttore','ref:fornitori'],['denominazione','Denominazione'],['tipologia','Tipologia','sel',0,TIPOL],['annata','Annata'],['volume','Volume nominale','sel',0,['37,5 cl','50 cl','75 cl','150 cl','300 cl']],['gradi','Titolo alcolometrico % vol','num'],['zuccheri_gl','Zuccheri residui g/L','num'],['lotto','Lotto'],['slug','Indirizzo pagina (auto da nome e annata)'],['qr_stampato','QR già in stampa (blocca l\'indirizzo)','chk'],['ingredienti','Ingredienti IT — allergeni tra **asterischi**','area'],['ingredienti_en','Ingredients EN (opzionale, attiva la versione inglese)','area'],['nutri_auto','Calcola energia e carboidrati da gradi e zuccheri','chk'],['kj','Energia kJ / 100 ml','num'],['kcal','Energia kcal / 100 ml','num'],['carbo','Carboidrati g','num'],['zucc','di cui zuccheri g','num'],['grassi','Grassi g','num'],['saturi','di cui saturi g','num'],['proteine','Proteine g','num'],['sale','Sale g','num'],['smaltimento','Smaltimento imballaggio (una riga per componente)','area'],['info','Altre informazioni (es. imbottigliato da…)','area'],['note','Note interne','area']],list:[]};
+S.pl.onSave=(o,prev)=>{let slug=slugify(o.slug||[o.nome,o.annata].filter(Boolean).join(' '));
+  if(prev.qr_stampato&&prev.slug&&slug!==prev.slug){alert('Il QR è già in stampa: l\'indirizzo della pagina non può cambiare.');return false}
+  if(slug!==prev.slug){const used=new Set(DB.all('pl').filter(x=>x.id!==o.id).map(x=>x.slug));let s=slug,i=2;while(used.has(s))s=slug+'-'+i++;slug=s}
+  o.slug=slug;o.files||=[];if(o.nutri_auto&&o.gradi!=null)Object.assign(o,nutri(o.gradi,o.zuccheri_gl||0))};
+const DIFETTI=['Sentore di tappo (TCA)','Ossidato','Rifermentato / frizzante anomalo','Riduzione','Volatile / acetico','Tappo difettoso / colatura','Bottiglia rotta o incrinata','Etichetta o capsula danneggiata','Sedimento anomalo','Altro'];
+const FL_FORN=['Da segnalare','Segnalata','Accettata – credito','Accettata – sostituzione','Respinta','Non necessaria'];
+S.fallate={t:'Fallate & segnalazioni',t1:'segnalazione',f:[['data','Data segnalazione cliente','date',1],['cliente_id','Cliente','ref:clienti'],['prodotto_id','Referenza','ref:prodotti',1],['lotto','Lotto'],['qta','Bottiglie','num',1],['difetto','Problema','sel',1,DIFETTI],['descr','Descrizione','area'],['rif','Rif. ordine / DDT / fattura'],['stato','Gestione cliente','sel',1,['Aperta','Sostituita','Nota di credito','Respinta','Chiusa']],['fornitore_id','Produttore / distributore (auto dalla referenza)','ref:fornitori'],['stato_forn','Stato verso il fornitore','sel',1,FL_FORN],['data_segn','Data segnalazione al fornitore','date'],['credito','Credito / rimborso ottenuto €','num'],['note','Note','area']],list:[],
+  onSave:o=>{if(!o.fornitore_id){const p=DB.get('prodotti',o.prodotto_id);o.fornitore_id=p?.distributore_id||p?.produttore_id||DB.get('mandati',p?.mandato_id)?.mandante_id||''}if(!o.num)o.num='FL-'+String(DB.nextNum('fl')).padStart(4,'0');if(o.stato_forn==='Segnalata'&&!o.data_segn)o.data_segn=today();o.files||=[]}};
+S.agenti={t:'Agenti',t1:'agente',f:[['nome','Nome e cognome / ragione sociale','text',1],['tipo','Tipo','sel',0,['Agente plurimandatario','Agente monomandatario','Segnalatore / procacciatore']],['zona','Zona'],['piva','P.IVA'],['cf','Codice fiscale'],['email','Email'],['tel','Telefono'],['indirizzo','Indirizzo'],['iban','IBAN'],['pct_vendita','Provvigione su vendite dirette %','num'],['quota_mandati','Quota della nostra provvigione sui mandati %','num'],['maturazione','Maturazione','sel',0,["All'incasso","All'evasione"]],['liquidazione','Liquidazione','sel',0,['Mensile','Trimestrale','Semestrale']],['enasarco','Iscritto Enasarco','chk'],['enasarco_pct','Aliquota Enasarco totale %','num'],['ritenuta_pct',"Ritenuta d'acconto effettiva %",'num'],['data_inizio','Inizio contratto','date'],['data_fine','Scadenza contratto','date'],['attivo','Attivo','chk'],['doc_url','Link contratto'],['note','Note','area']],list:[]};
+S.movimenti.onSave=o=>{if(o.tipo==='Carico')autoSoglia(o.prodotto_id,+o.qta)};
+const autoSoglia=(pid,q)=>{const p=DB.get('prodotti',pid);if(p&&p.scorta_min==null&&q>0){p.scorta_min=q>=12?6:q>=6?3:1;DB.upsert('prodotti',p)}};
+S.prodotti.onSave=o=>{o.formato=o.formato?fmtNorm(o.formato):o.formato;if(!o.sku)o.sku=CONFIG.skuPrefix+String(DB.nextNum('sku')).padStart(4,'0');if(!o.paese&&o.regione)o.paese=REG2P[o.regione.toLowerCase()]||''};
+const label=(c,o)=>!o?'':c==='prodotti'?[o.nome,o.annata,parseFloat(o.formato)&&parseFloat(o.formato)!==0.75&&fmtLbl(o.formato)].filter(Boolean).join(' · '):c==='mandati'?`${DB.get('fornitori',o.mandante_id)?.rag_soc||'?'} — ${o.tipo||''}`:o.rag_soc||o.nome||'';
+const fieldOf=(c,k)=>S[c].f.find(f=>f[0]===k);
+function cell(f,v){const t=f[2]||'text';if(t.startsWith('ref:'))return esc(label(t.slice(4),DB.get(t.slice(4),v)));if(t==='num')return num(v);if(t==='date')return dIT(v);if(t==='chk')return v?I('ok'):'';return esc(v)}
+function dueDate(d,pag){if(!d)return'';const m=/(\d+)\s*gg/.exec(pag||'');let x=addDays(d,m?+m[1]:0);if(/FM/.test(pag||'')){const t=new Date(x+'T12:00');x=iso(t.getFullYear(),t.getMonth()+2,0)}return x}
+/* ordinamento sommelier: Paese → Regione → Produttore → Vino → Annata */
+const somKey=p=>{const pi=PAESE_ORD.indexOf(p.paese),ri=(REGIONI[p.paese]||[]).indexOf(p.regione);return[pi<0?99:pi,p.paese||'',ri<0?99:ri,p.regione||'',(DB.get('fornitori',p.produttore_id)?.rag_soc||'').toLowerCase(),(p.nome||'').toLowerCase(),String(p.annata||'')]};
+const somCmp=(a,b)=>{const x=somKey(a),y=somKey(b);for(let i=0;i<x.length;i++){if(x[i]<y[i])return-1;if(x[i]>y[i])return 1}return 0};
+
+/* ================= FORM ================= */
+function fieldHTML([k,l,t='text',req,opts],v){const r=req?' required':'';v=v??'';let i;
+  if(t==='area')i=`<textarea name="${k}"${r}>${esc(v)}</textarea>`;
+  else if(t==='sel')i=`<select name="${k}"${r}><option value=""></option>${opts.map(o=>{const[ov,ol]=Array.isArray(o)?o:[o,o];return`<option value="${esc(ov)}"${String(ov)===String(v)||(k==='formato'&&v!==''&&parseFloat(ov)===parseFloat(v))?' selected':''}>${esc(ol)}</option>`}).join('')}</select>`;
+  else if(t.startsWith('ref:')){const c=t.slice(4);let list=DB.all(c);if(c==='prodotti')list=[...list].sort(somCmp);i=`<select name="${k}"${r}><option value=""></option>${list.map(o=>`<option value="${o.id}"${o.id===v?' selected':''}>${esc(label(c,o))}</option>`).join('')}</select>`}
+  else if(t==='chk')i=`<input type="checkbox" name="${k}"${v?' checked':''}>`;
+  else i=`<input name="${k}" type="${t==='num'?'number':t}"${t==='num'?' step="any" inputmode="decimal"':''} value="${esc(v)}"${r}${AC.has(k)?` list="dl-${k}" autocomplete="off"`:''}>`;
+  return `<label class="${t==='area'?'full':''}${t==='chk'?' chk':''}"><span>${esc(l)}${req?' *':''}</span>${i}</label>`}
+function readForm(f,fields,o={}){for(const [k,,t='text'] of fields){const el=f.elements[k];if(!el)continue;o[k]=t==='chk'?el.checked:t==='num'?(el.value===''?null:+el.value):el.value.trim()}return o}
+function datalists(root){const keys=new Set([...root.querySelectorAll('input[list]')].map(i=>i.getAttribute('list').slice(3)));let h='';
+  for(const k of keys){const v=new Set(SEED[k]||[]);for(const c of ['clienti','fornitori','prodotti','mandati','documenti'])for(const o of DB.all(c))if(o[k])v.add(o[k]);h+=`<datalist id="dl-${k}">${[...v].sort((a,b)=>a.localeCompare(b)).map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`}
+  root.insertAdjacentHTML('beforeend',h)}
+function modal(title,body,onSave,saveLabel='Salva'){const d=$('#dlg');
+  d.innerHTML=`<form method="dialog" class="mf"><header><h3>${esc(title)}</h3><button value="x" class="x" formnovalidate title="Chiudi">${I('x')}</button></header><div class="mb">${body}</div><footer><button value="x" formnovalidate>Annulla</button><button value="ok" class="pri">${saveLabel}</button></footer></form>`;
+  const f=$('form',d);datalists(f);
+  f.addEventListener('change',e=>{if(e.target.name==='regione'&&f.elements.paese&&!f.elements.paese.value)f.elements.paese.value=REG2P[e.target.value.toLowerCase()]||''});
+  f.onsubmit=e=>{if(e.submitter?.value!=='ok')return;e.preventDefault();if(!f.reportValidity())return;if(onSave(f)!==false){d.close();render()}};
+  d.showModal();return f}
+
+/* ================= CALCOLI ================= */
+const lineTot=r=>r2((+r.qta||0)*(+r.prezzo||0)*(1-(+r.sconto||0)/100));
+function totals(righe=[]){const by={};let imp=0;for(const r of righe){const t=lineTot(r);imp+=t;by[+r.iva||0]=(by[+r.iva||0]||0)+t}
+  let iva=0;const det=Object.entries(by).map(([a,b])=>{const v=r2(b*a/100);iva+=v;return{a:+a,imp:r2(b),iva:v}});return{imp:r2(imp),iva:r2(iva),tot:r2(imp+iva),det}}
+/* FIFO per prodotto: lotti residui, valore, scoperto (scarichi oltre giacenza) */
+function stockMap(){const by={},m={};for(const x of DB.all('movimenti'))(by[x.prodotto_id]||=[]).push(x);
+  for(const [pid,arr] of Object.entries(by)){const p=DB.get('prodotti',pid);arr.sort((a,b)=>a.data.localeCompare(b.data)||(SIGN[b.tipo]?1:0)-(SIGN[a.tipo]?1:0)||a.created_at.localeCompare(b.created_at));
+    const lots=[];let q=0,over=0;
+    for(const x of arr){const n=+x.qta||0;if(SIGN[x.tipo]){lots.push({q:n,c:x.costo_unit??(+p?.costo||0),l:x.lotto||''});q+=n}else{q-=n;let r=n;while(r>0&&lots.length){const L=lots[0],t=Math.min(r,L.q);L.q-=t;r-=t;if(!L.q)lots.shift()}over+=r}}
+    m[pid]={q,lots,over,val:lots.reduce((s,L)=>s+L.q*L.c,0)}}return m}
+const avgCost=(p,s)=>s&&s.q>0?s.val/s.q:(+p?.costo||0);
+function fifoTake(s,qty,p){let r=qty,c=0;for(const L of s?.lots||[]){if(r<=0)break;const t=Math.min(r,L.q);c+=t*L.c;L.q-=t;r-=t}if(s)s.lots=s.lots.filter(L=>L.q>0);c+=r*(+p?.costo||0);return qty?Math.round(c/qty*1e4)/1e4:0}
+function provvRows(f={}){return DB.all('ordini').filter(o=>o.tipo==='agenzia'&&['Confermato','Evaso'].includes(o.stato)&&(!f.m||o.mandato_id===f.m)&&(!f.da||o.data>=f.da)&&(!f.a||o.data<=f.a)&&(!f.st||(f.st==='liq')===!!o.provv_liq))
+  .map(o=>({o,...ourProvv(o)})).sort((a,b)=>b.o.data.localeCompare(a.o.data))}
+/* ordini dal CRM Wine Alchemist: la provvigione matura quando il cliente paga (wa_pagato) */
+const provvAttesa=o=>o.fonte==='CRM Wine Alchemist'&&!o.wa_pagato&&!o.provv_liq;
+function ourProvv(o){const m=DB.get('mandati',o.mandato_id)||{};let imp=0,pv=0;for(const r of o.righe){const t=lineTot(r);const pct=o.provv_pct??DB.get('prodotti',r.prodotto_id)?.provv_pct??m.provv_pct??0;imp+=t;pv+=t*pct/100}return{m,imp:r2(imp),pv:r2(pv)}}
+/* provvigioni agenti: vendite dirette = % su imponibile; mandati = quota della nostra provvigione (o % override su imponibile).
+   Maturazione all'incasso: vendite = fatture dell'ordine incassate; mandati = nostra provvigione liquidata dal mandante. */
+function agentRows(f={}){const docs=DB.all('documenti');return DB.all('ordini').filter(o=>o.agente_id&&['Confermato','Evaso'].includes(o.stato)&&o.tipo!=='acquisto'&&(!f.ag||o.agente_id===f.ag)&&(!f.da||o.data>=f.da)&&(!f.a||o.data<=f.a)).map(o=>{
+    const ag=DB.get('agenti',o.agente_id)||{},imp=totals(o.righe).imp;let pv;
+    if(o.agente_pct!=null)pv=imp*o.agente_pct/100;else if(o.tipo==='vendita')pv=imp*(+ag.pct_vendita||0)/100;else pv=ourProvv(o).pv*(+ag.quota_mandati||0)/100;
+    const ft=docs.filter(d=>d.ordine_id===o.id&&d.tipo==='fattura'),inc=o.tipo==='vendita'?ft.length>0&&ft.every(d=>d.pagata):!!o.provv_liq;
+    const mat=ag.maturazione==="All'evasione"?o.stato==='Evaso':inc;return{o,ag,imp:r2(imp),pv:r2(pv),st:o.agente_liq?'liq':mat?'mat':'att'}})
+  .filter(r=>!f.st||r.st===f.st).sort((a,b)=>b.o.data.localeCompare(a.o.data))}
+function inUse(c,id){const fk={agenti:['agente_id'],clienti:['cliente_id'],fornitori:['fornitore_id','produttore_id','mandante_id'],prodotti:['prodotto_id'],mandati:['mandato_id']}[c]||[];
+  const hit=o=>fk.some(k=>o[k]===id)||(o.righe||[]).some(r=>fk.some(k=>r[k]===id));return['ordini','documenti','movimenti','prodotti','mandati','passive','pl','fallate','clienti'].some(col=>DB.all(col).some(hit))}
+
+/* ================= STATO / ROUTER ================= */
+/* menù a gruppi: il lavoro di tutti i giorni in alto, l'amministrazione raccolta, le anagrafiche in fondo */
+const NAVG=[[null,[['dashboard','Plancia','dash'],['ordini','Ordini','ord']]],
+  ['Vini',[['magazzino','Magazzino e referenze','box'],['privatelabel','Private label','tag'],['prezzi','Calcolo prezzi','calc'],['fallate','Fallate','flag']]],
+  ['Amministrazione',[['amministrazione','Scadenze e pagamenti','wal'],['documenti','Fatture e DDT','doc'],['provvigioni','Provvigioni','eur'],['agenti','Agenti','agt']]],
+  ['Contatti',[['clienti','Clienti','usr'],['fornitori','Fornitori e contratti','trk']]]];
+const NAV=[...NAVG.flatMap(g=>g[1]),['impostazioni','Impostazioni','gear']];
+const VALIAS={prodotti:'magazzino',mandati:'fornitori'};   /* vecchi indirizzi: la vista confluita */
+const navOpen=(()=>{try{return JSON.parse(localStorage.getItem(_lsKey('nav')))||{}}catch{return{}}})();
+const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori'};
+function render(){if(!AUTH.prof)return;
+  if(st.view==='mandati')st.fotab='mandati';if(VALIAS[st.view])st.view=VALIAS[st.view];
+  const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length,badge={amministrazione:nUrg,fallate:nFl};
+  const item=([k,l,ic])=>`<button data-view="${k}" class="${st.view===k?'on':''}">${I(ic)}<span>${l}</span>${badge[k]?`<span class="nb">${badge[k]}</span>`:''}</button>`;
+  $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`
+    +NAVG.map(([g,items])=>{if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
+      return `<button class="gh${open?' open':''}" data-navg="${g}" aria-expanded="${open}"><span>${g}</span>${!open&&n?`<span class="nb">${n}</span>`:''}${I('chev')}</button><div class="gi${open?'':' closed'}">${items.map(item).join('')}</div>`}).join('')
+    +`<div class="foot">${item(['impostazioni','Impostazioni','gear'])}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst></span></div></div>`;
+  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);$('#app').innerHTML=remBanner(SC)+v();if(st.view==='prezzi')pcUpdate();DB.status()}
+const tbl=(cols,rows,rowAttr=()=>'',grpBy)=>{let last;return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th class="${c.n?'n':''}">${c.h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(o=>{let g='';if(grpBy){const k=grpBy(o);if(k!==last){last=k;g=`<tr class="grp"><td colspan="${cols.length}">${esc(k)}</td></tr>`}}return g+`<tr ${rowAttr(o)}>${cols.map(c=>`<td class="${c.n?'n':''}${c.a?' act':''}" data-l="${esc(c.h)}">${c.v(o)}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${cols.length}" class="muted">Nessun dato</td></tr>`}</tbody></table></div>`};
+const search=k=>`<input type="search" placeholder="Cerca…" value="${esc(st.q[k]||'')}" data-q="${k}" style="max-width:220px">`;
+const match=(k,o)=>{const q=(st.q[k]||'').toLowerCase();return!q||JSON.stringify(o).toLowerCase().includes(q)};
+const B=(act,html,id='',cls='sm',extra='',title='')=>`<button class="${cls}" data-act="${act}" data-id="${id}" ${extra}${title?` title="${esc(title)}"`:''}>${html}</button>`;
+const tabs=(key,items)=>`<div class="tabs">${items.map(([k,l])=>`<button data-act="tab" data-c="${key}" data-id="${k}" class="${st[key]===k?'on':''}">${l}</button>`).join('')}</div>`;
+const grpOf=p=>[p.paese,p.regione].filter(Boolean).join(' · ')||'Senza origine';
+
+/* ================= INVENTARIO (impostato come il Cantina Manager) ================= */
+const nrm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const fname=id=>DB.get('fornitori',id)?.rag_soc||'';
+function invRows(sm){const f=st.inv,q=nrm(st.q.giac).split(/\s+/).filter(Boolean),vit=nrm(f.vit);
+  let list=DB.all('prodotti').filter(p=>p.canale!=='Mandato agenzia'||sm[p.id]).map(p=>({p,s:sm[p.id],q:sm[p.id]?.q||0}));
+  list=list.filter(({p,q:g})=>{const hay=nrm([p.nome,fname(p.produttore_id),fname(p.distributore_id),p.regione,p.zona,p.vitigni,p.annata,p.paese,p.tipologia,p.denominazione,p.sku,p.ean].join(' '));
+    return q.every(t=>hay.includes(t))&&(!f.tipo||p.tipologia===f.tipo)&&(!f.naz||p.paese===f.naz)&&(!f.reg||p.regione===f.reg)&&(!f.prod||p.produttore_id===f.prod)&&(!f.distr||p.distributore_id===f.distr)&&(!f.fmt||parseFloat(p.formato||0.75)===parseFloat(f.fmt))&&(!f.canale||p.canale===f.canale)
+      &&(!vit||nrm(p.vitigni).split(/[,;/&+]+/).map(x=>x.trim()).includes(vit))&&(!f.giac||(f.giac==='esaurito'?g<=0:f.giac==='basso'?g>0&&p.scorta_min!=null&&g<=p.scorta_min:f.giac==='ok'?g>0&&(p.scorta_min==null||g>p.scorta_min):true))});
+  const ti=t=>{const i=TIPOL.indexOf(t);return i<0?99:i},by={nome:(a,b)=>a.p.nome.localeCompare(b.p.nome),produttore:(a,b)=>fname(a.p.produttore_id).localeCompare(fname(b.p.produttore_id))||a.p.nome.localeCompare(b.p.nome),giacenza:(a,b)=>b.q-a.q,valore:(a,b)=>(b.s?.val||0)-(a.s?.val||0),sommelier:(a,b)=>somCmp(a.p,b.p),tipologia:(a,b)=>ti(a.p.tipologia)-ti(b.p.tipologia)||somCmp(a.p,b.p)};
+  return list.sort(by[f.sort]||by.tipologia)}
+function invView(sm,tb){const f=st.inv,rows=invRows(sm),all=DB.all('prodotti'),uniq=k=>[...new Set(all.map(p=>p[k]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b))),forn=k=>[...new Set(all.map(p=>p[k]).filter(Boolean))].map(id=>[id,fname(id)]).sort((a,b)=>a[1].localeCompare(b[1]));
+  const sel=(k,ph,opts)=>`<select data-inv="${k}" style="width:auto"><option value="">${ph}</option>${opts.map(o=>{const[v,l]=Array.isArray(o)?o:[o,o];return`<option value="${esc(v)}"${String(f[k]??'')===String(v)?' selected':''}>${esc(l)}</option>`}).join('')}</select>`;
+  const vits=[...new Set(all.flatMap(p=>String(p.vitigni||'').split(/[,;/&+]+/).map(x=>x.trim()).filter(Boolean)))].sort();
+  const bt=rows.reduce((s,r)=>s+Math.max(r.q,0),0),val=rows.reduce((s,r)=>s+(r.s?.val||0),0),nf=['tipo','naz','reg','prod','distr','fmt','vit','giac','canale'].filter(k=>f[k]).length;
+  const gb=f.sort==='tipologia'?r=>r.p.tipologia||'Senza tipologia':f.sort==='sommelier'?r=>grpOf(r.p):null;
+  const gBadge=r=>{const p=r.p;return r.q<=0?`<span class="badge b-bad">${num(r.q)}</span>`:p.scorta_min!=null&&r.q<=p.scorta_min?`<span class="badge b-warn">${num(r.q)}</span>`:`<b>${num(r.q)}</b>`};
+  return `<div class="bar"><h2>Magazzino</h2>${tb}${search('giac')}${B('cm-imp',I('ul')+'Importa da Cantina Manager','','')}${B('csv',I('dl')+'CSV','','','data-c="prodotti"')}${B('new',I('plus')+'Nuova referenza','','pri','data-c="prodotti"')}</div>
+  <div class="bar">${sel('tipo','Tutte le tipologie',TIPOL)}${sel('naz','Tutte le nazioni',uniq('paese'))}${sel('reg','Tutte le regioni',uniq('regione'))}${sel('prod','Tutti i produttori',forn('produttore_id'))}${sel('distr','Tutti i distributori',forn('distributore_id'))}${sel('vit','Tutti i vitigni',vits)}${sel('fmt','Tutti i formati',FORMATI)}${sel('canale','Tutti i canali',['Import diretto','Acquisto Italia','Mandato agenzia','Private label'])}${sel('giac','Tutte le giacenze',[['ok','Disponibili'],['basso','Sotto soglia'],['esaurito','Esaurite']])}
+  <label style="display:flex;gap:6px;align-items:center;width:auto"><span class="muted">Ordina</span>${sel('sort','—',[['tipologia','Tipologia'],['sommelier','Sommelier (Nazione → Regione)'],['nome','Nome'],['produttore','Produttore'],['giacenza','Giacenza'],['valore','Valore']]).replace('<option value="">—</option>','')}</label>${nf?B('inv-reset',I('x')+'Azzera filtri ('+nf+')','',''):''}</div>
+  <p class="muted">${rows.length} referenze · ${num(bt)} bottiglie · valore FIFO <b>${eur(val)}</b></p>
+  ${tbl([{h:'SKU',v:r=>`<span class="muted">${esc(r.p.sku)}</span>`},{h:'Vino',v:r=>`<b>${esc(r.p.nome)}</b> ${esc(r.p.annata||'')}${parseFloat(r.p.formato)&&parseFloat(r.p.formato)!==0.75?` <span class="badge">${esc(fmtLbl(r.p.formato))}</span>`:''}${r.p.denominazione||r.p.vitigni?`<br><span class="muted">${esc([r.p.denominazione,r.p.vitigni].filter(Boolean).join(' · '))}</span>`:''}${r.s?.over?` <span class="badge b-bad" title="Scarichi oltre la giacenza">scoperto ${num(r.s.over)}</span>`:''}`},{h:'Produttore',v:r=>esc(fname(r.p.produttore_id))+(r.p.distributore_id?`<br><span class="muted">via ${esc(fname(r.p.distributore_id))}</span>`:'')},
+    {h:'Tipologia',v:r=>r.p.tipologia?`<span style="display:inline-flex;gap:6px;align-items:center"><i style="width:9px;height:9px;border-radius:50%;background:${TCOL[r.p.tipologia]||'#999'};display:inline-block"></i>${esc(r.p.tipologia)}</span>`:''},{h:'Origine',v:r=>esc([r.p.regione,r.p.paese].filter(Boolean).join(' · '))+(r.p.zona?`<br><span class="muted">${esc(r.p.zona)}</span>`:'')},
+    {h:'Giacenza',n:1,v:gBadge},{h:'Soglia',n:1,v:r=>num(r.p.scorta_min)},{h:'Costo medio',n:1,v:r=>eur(avgCost(r.p,r.s))},{h:'Listino',n:1,v:r=>r.p.prezzo!=null?eur(r.p.prezzo):'—'},{h:'Valore',n:1,v:r=>eur(r.s?.val||0)},
+    {h:'',a:1,v:r=>B('mv-new','+',r.p.id,'sm','data-t="Carico"','Carico')+B('mv-new','−',r.p.id,'sm','data-t="Scarico"','Scarico / rettifica')+B('inv-scheda',I('eye'),r.p.id,'sm','','Scheda')+B('edit',I('edit'),r.p.id,'sm','data-c="prodotti"','Modifica')}],rows,r=>r.p.scorta_min!=null&&r.q<=r.p.scorta_min?'class="warnrow"':'',gb)}`}
+function invScheda(p){const sm=stockMap(),s=sm[p.id],kv=(k,v)=>v||v===0?`<div><span class="muted" style="font-size:12px">${k}</span><br>${v}</div>`:'';
+  const mov=DB.all('movimenti').filter(m=>m.prodotto_id===p.id).sort((a,b)=>b.data.localeCompare(a.data)||b.created_at.localeCompare(a.created_at)).slice(0,40);
+  const vend=DB.all('ordini').filter(o=>o.tipo==='vendita'&&o.stato==='Evaso'&&o.righe.some(r=>r.prodotto_id===p.id)),btV=vend.reduce((t,o)=>t+o.righe.filter(r=>r.prodotto_id===p.id).reduce((a,r)=>a+(+r.qta||0),0),0);
+  modal(`${p.sku?p.sku+' · ':''}${label('prodotti',p)}`,`<div class="grid">${kv('Produttore',esc(fname(p.produttore_id)))}${kv('Distributore',esc(fname(p.distributore_id)))}${kv('Tipologia',esc(p.tipologia))}${kv('Formato',esc(fmtLbl(p.formato)))}${kv('Vitigni',esc(p.vitigni))}${kv('Origine',esc([p.zona,p.regione,p.paese].filter(Boolean).join(' · ')))}${kv('Denominazione',esc(p.denominazione))}${kv('Canale',esc(p.canale))}
+    ${kv('Giacenza',`<b>${num(s?.q||0)}</b> bt${p.scorta_min!=null?` · soglia ${num(p.scorta_min)}`:''}`)}${kv('Costo medio FIFO',eur(avgCost(p,s)))}${kv('Valore',eur(s?.val||0))}${kv('Listino HoReCa',p.prezzo!=null?eur(p.prezzo):'—')}${kv('Venduto',num(btV)+' bt in '+vend.length+' ordini')}${p.descr?`<div class="full">${esc(p.descr)}</div>`:''}</div>
+    <h4>Lotti in giacenza (FIFO)</h4>${tbl([{h:'Lotto',v:L=>esc(L.l)||'—'},{h:'Residuo',n:1,v:L=>num(L.q)},{h:'Costo u.',n:1,v:L=>eur(L.c)}],s?.lots||[])}
+    <h4>Ultimi movimenti</h4>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Rif.',v:m=>esc(m.rif)}],mov)}`,()=>{},'Chiudi')}
+/* import schede da Cantina Manager: backup .json, manifesto (schede / bottiglie / ordine) in JSON o base64. Solo anagrafica: la giacenza resta dei locali. */
+function cmParse(txt){txt=String(txt||'').trim();let o;try{o=JSON.parse(txt)}catch{try{o=JSON.parse(decodeURIComponent(escape(atob(txt.replace(/\s+/g,'')))))}catch{return null}}
+  if(o?.type==='cantina-order')return(o.ordine?.referenze||[]).map(r=>({...r,nome:r.nomeVino}));if(o?.type==='cantina-transfer')return o.lines||[];
+  let best=[];const walk=(x,d)=>{if(d>5||!x||typeof x!=='object')return;if(Array.isArray(x)){if(x.length>best.length&&x.some(e=>e&&typeof e==='object'&&'nome' in e&&('produttore' in e||'annata' in e)))best=x;x.slice(0,50).forEach(e=>walk(e,d+1))}else Object.values(x).forEach(v=>walk(v,d+1))};walk(o,0);return best}
+function cmImport(){modal('Importa referenze da Cantina Manager',`<div class="grid"><label class="full"><span>Backup .json del Cantina Manager o manifesto Trasferimenti (file)</span><input type="file" name="file" accept=".json,.txt"></label><label class="full"><span>…oppure incolla qui il codice manifesto</span><textarea name="txt" placeholder="JSON o base64"></textarea></label>${fieldHTML(['canale','Canale da assegnare','sel',1,['Acquisto Italia','Import diretto','Private label','Mandato agenzia']],'Acquisto Italia')}</div><p class="muted">Importa solo le schede (nome, produttore, distributore, annata, tipologia, formato, vitigni, nazione, regione, zona, denominazione, costo, IVA). Le giacenze restano dei locali; le referenze già presenti (produttore + nome + annata + formato) vengono saltate.</p>`,f=>{
+  const fl=f.elements.file.files[0],can=f.elements.canale.value;(fl?fl.text():Promise.resolve(f.elements.txt.value)).then(txt=>{const arr=cmParse(txt);if(!arr||!arr.length)return alert('Nessuna referenza riconosciuta nel file o nel codice.');
+    const lc=x=>nrm(x).trim(),key=(pr,n,a,fm)=>[lc(pr),lc(n),lc(a),parseFloat(fm)||0.75].join('|'),have=new Set(DB.all('prodotti').map(p=>key(fname(p.produttore_id),p.nome,p.annata,p.formato)));
+    const fid=(name,tipo,paese)=>{name=String(name||'').trim();if(!name)return'';const ex=DB.all('fornitori').find(x=>lc(x.rag_soc)===lc(name));return(ex||DB.upsert('fornitori',{rag_soc:name,tipo,paese:paese||''})).id};
+    let n=0,sk=0;for(const w of arr){const nome=String(w.nome||w.nomeVino||'').trim();if(!nome)continue;const k=key(w.produttore,nome,w.annata,w.formato);if(have.has(k)){sk++;continue}have.add(k);
+      const naz=w.nazione||'',p={nome,produttore_id:fid(w.produttore,naz&&naz!=='Italia'?'Produttore estero':'Produttore IT',naz),distributore_id:fid(w.distributore,'Distributore / Mandante'),canale:can,annata:String(w.annata||''),tipologia:w.tipologia||'',formato:fmtNorm(w.formato),vitigni:w.vitigni||'',paese:naz,regione:w.regione||'',zona:w.zona||'',denominazione:w.denominazione||'',costo:parseFloat(w.prezzoAcq)||null,iva:parseInt(w.iva)||22,attivo:true,note:w.sku?'SKU Cantina Manager: '+w.sku:''};
+      S.prodotti.onSave(p);DB.upsert('prodotti',p);n++}
+    toast(`${n} referenze importate${sk?`, ${sk} già presenti`:''}`);render()})},'Importa')}
+
+/* ================= PLANCIA ================= */
+function plRange(){const T=today(),y=+T.slice(0,4),m=+T.slice(5,7);
+  switch(st.per){case'mesep':return[iso(y,m-1,1),iso(y,m,0)];case'trim':{const q=Math.floor((m-1)/3)*3+1;return[iso(y,q,1),iso(y,q+3,0)]}case'anno':return[iso(y,1,1),iso(y,12,31)];case'custom':return[st.pda||iso(y,m,1),st.pa||T];default:return[iso(y,m,1),iso(y,m+1,0)]}}
+function prevRange([da,a]){const ms=new Date(a+'T12:00')-new Date(da+'T12:00'),pa=addDays(da,-1);return[new Date(new Date(pa+'T12:00')-ms).toLocaleDateString('sv'),pa]}
+function stats(da,a){const inR=d=>d&&d>=da&&d<=a,s={ven:0,bt:0,acq:0,ag:0,cogs:0,tip:{},grp:{},forn:{},prod:{},agt:{}};
+  for(const o of DB.all('ordini')){if(o.stato!=='Evaso'||!inR(o.data_evasione||o.data))continue;const t=totals(o.righe).imp;
+    if(o.tipo==='acquisto'){const e=t*(+o.cambio||1)+(+o.costi_acc||0);s.acq+=e;const n=DB.get('fornitori',o.fornitore_id)?.rag_soc||'?';s.forn[n]=(s.forn[n]||0)+e;continue}
+    if(o.tipo==='vendita'){s.ven+=t;const g=DB.get('clienti',o.cliente_id)?.gruppo||'Esterno';s.grp[g]=(s.grp[g]||0)+t}else s.ag+=t;if(o.agente_id){const n=DB.get('agenti',o.agente_id)?.nome||'?';s.agt[n]=(s.agt[n]||0)+t}
+    for(const r of o.righe){const p=DB.get('prodotti',r.prodotto_id),q=+r.qta||0;if(o.tipo==='vendita')s.bt+=q;const tp=p?.tipologia||'Altro';s.tip[tp]=(s.tip[tp]||0)+q;const pn=p?.produttore_id?DB.get('fornitori',p.produttore_id)?.rag_soc:null;if(pn)s.prod[pn]=(s.prod[pn]||0)+lineTot(r)}}
+  for(const m of DB.all('movimenti'))if(m.tipo==='Scarico'&&m.ordine_id&&inR(m.data))s.cogs+=(+m.costo_unit||0)*(+m.qta||0);
+  s.pv=provvRows({da,a}).reduce((x,r)=>x+r.pv,0);s.marg=s.ven-s.cogs;return s}
+function pie(obj){const e=Object.entries(obj).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]),tot=e.reduce((s,[,v])=>s+v,0);if(!tot)return'<p class="muted">Nessun dato nel periodo</p>';
+  let a=0,s='';for(const [k,v] of e){const f=v/tot,a2=a+f*2*Math.PI,P=t=>`${(50+45*Math.sin(t)).toFixed(2)} ${(50-45*Math.cos(t)).toFixed(2)}`;
+    s+=f>.9999?`<circle cx="50" cy="50" r="45" fill="${TCOL[k]||'#999'}"/>`:`<path d="M50 50L${P(a)}A45 45 0 ${f>.5?1:0} 1 ${P(a2)}Z" fill="${TCOL[k]||'#999'}"/>`;a=a2}
+  return `<div class="pie"><svg viewBox="0 0 100 100">${s}</svg><ul>${e.map(([k,v])=>`<li><i style="background:${TCOL[k]||'#999'}"></i>${esc(k)} <b>${num(v)}</b><span class="muted">${Math.round(v/tot*100)}%</span></li>`).join('')}</ul></div>`}
+function bars(obj,fmt=eur,max=8){const e=Object.entries(obj).filter(([,v])=>v).sort((a,b)=>b[1]-a[1]).slice(0,max),mx=Math.max(...e.map(x=>x[1]),1);
+  return e.length?`<div class="bars">${e.map(([k,v])=>`<div><span title="${esc(k)}">${esc(k)}</span><u style="width:${Math.max(2,v/mx*100)}%"></u><b>${fmt(v)}</b></div>`).join('')}</div>`:'<p class="muted">Nessun dato nel periodo</p>'}
+
+/* ================= VIEWS ================= */
+const VIEWS={
+dashboard(){const R=plRange(),P=prevRange(R),s=stats(...R),p=stats(...P),T=today(),sm=stockMap();
+  const dl=(a,b,inv)=>{if(!b)return'';const d=(a-b)/Math.abs(b)*100;return `<span class="${(d>=0)!==!!inv?'d-up':'d-dn'}">${d>=0?'+':''}${d.toFixed(0)}% vs prec.</span>`};
+  const K=(v,l,x='')=>`<div class="kpi"><b>${v}</b><span>${l}</span>${x?'<br>'+x:''}</div>`;
+  let val=0;const low=[];for(const pr of DB.all('prodotti')){const x=sm[pr.id],q=x?.q||0;val+=x?.val||0;if(pr.scorta_min!=null&&pr.canale!=='Mandato agenzia'&&q<pr.scorta_min)low.push({p:pr,q})}
+  const att=DB.all('documenti').filter(d=>d.tipo==='fattura'&&!d.pagata),pas=DB.all('passive').filter(x=>!x.pagata);
+  const daInc=att.reduce((a,d)=>a+totals(d.righe).tot,0),daPag=pas.reduce((a,x)=>a+(+x.totale||0),0);
+  const scaduto=att.filter(d=>d.scadenza<T).reduce((a,d)=>a+totals(d.righe).tot,0),scadP=pas.filter(x=>x.scadenza<T).reduce((a,x)=>a+(+x.totale||0),0);
+  const lim=addDays(T,30),scad=[...att.filter(d=>d.scadenza<=lim).map(d=>({t:'Incasso',c:DB.get('clienti',d.cliente_id)?.rag_soc,s:d.scadenza,v:totals(d.righe).tot,r:`FT ${d.numero}/${d.anno}`})),...pas.filter(x=>x.scadenza<=lim).map(x=>({t:'Pagamento',c:DB.get('fornitori',x.fornitore_id)?.rag_soc,s:x.scadenza,v:+x.totale||0,r:x.numero}))].sort((a,b)=>a.s.localeCompare(b.s));
+  const mScad=DB.all('mandati').filter(m=>m.data_fine&&m.data_fine<=addDays(T,60)).sort((a,b)=>a.data_fine.localeCompare(b.data_fine));
+  const mp=s.ven?s.marg/s.ven*100:0;
+  return `<div class="bar"><h2>Plancia</h2>${tabs('per',[['mese','Mese'],['mesep','Mese scorso'],['trim','Trimestre'],['anno','Anno'],['custom','Personalizzato']])}${st.per==='custom'?`<input type="date" data-s="pda" value="${st.pda}" style="width:auto"><input type="date" data-s="pa" value="${st.pa}" style="width:auto">`:''}<span class="muted">${dIT(R[0])} – ${dIT(R[1])}</span></div>
+  <div class="kpis">${K(eur(s.ven),'Venduto diretto (imponibile)',dl(s.ven,p.ven))}${K(eur(s.marg),`Margine lordo · ${mp.toFixed(1)}%`,dl(s.marg,p.marg))}${K(num(s.bt),'Bottiglie vendute',dl(s.bt,p.bt))}${K(eur(s.ag),'Venduto in agenzia',dl(s.ag,p.ag))}${K(eur(s.pv),'Provvigioni maturate',dl(s.pv,p.pv))}${K(eur(s.acq),'Acquisti (landed, €)',dl(s.acq,p.acq,1))}</div>
+  ${cashBoxes()}<div class="kpis">${K(eur(val),'Valore magazzino (FIFO)')}${K(low.length,'Referenze sotto scorta')}${K(eur(daInc),'Crediti aperti totali')}${K(eur(daPag),'Debiti aperti totali')}</div>
+  <div class="cols"><div class="card"><h3>Bottiglie per tipologia</h3>${pie(s.tip)}</div>
+  <div class="card"><h3>Venduto per gruppo cliente</h3>${bars(s.grp)}</div>
+  <div class="card"><h3>Venduto per agente</h3>${bars(s.agt)}</div>
+  <div class="card"><h3>Spesa per fornitore</h3>${bars(s.forn)}</div>
+  <div class="card"><h3>Venduto per produttore</h3>${bars(s.prod)}</div>
+  <div class="card"><h3>Scadenze prossimi 30 giorni</h3>${tbl([{h:'',v:x=>`<span class="badge ${x.t==='Incasso'?'b-ok':'b-warn'}">${x.t}</span>`},{h:'Controparte',v:x=>esc(x.c)},{h:'Rif.',v:x=>esc(x.r)},{h:'Scad.',v:x=>`<span class="${x.s<T?'d-dn':''}">${dIT(x.s)}</span>`},{h:'Importo',n:1,v:x=>eur(x.v)}],scad)}</div>
+  <div class="card"><h3>Sotto scorta</h3>${tbl([{h:'Referenza',v:x=>esc(label('prodotti',x.p))},{h:'Giac.',n:1,v:x=>num(x.q)},{h:'Min',n:1,v:x=>num(x.p.scorta_min)}],low)}</div>
+  <div class="card"><h3>Mandati in scadenza (60 gg)</h3>${tbl([{h:'Mandato',v:m=>esc(label('mandati',m))},{h:'Scadenza',v:m=>`<span class="badge ${m.data_fine<T?'b-bad':'b-warn'}">${dIT(m.data_fine)}</span>`},{h:'Preavviso',n:1,v:m=>m.preavviso_gg?m.preavviso_gg+' gg':''}],mScad)}</div></div>`},
+
+ordini(){const rows=DB.all('ordini').filter(o=>(!st.otipo||o.tipo===st.otipo)&&(!st.ostato||o.stato===st.ostato)&&match('ordini',{...o,_c:counterpart(o)})).sort((a,b)=>b.data.localeCompare(a.data)||b.numero.localeCompare(a.numero));
+  const docs=DB.all('documenti'),pas=DB.all('passive'),sb={Bozza:'',Confermato:'b-warn',Evaso:'b-ok',Annullato:'b-bad'};
+  return `<div class="bar"><h2>Ordini</h2>${tabs('otipo',[['','Tutti'],['vendita','Vendita'],['acquisto','Acquisto'],['agenzia','Agenzia']])}
+  <select data-s="ostato" style="width:auto"><option value="">Tutti gli stati</option>${STATI.map(s=>`<option${st.ostato===s?' selected':''}>${s}</option>`).join('')}</select>${search('ordini')}${waChip()}${B('o-new',I('plus')+'Nuovo ordine','','pri')}</div>
+  ${tbl([{h:'N°',v:o=>`<b>${esc(o.numero)}</b>`},{h:'Data',v:o=>dIT(o.data)},{h:'Tipo',v:o=>`<span class="badge">${o.tipo}</span>`},{h:'Controparte',v:counterpart},{h:'Stato',v:o=>`<span class="badge ${sb[o.stato]}">${o.stato}</span>`},{h:'Imponibile',n:1,v:o=>eur(totals(o.righe).imp)+(o.tipo==='acquisto'&&o.valuta&&o.valuta!=='EUR'?' '+o.valuta:'')},
+    {h:'Doc.',v:o=>[...docs.filter(d=>d.ordine_id===o.id).map(d=>`${d.tipo==='ddt'?'DDT':'FT'} ${d.numero}`),...pas.filter(x=>x.ordine_id===o.id).map(x=>'FT ric. '+x.numero)].map(esc).join(', ')},
+    {h:'',a:1,v:o=>{const c=DB.get('clienti',o.cliente_id);return B('o-edit',I('edit'),o.id,'sm','','Modifica')
+      +(!o.mov&&['Confermato','Bozza'].includes(o.stato)?B('o-evadi',I('ok')+(o.tipo==='acquisto'?'Ricevi':'Evadi'),o.id):'')
+      +(o.tipo==='vendita'&&o.stato!=='Annullato'?B('o-ddt',I('trk')+'DDT',o.id)+B('o-fatt',I('doc')+'Fattura',o.id):'')
+      +(o.tipo==='vendita'&&c&&c.gruppo!=='Esterno'?B('o-man',I('dl'),o.id,'sm','','Manifesto per Cantina Manager'):'')
+      +(o.tipo==='acquisto'&&o.stato!=='Annullato'?B('o-ftric',I('inb')+'Fatt. ricevuta',o.id):'')
+      +B('o-del',I('del'),o.id,'sm','','Elimina')}}],rows)}`},
+
+magazzino(){const sm=stockMap(),tb=tabs('mtab',[['giac','Giacenze'],['lotti','Lotti FIFO'],['mov','Movimenti']]);
+  if(st.mtab==='mov'){const rows=DB.all('movimenti').filter(m=>match('mov',{...m,p:label('prodotti',DB.get('prodotti',m.prodotto_id))})).sort((a,b)=>b.data.localeCompare(a.data)||b.created_at.localeCompare(a.created_at));
+    return `<div class="bar"><h2>Magazzino</h2>${tb}${search('mov')}${B('csv',I('dl')+'CSV','','',`data-c="movimenti"`)}${B('new',I('plus')+'Movimento','','pri','data-c="movimenti"')}</div>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Referenza',v:m=>esc(label('prodotti',DB.get('prodotti',m.prodotto_id)))},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Lotto',v:m=>esc(m.lotto)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Prezzo u.',n:1,v:m=>m.prezzo_unit!=null?eur(m.prezzo_unit):''},{h:'Rif.',v:m=>esc(m.rif)},{h:'e-AD/DAS',v:m=>esc(m.das)},{h:'',a:1,v:m=>B('edit',I('edit'),m.id,'sm','data-c="movimenti"','Modifica')+B('del',I('del'),m.id,'sm','data-c="movimenti"','Annulla movimento')}],rows)}`}
+  if(st.mtab==='lotti'){const rows=DB.all('prodotti').filter(p=>sm[p.id]?.lots.length&&match('giac',p)).sort(somCmp).flatMap(p=>sm[p.id].lots.map(L=>({p,L})));
+    return `<div class="bar"><h2>Magazzino</h2>${tb}${search('giac')}</div>${tbl([{h:'Referenza',v:x=>esc(label('prodotti',x.p))},{h:'Lotto',v:x=>esc(x.L.l)||'<span class="muted">—</span>'},{h:'Residuo',n:1,v:x=>num(x.L.q)},{h:'Costo u.',n:1,v:x=>eur(x.L.c)},{h:'Valore',n:1,v:x=>eur(x.L.q*x.L.c)}],rows,()=>'',x=>grpOf(x.p))}`}
+  return invView(sm,tb)},
+
+documenti(){const rows=DB.all('documenti').filter(d=>(!st.dtipo||d.tipo===st.dtipo)&&match('doc',{...d,c:DB.get('clienti',d.cliente_id)?.rag_soc})).sort((a,b)=>b.data.localeCompare(a.data)||b.numero-a.numero),T=today();
+  return `<div class="bar"><h2>Fatture & DDT</h2>${tabs('dtipo',[['','Tutti'],['fattura','Fatture'],['ddt','DDT']])}${search('doc')}${B('d-new',I('plus')+'Nuovo documento','','pri')}</div>
+  <p class="muted">Si generano dagli ordini di vendita o si compongono a mano selezionando le referenze. La fattura stampata è copia di cortesia: l'originale va emesso via SDI.</p>
+  ${tbl([{h:'Tipo',v:d=>`<span class="badge">${d.tipo==='ddt'?'DDT':'Fattura'}</span>`},{h:'N°',v:d=>`<b>${d.numero}/${d.anno}</b>`},{h:'Data',v:d=>dIT(d.data)},{h:'Cliente',v:d=>esc(DB.get('clienti',d.cliente_id)?.rag_soc)},{h:'Totale',n:1,v:d=>d.tipo==='fattura'?eur(totals(d.righe).tot):num(d.righe.reduce((s,r)=>s+(+r.qta||0),0))+' bt'},
+    {h:'Scadenza',v:d=>d.tipo!=='fattura'?'':d.pagata?'<span class="badge b-ok">Incassata</span>':`<span class="badge ${d.scadenza&&d.scadenza<T?'b-bad':'b-warn'}">${dIT(d.scadenza)||'—'}</span>`},
+    {h:'',a:1,v:d=>(d.tipo==='fattura'&&!d.pagata?B('d-pay',I('ok')+'Incassata',d.id):'')+B('d-edit',I('edit'),d.id,'sm','','Modifica')+B('d-print',I('prt'),d.id,'sm','','Stampa')+B('d-del',I('del'),d.id,'sm','','Elimina')}],rows)}`},
+
+amministrazione(){const T=today(),lim=addDays(T,7),all=DB.all('passive');
+  const rows=all.filter(x=>(st.atab==='tutte'||(st.atab==='aperte'?!x.pagata:!x.pagata&&x.scadenza<T))&&match('pas',{...x,f:DB.get('fornitori',x.fornitore_id)?.rag_soc})).sort((a,b)=>(a.scadenza||'').localeCompare(b.scadenza||''));
+  const ap=all.filter(x=>!x.pagata),tot=ap.reduce((s,x)=>s+(+x.totale||0),0),sc=ap.filter(x=>x.scadenza<T).reduce((s,x)=>s+(+x.totale||0),0),m30=ap.filter(x=>x.scadenza<=addDays(T,30)).reduce((s,x)=>s+(+x.totale||0),0);
+  const att=DB.all('documenti').filter(d=>d.tipo==='fattura'&&!d.pagata).sort((a,b)=>a.scadenza.localeCompare(b.scadenza)),inc30=att.filter(d=>d.scadenza<=addDays(T,30)).reduce((s,d)=>s+totals(d.righe).tot,0);
+  const K=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`;
+  return `<div class="bar"><h2>Scadenze e pagamenti</h2>${tabs('atab',[['aperte','Da pagare'],['scadute','Scadute'],['tutte','Tutte']])}${search('pas')}${B('new',I('plus')+'Fattura ricevuta','','pri','data-c="passive"')}</div>
+  ${cashBoxes()}${remList()}<h3 style="margin:22px 0 10px;font-size:15px">Fatture ricevute</h3>
+  ${tbl([{h:'Fornitore',v:x=>esc(DB.get('fornitori',x.fornitore_id)?.rag_soc)},{h:'N°',v:x=>esc(x.numero)},{h:'Data',v:x=>dIT(x.data)},{h:'Rif. ordine',v:x=>esc(x.rif_ordine)},{h:'Pagamento',v:x=>esc(x.pagamento)},{h:'Totale',n:1,v:x=>(x.valuta&&x.valuta!=='EUR'?num(x.totale)+' '+x.valuta:eur(x.totale))},
+    {h:'Scadenza',v:x=>x.pagata?`<span class="badge b-ok">Pagata ${dIT(x.data_pag)}</span>`:`<span class="badge ${x.scadenza<T?'b-bad':x.scadenza<=lim?'b-warn':''}">${dIT(x.scadenza)}</span>`},
+    {h:'',a:1,v:x=>(!x.pagata?B('a-pay',I('ok')+'Pagata',x.id):'')+B('edit',I('edit'),x.id,'sm','data-c="passive"','Modifica')+B('del',I('del'),x.id,'sm','data-c="passive"','Elimina')}],rows)}
+  <h3 style="margin:22px 0 10px;font-size:15px">Fatture emesse da incassare</h3>
+  ${tbl([{h:'N°',v:d=>d.numero+'/'+d.anno},{h:'Cliente',v:d=>esc(DB.get('clienti',d.cliente_id)?.rag_soc)},{h:'Data',v:d=>dIT(d.data)},{h:'Scadenza',v:d=>`<span class="badge ${d.scadenza<T?'b-bad':'b-warn'}">${dIT(d.scadenza)}</span>`},{h:'Totale',n:1,v:d=>eur(totals(d.righe).tot)},{h:'',a:1,v:d=>B('d-pay',I('ok')+'Incassata',d.id)}],att)}`},
+
+provvigioni(){const f=st.pf,rows=provvRows(f),imp=rows.reduce((s,r)=>s+r.imp,0),pv=rows.reduce((s,r)=>s+r.pv,0);
+  return `<div class="bar"><h2>Provvigioni</h2>${waChip()}${B('p-print',I('prt')+'Estratto conto','','pri')}</div>
+  <div class="bar"><select data-pf="m" style="width:auto"><option value="">Tutti i mandati</option>${DB.all('mandati').map(m=>`<option value="${m.id}"${f.m===m.id?' selected':''}>${esc(label('mandati',m))}</option>`).join('')}</select>
+  <input type="date" data-pf="da" value="${f.da||''}" style="width:auto" title="Dal"><input type="date" data-pf="a" value="${f.a||''}" style="width:auto" title="Al">
+  <select data-pf="st" style="width:auto"><option value="">Tutte</option><option value="mat"${f.st==='mat'?' selected':''}>Da liquidare</option><option value="liq"${f.st==='liq'?' selected':''}>Liquidate</option></select>
+  <span class="muted">Venduto: <b>${eur(imp)}</b> · Provvigioni: <b>${eur(pv)}</b></span></div>
+  ${tbl([{h:'Data',v:r=>dIT(r.o.data)},{h:'Ordine',v:r=>esc(r.o.numero)+(r.o.fonte?` <span class="muted">${esc(r.o.fonte)}</span>`:'')},{h:'Cliente',v:r=>esc(DB.get('clienti',r.o.cliente_id)?.rag_soc)},{h:'Mandante',v:r=>esc(DB.get('fornitori',r.m.mandante_id)?.rag_soc)},{h:'Imponibile',n:1,v:r=>eur(r.imp)},{h:'%',n:1,v:r=>num(r.imp?r.pv/r.imp*100:0)},{h:'Provvigione',n:1,v:r=>`<b>${eur(r.pv)}</b>`},
+    {h:'Stato',v:r=>r.o.provv_liq?`<span class="badge b-ok">Liquidata ${dIT(r.o.provv_liq)}</span>`:provvAttesa(r.o)?'<span class="badge">In attesa pagamento cliente</span>':'<span class="badge b-warn">Maturata</span>'},{h:'',a:1,v:r=>B('p-liq',r.o.provv_liq?'Annulla liq.':I('ok')+'Liquidata',r.o.id)}],rows)}`},
+
+impostazioni(){const a=DB.settings().azienda||{};
+  return `<div class="bar"><h2>Impostazioni</h2></div><form id="setf" class="card"><h3>Dati di fatturazione (intestazione documenti)</h3><div class="grid">${AZF.map(f=>fieldHTML(f,a[f[0]])).join('')}</div><p><button class="pri">${I('ok')}Salva</button></p></form>
+  ${waCard()}<div class="card" style="margin-top:14px"><h3>Dati e backup</h3><p class="muted">I dati stanno su Supabase (progetto Growing Liquids), condivisi tra tutte le postazioni, con backup automatico ogni notte. Questo browser ne tiene una copia per lavorare anche senza rete: <b data-dbst></b>.</p>
+  ${DB.vecchi()&&!localStorage.getItem(_lsKey('db_v1_caricato'))?`<p class="rem" style="border-radius:16px"><span>In questo browser ci sono ${DB.vecchi()} record del vecchio gestionale, salvati solo qui.</span>${B('db-import',I('ul')+'Carica su Supabase','','pri')}</p>`:''}
+  ${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('x')+'Svuota la copia locale','','','','Ricarica tutto dal server')}</div>`}
+};
+const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA'],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
+function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
+
+/* fornitori, mandanti e contratti nella stessa voce, su due schede */
+VIEWS.fornitori=()=>crudView(st.fotab==='mandati'?'mandati':'fornitori',tabs('fotab',[['fornitori','Fornitori e mandanti'],['mandati','Contratti e mandati']]));
+function crudView(c,tb=''){const s=S[c];let rows=DB.all(c).filter(o=>match(c,c==='prodotti'?{...o,_p:DB.get('fornitori',o.produttore_id)?.rag_soc}:o));
+  rows=c==='prodotti'?rows.sort(somCmp):rows.sort((a,b)=>label(c,a).localeCompare(label(c,b)));
+  const cols=s.list.map(k=>{const f=fieldOf(c,k);return{h:f[1].replace(/ \(.*\)/,''),n:f[2]==='num',v:o=>cell(f,o[k])}});
+  cols.push({h:'',a:1,v:o=>(c==='prodotti'&&o.canale!=='Mandato agenzia'?B('pc-go',I('calc'),o.id,'sm','','Calcola prezzo'):'')+B('edit',I('edit'),o.id,'sm',`data-c="${c}"`,'Modifica')+B('del',I('del'),o.id,'sm',`data-c="${c}"`,'Elimina')});
+  return `<div class="bar"><h2>${tb?'Fornitori e contratti':s.t}</h2>${tb}${search(c)}${B('csv',I('dl')+'CSV','','',`data-c="${c}"`)}${B('new',I('plus')+'Nuovo','','pri',`data-c="${c}"`)}</div>${tbl(cols,rows,()=>'',c==='prodotti'?grpOf:null)}`}
+function crudForm(c,o){const s=S[c];o=o?{...o}:({movimenti:{data:today()},prodotti:{attivo:true,iva:22,formato:'0.75'},passive:{data:today(),valuta:'EUR'},agenti:{attivo:true,tipo:'Agente plurimandatario',maturazione:"All'incasso",liquidazione:'Trimestrale',ritenuta_pct:11.5,quota_mandati:50},fallate:{data:today(),qta:1,stato:'Aperta',stato_forn:'Da segnalare'},pl:{nutri_auto:true,volume:'75 cl',grassi:0,saturi:0,proteine:0,sale:0,ingredienti:'Uve, conservanti: **solfiti**',smaltimento:SMALT}}[c]||{});const prev={...o};
+  modal((o.id?'Modifica ':'Nuovo: ')+s.t1,`<div class="grid">${s.f.map(f=>fieldHTML(f,o[f[0]])).join('')}</div>`,f=>{readForm(f,s.f,o);if(s.onSave?.(o,prev)===false)return false;DB.upsert(c,o);toast('Salvato')})}
+
+/* ================= ORDINI / RIGHE ================= */
+const OHEAD=[['tipo','Tipo','sel',1,['vendita','acquisto','agenzia']],['data','Data','date',1],['stato','Stato','sel',1,STATI],['cliente_id','Cliente','ref:clienti'],['fornitore_id','Fornitore','ref:fornitori'],['mandato_id','Mandato','ref:mandati'],['provv_pct','Provvigione % (override)','num'],['agente_id','Agente','ref:agenti'],['agente_pct','Provvigione agente % sull\'imponibile (override)','num'],['valuta','Valuta fornitore','sel',0,VAL],['cambio','Cambio (1 valuta = € …)','num'],['costi_acc','Costi accessori € (trasporto, dogana…)','num'],['consegna','Consegna prevista','date'],['rif_esterno','Rif. ordine cliente/fornitore'],['note','Note','area']];
+const OVIS={agente_id:['vendita','agenzia'],agente_pct:['vendita','agenzia'],cliente_id:['vendita','agenzia'],fornitore_id:['acquisto'],mandato_id:['agenzia'],provv_pct:['agenzia'],valuta:['acquisto'],cambio:['acquisto'],costi_acc:['acquisto']};
+/* editor righe riusabile (ordini + documenti composti a mano) */
+function linesHTML(){return `<h4>Righe</h4><div class="tw"><table class="lines"><thead><tr><th>Referenza</th><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th><th>Sc.%</th><th>IVA%</th><th class="n">Totale</th><th></th></tr></thead><tbody></tbody></table></div><p><button type="button" data-l="add">${I('plus')}Riga</button></p><div class="tots"></div>`}
+function linesEditor(f,righe,ctx){const tb=$('tbody',f),popt='<option value=""></option>'+DB.all('prodotti').filter(p=>p.attivo!==false).sort(somCmp).map(p=>`<option value="${p.id}">${esc((p.sku?p.sku+' · ':'')+label('prodotti',p))}</option>`).join('');
+  const add=(r={qta:1,sconto:0,iva:22})=>{const tr=document.createElement('tr');tr.innerHTML=`<td data-l="Referenza"><select name="p">${popt}</select></td><td data-l="Descrizione"><input name="d" value="${esc(r.descr)}"></td><td data-l="Q.tà"><input name="q" type="number" step="any" inputmode="decimal" value="${r.qta??''}"></td><td data-l="Prezzo"><input name="pr" type="number" step="0.0001" inputmode="decimal" value="${r.prezzo??''}"></td><td data-l="Sconto %"><input name="s" type="number" step="any" inputmode="decimal" value="${r.sconto??0}"></td><td data-l="IVA %"><input name="i" type="number" step="any" inputmode="decimal" value="${r.iva??22}"></td><td class="n lt" data-l="Totale"></td><td class="act" data-l=""><button type="button" data-l="del" class="sm" title="Rimuovi">${I('x')}</button></td>`;tr.querySelector('select').value=r.prodotto_id||'';tb.append(tr)};
+  const smE=stockMap();
+  const sync=()=>{const all=[],sell=ctx.tipo()==='vendita';let cst=0,under=0;for(const tr of tb.rows){const g=n=>+tr.querySelector(`[name=${n}]`).value||0,r={qta:g('q'),prezzo:g('pr'),sconto:g('s'),iva:g('i')},lt=lineTot(r);tr.querySelector('.lt').textContent=eur(lt);all.push(r);
+      const pid=tr.querySelector('[name=p]').value,pp=DB.get('prodotti',pid);let bad=false;if(sell&&pp&&r.qta){const cu=avgCost(pp,smE[pid]);cst+=cu*r.qta;bad=lt<cu*r.qta;under+=bad}tr.classList.toggle('under',bad)}
+    const t=totals(all),mg=t.imp-cst;$('.tots',f).innerHTML=`Imponibile <b>${eur(t.imp)}</b> · IVA ${eur(t.iva)} · Totale <b>${eur(t.tot)}</b>${ctx.note?.()||''}`+(sell&&cst?`<br><span class="${mg<0||under?'d-dn':'muted'}">Margine stimato ${eur(mg)} (${t.imp?(mg/t.imp*100).toFixed(1):0}%)${under?` · ${under} righe sotto costo`:''}</span>`:'');ctx.sync?.()};
+  f.addEventListener('click',e=>{const l=e.target.closest('[data-l]')?.dataset.l;if(l==='add'){add();sync()}else if(l==='del'){e.target.closest('tr').remove();sync()}});
+  f.addEventListener('input',sync);
+  f.addEventListener('change',e=>{if(e.target.name!=='p')return;const p=DB.get('prodotti',e.target.value),tr=e.target.closest('tr');if(!p)return;const set=(n,v)=>tr.querySelector(`[name=${n}]`).value=v??'';
+    const c=DB.get('clienti',ctx.cliente()),t=ctx.tipo();set('d',label('prodotti',p));set('i',p.iva??22);
+    set('pr',t==='acquisto'?p.costo:prezzoCliente(p,c));if(t!=='acquisto')set('s',c?.sconto||0);sync()});
+  (righe.length?righe:[undefined]).forEach(r=>add(r));sync();
+  return()=>[...tb.rows].map(tr=>{const g=n=>tr.querySelector(`[name=${n}]`).value;return{prodotto_id:g('p')||null,descr:g('d').trim(),qta:+g('q')||0,prezzo:+g('pr')||0,sconto:+g('s')||0,iva:+g('i')||0}}).filter(r=>(r.prodotto_id||r.descr)&&r.qta)}
+function orderForm(o){o=structuredClone(o||{tipo:st.otipo||'vendita',data:today(),stato:'Bozza',righe:[],cambio:1});let read;
+  if(o.mov)return modal(o.numero,'<p>Ordine già evaso: i movimenti di magazzino sono stati generati. Per correzioni usa una rettifica in Magazzino o un reso, così la contabilità resta coerente.</p>',()=>{},'OK');
+  const f=modal(o.numero||'Nuovo ordine',`<div class="grid">${OHEAD.map(x=>fieldHTML(x,o[x[0]])).join('')}</div>${linesHTML()}`,f=>{
+    readForm(f,OHEAD,o);for(const k in OVIS)if(!OVIS[k].includes(o.tipo))o[k]=null;
+    if(o.tipo!=='acquisto'&&!o.cliente_id)return alert('Seleziona il cliente'),false;
+    if(o.tipo==='acquisto'&&!o.fornitore_id)return alert('Seleziona il fornitore'),false;
+    if(o.tipo==='agenzia'&&!o.mandato_id)return alert('Seleziona il mandato'),false;
+    o.righe=read();if(!o.righe.length)return alert('Aggiungi almeno una riga con quantità'),false;
+    if(!o.numero){const y=o.data.slice(0,4);o.numero=`${{vendita:'OV',acquisto:'OA',agenzia:'AG'}[o.tipo]}-${y}-${String(DB.nextNum('ord'+o.tipo,y)).padStart(4,'0')}`}
+    DB.upsert('ordini',o);toast('Ordine '+o.numero+' salvato')});
+  const E=f.elements;
+  read=linesEditor(f,o.righe,{tipo:()=>E.tipo.value,cliente:()=>E.cliente_id.value,sync:()=>{for(const k in OVIS)E[k].closest('label').hidden=!OVIS[k].includes(E.tipo.value)},note:()=>E.tipo.value==='acquisto'&&E.valuta.value&&E.valuta.value!=='EUR'?` <span class="muted">(importi in ${E.valuta.value})</span>`:''});
+  f.addEventListener('change',e=>{if(e.target.name==='cliente_id'){const c=DB.get('clienti',e.target.value);if(c?.agente_id&&!E.agente_id.value)E.agente_id.value=c.agente_id}if(e.target.name==='fornitore_id'){const fo=DB.get('fornitori',e.target.value);if(fo?.valuta)E.valuta.value=fo.valuta}if(e.target.name==='tipo')f.dispatchEvent(new Event('input'))})}
+
+function evadi(o){if(o.mov)return toast('Movimenti già generati');const T=today();
+  if(o.tipo!=='agenzia'){const sm=stockMap();
+    if(o.tipo==='vendita'){const need={};for(const r of o.righe)if(r.prodotto_id)need[r.prodotto_id]=(need[r.prodotto_id]||0)+r.qta;const miss=Object.entries(need).filter(([p,q])=>(sm[p]?.q||0)<q);
+      if(miss.length&&!confirm(`Giacenza insufficiente per ${miss.length} referenze: l'eccedenza verrà valorizzata a costo standard e segnalata come scoperto. Procedere?`))return}
+    let lotto='';if(o.tipo==='acquisto'){lotto=prompt('Lotto (opzionale):','');if(lotto===null)return}
+    const cambio=+o.cambio||1,base=o.righe.reduce((s,r)=>s+lineTot(r),0),acc=+o.costi_acc||0;
+    for(const r of o.righe){if(!r.prodotto_id)continue;const lt=lineTot(r),m={data:T,prodotto_id:r.prodotto_id,qta:r.qta,rif:o.numero,ordine_id:o.id};
+      if(o.tipo==='acquisto'){m.tipo='Carico';autoSoglia(r.prodotto_id,r.qta);m.costo_unit=Math.round((lt*cambio+(base?acc*lt/base:0))/r.qta*1e4)/1e4;m.lotto=lotto}
+      else{m.tipo='Scarico';m.costo_unit=fifoTake(sm[r.prodotto_id],r.qta,DB.get('prodotti',r.prodotto_id));m.prezzo_unit=Math.round(lt/r.qta*1e4)/1e4}
+      DB.upsert('movimenti',m)}o.mov=true}
+  o.stato='Evaso';o.data_evasione=T;DB.upsert('ordini',o);toast(o.numero+' evaso');render()}
+
+/* manifesto .json per Trasferimenti → Ricevi del Cantina Manager (mode "ordine") */
+function manifesto(o){const c=DB.get('clienti',o.cliente_id)||{},from=(DB.settings().azienda||{}).rag_soc||CONFIG.nome;
+  const refs=o.righe.filter(r=>r.qta>0).map(r=>{const p=DB.get('prodotti',r.prodotto_id)||{};return{produttore:fname(p.produttore_id),nomeVino:p.nome||r.descr,vitigni:p.vitigni||'',annata:String(p.annata||''),tipologia:p.tipologia||'Rosso',formato:parseFloat(p.formato)||0.75,nazione:p.paese||'Italia',regione:p.regione||'',zona:p.zona||'',prezzoAcq:Math.round(lineTot(r)/r.qta*100)/100,iva:parseInt(r.iva)||22,prezzoCarta:0,qty:parseInt(r.qta)||1,scontoRef:0}});
+  o.manifest_id||=uid();DB.upsert('ordini',o);
+  const man={v:1,type:'cantina-order',mode:'ordine',transferId:o.manifest_id,from,fromDbUser:'growing-liquids',dest:c.rag_soc||'',data:today(),ordine:{dataOrdine:o.data,fornitore:from,note:`Ordine ${o.numero}${o.rif_esterno?' · rif. '+o.rif_esterno:''}`,sconto:0,categoria:'',referenze:refs},lines:refs.map(r=>({nome:r.nomeVino,produttore:r.produttore,annata:r.annata,qty:r.qty}))};
+  const txt=JSON.stringify(man);navigator.clipboard?.writeText(txt).catch(()=>{});download(`manifesto-${o.numero}.json`,JSON.stringify(man,null,2),'application/json');toast('Manifesto copiato e scaricato: incollalo in Trasferimenti → Ricevi')}
+
+/* ================= IMPORT CRM WINE ALCHEMIST (CSV) ================= */
+function parseCSV(txt){txt=txt.replace(/^\ufeff/,'');const h=txt.split(/\r?\n/)[0],sep=(h.match(/;/g)||[]).length>(h.match(/,/g)||[]).length?';':',';
+  const rows=[];let row=[],cur='',q=false;for(let i=0;i<txt.length;i++){const ch=txt[i];
+    if(q){if(ch==='"'){if(txt[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+    else if(ch==='"')q=true;else if(ch===sep){row.push(cur);cur=''}else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&txt[i+1]==='\n')i++;row.push(cur);rows.push(row);row=[];cur=''}else cur+=ch}
+  if(cur||row.length){row.push(cur);rows.push(row)}return rows.filter(r=>r.some(x=>x.trim()))}
+const pnum=v=>{v=String(v??'').replace(/[€\s]/g,'');if(/,\d{1,2}$/.test(v))v=v.replace(/\./g,'').replace(',','.');return +v||0};
+const pdate=v=>{v=String(v||'').trim();const m=v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/);return m?`${m[3].length===2?'20'+m[3]:m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:/^\d{4}-\d{2}-\d{2}/.test(v)?v.slice(0,10):today()};
+function importWA(){const def=DB.all('mandati').find(m=>/alchemist/i.test(label('mandati',m)));
+  modal('Importa ordini dal CRM Wine Alchemist',`<div class="grid">${fieldHTML(['mandato_id','Mandato Wine Alchemist','ref:mandati',1],def?.id)}<label class="full"><span>CSV esportato dal CRM — colonne: data, n° ordine, cliente, vino/referenza, quantità, prezzo, totale</span><input type="file" name="file" accept=".csv,text/csv" required></label></div><p class="muted">Righe con lo stesso n° ordine vengono raggruppate; ordini già importati saltati; clienti mancanti creati.</p>`,f=>{
+    const mid=f.elements.mandato_id.value;f.elements.file.files[0].text().then(txt=>{const rows=parseCSV(txt);if(rows.length<2)return alert('CSV vuoto');
+      const H=rows[0].map(h=>h.toLowerCase().trim()),col=re=>H.findIndex(h=>re.test(h));
+      const ix={data:col(/^data|date/),ord:col(/ordine|order|^n[°.]?$|numero|^id$/),cli:col(/cliente|client|locale|ragione/),vino:col(/vino|referenza|prodotto|articolo|descr|wine/),qta:col(/q\.?t|quant|bott|pezzi/),pr:col(/prezzo|price|unit/),tot:col(/totale|importo|total/)};
+      if(ix.cli<0||ix.vino<0||ix.qta<0)return alert('Colonne obbligatorie (cliente, vino, quantità) non trovate.\nIntestazioni: '+H.join(' | '));
+      const groups=new Map();for(const r of rows.slice(1)){const g=c=>c<0?'':(r[c]??'').trim(),key=g(ix.ord)||`${g(ix.data)}|${g(ix.cli)}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(g)}
+      const ext=new Set(DB.all('ordini').map(o=>o.ext_id).filter(Boolean)),cli=new Map(DB.all('clienti').map(c=>[c.rag_soc.toLowerCase(),c])),prd=new Map(DB.all('prodotti').map(p=>[p.nome.toLowerCase(),p]));let n=0,sk=0;
+      for(const [key,lines] of groups){const eid='wa:'+key;if(ext.has(eid)){sk++;continue}const g0=lines[0],cn=g0(ix.cli);if(!cn)continue;
+        let c=cli.get(cn.toLowerCase());if(!c){c=DB.upsert('clienti',{rag_soc:cn,tipo:'Ristorante',gruppo:'Esterno',note:'Creato da import CRM Wine Alchemist'});cli.set(cn.toLowerCase(),c)}
+        const righe=lines.map(g=>{const q=pnum(g(ix.qta));let pr=pnum(g(ix.pr));if(!pr&&ix.tot>=0&&q)pr=r2(pnum(g(ix.tot))/q);const p=prd.get(g(ix.vino).toLowerCase());return{prodotto_id:p?.id||null,descr:g(ix.vino),qta:q,prezzo:pr,sconto:0,iva:22}}).filter(r=>r.qta);
+        if(!righe.length)continue;const data=pdate(g0(ix.data)),y=data.slice(0,4);
+        DB.upsert('ordini',{tipo:'agenzia',numero:`AG-${y}-${String(DB.nextNum('ordagenzia',y)).padStart(4,'0')}`,data,data_evasione:data,stato:'Evaso',cliente_id:c.id,agente_id:c.agente_id||null,mandato_id:mid,righe,fonte:'CRM Wine Alchemist',ext_id:eid,rif_esterno:key.includes('|')?'':key});n++}
+      toast(`Importati ${n} ordini${sk?`, ${sk} già presenti`:''}`);render()})})}
+
+/* ================= DOCUMENTI ================= */
+function creaDoc(o,tipo){const y=today().slice(0,4),c=DB.get('clienti',o.cliente_id)||{};
+  if(DB.all('documenti').some(d=>d.ordine_id===o.id&&d.tipo===tipo)&&!confirm(`Esiste già ${tipo==='ddt'?'un DDT':'una fattura'} per questo ordine. Crearne un altro?`))return;
+  const d=Object.assign({tipo,anno:y,data:today(),cliente_id:o.cliente_id,ordine_id:o.id,righe:structuredClone(o.righe)},docDefaults(tipo,c,o.righe));d.numero=DB.nextNum(tipo,y);
+  DB.upsert('documenti',d);toast(`${tipo==='ddt'?'DDT':'Fattura'} ${d.numero}/${y} creata`);st.view='documenti';location.hash='documenti';render();docForm(d)}
+function docDefaults(tipo,c,righe){if(tipo==='fattura')return{pagamento:c.pagamento||'',scadenza:dueDate(today(),c.pagamento),pagata:false};
+  const cart=righe.reduce((s,r)=>{const p=DB.get('prodotti',r.prodotto_id);return s+(p?.cartone?Math.ceil(r.qta/p.cartone):0)},0);
+  return{causale:'Vendita',destinazione:c.dest||[c.indirizzo,c.cap,c.citta].filter(Boolean).join(' '),aspetto:'Cartoni',vettore:'Mittente',colli:cart||null}}
+const DOCF={fattura:[['data','Data','date',1],['pagamento','Pagamento','sel',0,PAG],['scadenza','Scadenza','date'],['pagata','Incassata','chk'],['note','Note','area']],
+  ddt:[['data','Data','date',1],['causale','Causale trasporto','sel',0,['Vendita','Conto visione','Conto deposito','Campionatura','Omaggio','Reso']],['destinazione','Luogo di destinazione'],['vettore','Trasporto a cura','sel',0,['Mittente','Destinatario','Vettore']],['vettore_nome','Vettore (dati)'],['colli','N° colli','num'],['peso','Peso kg','num'],['aspetto','Aspetto beni'],['mvv','MVV-E / e-AD n°'],['ora','Inizio trasporto (data/ora)'],['note','Note','area']]};
+/* documento composto a mano (senza ordine): referenze da menù a tendina */
+function newDoc(){const tipo=st.dtipo||'fattura';let read;
+  const f=modal('Nuovo documento',`<div class="grid">${fieldHTML(['tipo','Tipo','sel',1,['fattura','ddt']],tipo)}${fieldHTML(['cliente_id','Cliente','ref:clienti',1])}${fieldHTML(['scarica','Scarica dal magazzino (FIFO)','chk'],tipo==='ddt')}</div>${linesHTML()}`,f=>{
+    const E=f.elements,righe=read();if(!righe.length)return alert('Aggiungi almeno una riga'),false;const t=E.tipo.value,c=DB.get('clienti',E.cliente_id.value)||{},y=today().slice(0,4);
+    let ordine_id=null;if(E.scarica.checked&&righe.some(r=>r.prodotto_id)){const o=DB.upsert('ordini',{tipo:'vendita',data:today(),stato:'Confermato',cliente_id:c.id,agente_id:c.agente_id||null,righe,numero:`OV-${y}-${String(DB.nextNum('ordvendita',y)).padStart(4,'0')}`,note:'Generato da documento'});evadi(o);ordine_id=o.id}
+    const d=Object.assign({tipo:t,anno:y,data:today(),cliente_id:c.id,ordine_id,righe},docDefaults(t,c,righe));d.numero=DB.nextNum(t,y);DB.upsert('documenti',d);toast(`${t==='ddt'?'DDT':'Fattura'} ${d.numero}/${y} creata`)},'Crea');
+  read=linesEditor(f,[],{tipo:()=>'vendita',cliente:()=>f.elements.cliente_id.value})}
+function docForm(d){const F=DOCF[d.tipo];modal(`${d.tipo==='ddt'?'DDT':'Fattura'} ${d.numero}/${d.anno}`,`<div class="grid">${F.map(f=>fieldHTML(f,d[f[0]])).join('')}</div><h4>Righe</h4>${tbl([{h:'Descrizione',v:r=>esc(r.descr)},{h:'Q.tà',n:1,v:r=>num(r.qta)},{h:'Prezzo',n:1,v:r=>eur(r.prezzo)},{h:'Sc.',n:1,v:r=>num(r.sconto)},{h:'IVA',n:1,v:r=>r.iva+'%'},{h:'Totale',n:1,v:r=>eur(lineTot(r))}],d.righe)}<p class="muted">Le righe sono fotografate all'emissione: per correggerle emetti nota di credito / nuovo documento.</p>`,f=>{
+    const old=d.pagamento;readForm(f,F,d);if(d.tipo==='fattura'&&d.pagamento!==old&&f.elements.scadenza.value===f.elements.scadenza.defaultValue)d.scadenza=dueDate(d.data,d.pagamento);if(d.pagata&&!d.data_incasso)d.data_incasso=today();DB.upsert('documenti',d)})}
+/* stampa via iframe (no popup: Safari/iOS) */
+function printPage(title,inner){const a=DB.settings().azienda||{};let fr=$('#prt');if(!fr){fr=document.createElement('iframe');fr.id='prt';fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';document.body.append(fr)}
+  fr.onload=()=>{fr.contentWindow.focus();fr.contentWindow.print()};
+  fr.srcdoc=`<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font:12px/1.4 system-ui,sans-serif;color:#111;margin:28px}h1{font-family:Tinos,'Times New Roman',Times,serif;font-weight:400;font-size:24px;margin:0}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{border-bottom:1px solid #ccc;padding:6px;text-align:left}th{background:#f3f3f3}.n{text-align:right}.hd{display:flex;justify-content:space-between;gap:24px;margin-bottom:18px}.box{border:1px solid #ccc;padding:10px;border-radius:6px;min-width:240px}.muted{color:#666}.sign{display:flex;gap:30px;margin-top:40px}.sign div{flex:1;border-top:1px solid #999;padding-top:4px}@media print{body{margin:10mm}}</style></head><body>
+  <div class="hd"><div><img src="${esc(a.logo||CONFIG.logo||LOGO)}" style="height:64px;margin-bottom:6px"><br><b style="font-size:16px">${esc(a.rag_soc||CONFIG.nome)}</b><br>${esc([a.indirizzo,a.cap,a.citta].filter(Boolean).join(' '))}<br>${a.piva?'P.IVA '+esc(a.piva):''} ${a.cf?'· CF '+esc(a.cf):''}${a.rea?'<br>REA '+esc(a.rea):''}${a.accisa?'<br>Cod. accisa '+esc(a.accisa):''}<br>${esc([a.email,a.pec,a.tel].filter(Boolean).join(' · '))}</div><div class="n"><h1>${esc(title)}</h1></div></div>${inner}${a.footer?`<p class="muted">${esc(a.footer)}</p>`:''}</body></html>`}
+function printDoc(d){const c=DB.get('clienti',d.cliente_id)||{},t=totals(d.righe),F=d.tipo==='fattura',a=DB.settings().azienda||{};
+  const ddts=F&&d.ordine_id?DB.all('documenti').filter(x=>x.tipo==='ddt'&&x.ordine_id===d.ordine_id):[];
+  const cli=`<div class="box"><span class="muted">${F?'Cliente':'Destinatario'}</span><br><b>${esc(c.rag_soc)}</b><br>${esc([c.indirizzo,c.cap,c.citta,c.prov&&'('+c.prov+')'].filter(Boolean).join(' '))}<br>${c.piva?'P.IVA '+esc(c.piva):''} ${c.cf?'· CF '+esc(c.cf):''}${F&&c.sdi?'<br>SDI/PEC '+esc(c.sdi):''}</div>`;
+  const rows=d.righe.map(r=>`<tr><td>${esc(r.descr)}</td><td class="n">${num(r.qta)}</td>${F?`<td class="n">${eur(r.prezzo)}</td><td class="n">${r.sconto?num(r.sconto)+'%':''}</td><td class="n">${r.iva}%</td><td class="n">${eur(lineTot(r))}</td>`:''}</tr>`).join('');
+  const body=F?`<div class="hd">${cli}<div class="box">Data: <b>${dIT(d.data)}</b><br>Pagamento: ${esc(d.pagamento)}<br>Scadenza: ${dIT(d.scadenza)}${a.iban?'<br>IBAN: '+esc(a.iban):''}${ddts.length?'<br>Rif. DDT: '+ddts.map(x=>`${x.numero}/${x.anno} del ${dIT(x.data)}`).join(', '):''}</div></div>
+    <table><thead><tr><th>Descrizione</th><th class="n">Q.tà</th><th class="n">Prezzo</th><th class="n">Sc.</th><th class="n">IVA</th><th class="n">Importo</th></tr></thead><tbody>${rows}</tbody></table>
+    <table style="width:auto;margin-left:auto"><tbody>${t.det.map(x=>`<tr><td>Imponibile ${x.a}%</td><td class="n">${eur(x.imp)}</td><td>IVA</td><td class="n">${eur(x.iva)}</td></tr>`).join('')}<tr><th colspan="3">TOTALE DOCUMENTO</th><th class="n">${eur(t.tot)}</th></tr></tbody></table>
+    <p class="muted">Copia di cortesia priva di valore fiscale. L'originale è trasmesso tramite Sistema di Interscambio (SDI).</p>${d.note?`<p>${esc(d.note)}</p>`:''}`
+   :`<div class="hd">${cli}<div class="box">Data: <b>${dIT(d.data)}</b><br>Causale: ${esc(d.causale)}<br>Destinazione: ${esc(d.destinazione)}${d.mvv?'<br>MVV-E / e-AD: '+esc(d.mvv):''}</div></div>
+    <table><thead><tr><th>Descrizione</th><th class="n">Q.tà (bott.)</th></tr></thead><tbody>${rows}</tbody></table>
+    <table><tbody><tr><td>Trasporto a cura: <b>${esc(d.vettore)}</b> ${esc(d.vettore_nome)}</td><td>Colli: <b>${num(d.colli)}</b></td><td>Peso: <b>${num(d.peso)} kg</b></td><td>Aspetto: ${esc(d.aspetto)}</td><td>Inizio trasporto: ${esc(d.ora)}</td></tr></tbody></table>${d.note?`<p>${esc(d.note)}</p>`:''}
+    <div class="sign"><div>Firma conducente</div><div>Firma vettore</div><div>Firma destinatario</div></div>`;
+  printPage(`${F?'Fattura':'Documento di trasporto'} n. ${d.numero}/${d.anno}`,body)}
+function printProvv(){const f=st.pf,rows=provvRows(f);if(!rows.length)return toast('Nessuna provvigione nel filtro');const m=f.m&&DB.get('mandati',f.m),pv=rows.reduce((s,r)=>s+r.pv,0),imp=rows.reduce((s,r)=>s+r.imp,0);
+  printPage('Estratto conto provvigioni',`<p>${m?`Mandante: <b>${esc(DB.get('fornitori',m.mandante_id)?.rag_soc)}</b><br>`:''}Periodo: ${f.da?dIT(f.da):'inizio'} – ${f.a?dIT(f.a):dIT(today())}</p>
+  <table><thead><tr><th>Data</th><th>Ordine</th><th>Cliente</th><th class="n">Imponibile</th><th class="n">%</th><th class="n">Provvigione</th><th>Stato</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${dIT(r.o.data)}</td><td>${esc(r.o.rif_esterno||r.o.numero)}</td><td>${esc(DB.get('clienti',r.o.cliente_id)?.rag_soc)}</td><td class="n">${eur(r.imp)}</td><td class="n">${num(r.imp?r.pv/r.imp*100:0)}</td><td class="n">${eur(r.pv)}</td><td>${r.o.provv_liq?'Liquidata':'Maturata'}</td></tr>`).join('')}
+  <tr><th colspan="3">TOTALE</th><th class="n">${eur(imp)}</th><th></th><th class="n">${eur(pv)}</th><th></th></tr></tbody></table>`)}
+
+/* ================= PRIVATE LABEL / E-LABEL ================= */
+const SMALT='Bottiglia: vetro GL 70 – raccolta vetro\nTappo: sughero FOR 51 – raccolta umido\nCapsula: C/ALU 90 – raccolta plastica e metalli\nVerifica le disposizioni del tuo Comune.';
+const PLCAT=['Etichetta fronte','Retroetichetta','Esecutivo tipografia','Analisi di laboratorio','Scheda tecnica','Contratto / accordi','Foto','Altro'];
+const slugify=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const r1=v=>Math.round(v*10)/10;
+/* per 100 ml: alcol g = %vol × 0,789; fattori UE alcol 29 kJ / 7 kcal, carboidrati 17 kJ / 4 kcal */
+function nutri(vol,zgl){const a=vol*0.789,c=zgl/10;return{kj:Math.round(a*29+c*17),kcal:Math.round(a*7+c*4),carbo:r1(c),zucc:r1(c)}}
+const fN=v=>{v=+v||0;return v<0.5?'0':v<10?String(r1(v)).replace('.',','):String(Math.round(v))};
+const fmtSize=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const plBase=()=>{const b=(DB.settings().azienda||{}).elabel_base||CONFIG.elabelBase||'';return b&&!b.endsWith('/')?b+'/':b};
+const plUrl=p=>plBase()&&p.slug?plBase()+p.slug+'.html':'';
+/* archivio file: IndexedDB (localStorage non regge PDF e immagini) */
+const FS=(()=>{let dbp;const open=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open(_lsKey('files'),1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  const tx=async(mode,fn)=>{const db=await open();return new Promise((res,rej)=>{const t=db.transaction('f',mode),q=fn(t.objectStore('f'));t.oncomplete=()=>res(q.result);t.onerror=()=>rej(t.error)})};
+  return{put:(id,b)=>tx('readwrite',s=>s.put(b,id)),get:id=>tx('readonly',s=>s.get(id)),del:id=>tx('readwrite',s=>s.delete(id))}})();
+VIEWS.privatelabel=()=>{const rows=DB.all('pl').filter(p=>match('pl',p)).sort((a,b)=>a.nome.localeCompare(b.nome));
+  return `<div class="bar"><h2>Private label</h2>${search('pl')}${B('new',I('plus')+'Nuova etichetta','','pri','data-c="pl"')}</div>
+  ${plBase()?'':'<p class="muted">Imposta in Impostazioni l\'indirizzo base delle e-label (la pagina GitHub Pages di Growing Liquids) per generare link e QR.</p>'}
+  ${tbl([{h:'Etichetta',v:p=>`<b>${esc(p.nome)}</b>`},{h:'Annata',v:p=>esc(p.annata)},{h:'% vol',n:1,v:p=>num(p.gradi)},{h:'Energia',n:1,v:p=>p.kcal!=null?p.kcal+' kcal':''},{h:'Pagina',v:p=>plUrl(p)?`<span class="muted">${esc(p.slug)}.html</span>`:'—'},{h:'QR',v:p=>p.qr_stampato?'<span class="badge b-ok">In stampa</span>':'<span class="badge">Bozza</span>'},{h:'File',n:1,v:p=>(p.files||[]).length},
+    {h:'',a:1,v:p=>B('edit',I('edit'),p.id,'sm','data-c="pl"','Modifica')+B('pl-prev',I('eye'),p.id,'sm','','Anteprima e-label')+B('pl-page',I('dl')+'Pagina',p.id,'sm','','Scarica la pagina da pubblicare')+B('pl-qr',I('qr')+'QR',p.id)+B('pl-files',I('doc')+'File',p.id)+B('del',I('del'),p.id,'sm','data-c="pl"','Elimina')}],rows)}
+  <div class="card" style="margin-top:14px"><h3>Pubblicare una e-label</h3><p class="muted">1. Compila la scheda e controlla l'anteprima. 2. Scarica la pagina e caricala nel repository GitHub Pages di Growing Liquids, nella cartella dell'indirizzo base. 3. Apri il link dal telefono per verificarlo. 4. Scarica il QR in SVG per la tipografia e segnalo "in stampa": da quel momento l'indirizzo è bloccato. La pagina non contiene script, cookie o tracciamenti.</p></div>`};
+function elabelHTML(p){const md=s=>esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'),a=DB.settings().azienda||{};
+  const trasc=(+p.grassi||0)<0.5&&(+p.saturi||0)<0.1&&(+p.proteine||0)<0.5&&(+p.sale||0)<0.0125;
+  const L={it:{ing:'Ingredienti',nut:'Dichiarazione nutrizionale',per:'per 100 ml',en:'Energia',fat:'Grassi',sat:'di cui acidi grassi saturi',carb:'Carboidrati',sug:'di cui zuccheri',pro:'Proteine',salt:'Sale',neg:'Contiene quantità trascurabili di grassi, acidi grassi saturi, proteine e sale.',disp:'Smaltimento dell\'imballaggio',info:'Informazioni'},
+    en:{ing:'Ingredients',nut:'Nutrition declaration',per:'per 100 ml',en:'Energy',fat:'Fat',sat:'of which saturates',carb:'Carbohydrate',sug:'of which sugars',pro:'Protein',salt:'Salt',neg:'Contains negligible amounts of fat, saturates, protein and salt.'}};
+  const hasEn=!!(p.ingredienti_en||'').trim();
+  const sec=lang=>{const t=L[lang],rows=[[t.en,`${p.kj??0} kJ / ${p.kcal??0} kcal`]];if(!trasc)rows.push([t.fat,fN(p.grassi)+' g'],[t.sat,fN(p.saturi)+' g']);rows.push([t.carb,fN(p.carbo)+' g'],[t.sug,fN(p.zucc)+' g']);if(!trasc)rows.push([t.pro,fN(p.proteine)+' g'],[t.salt,(+p.sale||0)<0.0125?'0 g':String(r1(+p.sale*10)/10).replace('.',',')+' g']);
+    return `<section id="${lang}" lang="${lang}"><h2>${t.ing}</h2><p>${md(lang==='it'?p.ingredienti:p.ingredienti_en)}</p><h2>${t.nut} <small>${t.per}</small></h2><table>${rows.map(([x,y])=>`<tr><th>${x}</th><td>${y}</td></tr>`).join('')}</table>${trasc?`<p class="s">${t.neg}</p>`:''}${lang==='it'&&p.smaltimento?`<h2>${t.disp}</h2><p>${md(p.smaltimento)}</p>`:''}${lang==='it'&&p.info?`<h2>${t.info}</h2><p>${md(p.info)}</p>`:''}</section>`};
+  const meta=[p.denominazione,p.tipologia,p.annata,p.volume,p.gradi!=null&&String(p.gradi).replace('.',',')+'% vol'].filter(Boolean).map(esc).join(' · ');
+  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${esc(p.nome)} – e-label</title><style>body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1c1c1a;background:#f7f6f3}main{max-width:560px;margin:0 auto;padding:28px 18px 40px}header{border-bottom:1px solid #ddd;padding-bottom:14px}h1{font-family:'Times New Roman',Times,serif;font-weight:400;font-size:28px;margin:0 0 4px}.m{color:#666;font-size:14px}nav{margin-top:12px;font-size:14px}nav a{color:#1c1c1a;margin-right:14px}h2{font-size:16px;margin:24px 0 8px}h2 small{font-weight:400;color:#666}table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #ddd;border-radius:6px}th,td{padding:9px 12px;border-bottom:1px solid #eee;text-align:left;font-weight:400}td{text-align:right;font-weight:600}tr:last-child th,tr:last-child td{border:0}.s{font-size:14px;color:#444}section+section{border-top:1px solid #ddd;margin-top:30px}footer{margin-top:34px;font-size:12px;color:#888}</style></head><body><main><header><h1>${esc(p.nome)}</h1><div class="m">${meta}</div>${hasEn?'<nav><a href="#it">Italiano</a><a href="#en">English</a></nav>':''}</header>${sec('it')}${hasEn?sec('en'):''}<footer>${esc(a.rag_soc||CONFIG.nome)}</footer></main></body></html>`}
+function plCheck(p){const miss=[!(p.ingredienti||'').trim()&&'ingredienti',p.kcal==null&&'energia',p.carbo==null&&'carboidrati',p.gradi==null&&'titolo alcolometrico'].filter(Boolean);return miss.length?'Mancano: '+miss.join(', ')+'.':''}
+function qrSVG(text){if(typeof qrcode!=='function')throw Error('Libreria QR non caricata: serve la connessione al primo avvio.');const q=qrcode(0,'M');q.addData(text);q.make();const n=q.getModuleCount(),m=4,z=n+2*m;let d='';
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+=`M${c+m} ${r+m}h1v1h-1z`;return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${z} ${z}" width="${z*10}" height="${z*10}" shape-rendering="crispEdges"><rect width="${z}" height="${z}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`}
+function svgPng(svg,px,name){const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=px;const x=c.getContext('2d');x.imageSmoothingEnabled=false;x.drawImage(img,0,0,px,px);c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click()})};img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)}
+function plQR(p){const url=plUrl(p);if(!url)return alert('Imposta prima in Impostazioni l\'indirizzo base delle e-label.');let svg;try{svg=qrSVG(url)}catch(e){return alert(e.message)}
+  const f=modal('QR · '+p.nome,`<div style="text-align:center"><div style="width:220px;margin:0 auto">${svg.replace(/width="\d+" height="\d+"/,'width="220" height="220"')}</div><p><b>${esc(url)}</b></p><p class="tabs" style="justify-content:center"><button type="button" data-qx="svg">${I('dl')}SVG per tipografia</button><button type="button" data-qx="png">${I('dl')}PNG 1200 px</button><button type="button" data-qx="copy">Copia link</button></p></div>
+  <p class="muted">QR statico, senza servizi esterni né scadenze: punta per sempre a questo indirizzo. Prima di mandarlo in stampa pubblica la pagina e verifica che si apra. Lato minimo consigliato in stampa: 1,5 cm.</p>${p.qr_stampato?'<p><span class="badge b-ok">Segnato come in stampa: indirizzo bloccato</span></p>':''}`,()=>{if(p.qr_stampato)return true;const x=DB.get('pl',p.id);x.qr_stampato=true;DB.upsert('pl',x);toast('Indirizzo bloccato')},p.qr_stampato?'Chiudi':'Segna come in stampa');
+  f.addEventListener('click',e=>{const k=e.target.closest('[data-qx]')?.dataset.qx;if(!k)return;const nm='qr-'+p.slug;
+    if(k==='svg')download(nm+'.svg',svg,'image/svg+xml');else if(k==='png')svgPng(svg,1200,nm+'.png');else navigator.clipboard?.writeText(url).then(()=>toast('Link copiato'))})}
+function filesModal(c,p){const CAT=c==="pl"?PLCAT:FLCAT;const rows=p.files||[];
+  const f=modal('File · '+(p.nome||p.num),`<div class="grid">${fieldHTML(['cat','Categoria','sel',0,CAT],CAT[0])}<label class="full"><span>Aggiungi file (anche più di uno)</span><input type="file" name="up" multiple></label></div><h4>Archivio (${rows.length})</h4>${tbl([{h:'File',v:x=>esc(x.name)},{h:'Categoria',v:x=>esc(x.cat)},{h:'Peso',n:1,v:x=>fmtSize(x.size)},{h:'Data',v:x=>dIT(x.added)},{h:'',a:1,v:x=>`<button type="button" class="sm" data-fx="get" data-fid="${x.id}" title="Scarica">${I('dl')}</button><button type="button" class="sm" data-fx="del" data-fid="${x.id}" title="Elimina">${I('del')}</button>`}],rows)}<p class="muted">I file sono salvati in questo browser e non entrano nel backup JSON. Con Supabase passeranno sullo Storage condiviso.</p>`,f=>{
+    const files=[...f.elements.up.files];if(!files.length)return true;const cat=f.elements.cat.value;navigator.storage?.persist?.();
+    Promise.all(files.map(async fl=>{const id=uid();await FS.put(id,fl);return{id,name:fl.name,type:fl.type,size:fl.size,cat,added:today()}}))
+      .then(meta=>{const x=DB.get(c,p.id);x.files=[...(x.files||[]),...meta];DB.upsert(c,x);toast(meta.length+' file salvati');render();filesModal(c,x)}).catch(e=>alert('Errore nel salvataggio: '+e.message))},'Carica');
+  f.addEventListener('click',async e=>{const b=e.target.closest('[data-fx]');if(!b)return;const fid=b.dataset.fid,x=DB.get(c,p.id),meta=x.files.find(m=>m.id===fid);
+    if(b.dataset.fx==='get'){const blob=await FS.get(fid);if(!blob)return alert('File non presente in questo browser.');const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=meta.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5e3)}
+    else if(confirm('Eliminare '+meta.name+'?')){await FS.del(fid);x.files=x.files.filter(m=>m.id!==fid);DB.upsert(c,x);$('#dlg').close();render();filesModal(c,x)}})}
+
+/* ================= AGENTI ================= */
+VIEWS.agenti=()=>{const y=today().slice(0,4),f=st.af,tb=tabs('agtab',[['anag','Rete agenti'],['provv','Provvigioni agenti']]);
+  if(st.agtab==='provv'){const rows=agentRows(f),tot=rows.reduce((s,r)=>s+r.pv,0),sb={att:['In attesa incasso',''],mat:['Maturata','b-warn'],liq:['Liquidata','b-ok']};
+    return `<div class="bar"><h2>Agenti</h2>${tb}${B('ag-print',I('prt')+'Estratto conto','','pri')}</div>
+    <div class="bar"><select data-af="ag" style="width:auto"><option value="">Tutti gli agenti</option>${DB.all('agenti').map(a=>`<option value="${a.id}"${f.ag===a.id?' selected':''}>${esc(a.nome)}</option>`).join('')}</select><input type="date" data-af="da" value="${f.da||''}" style="width:auto" title="Dal"><input type="date" data-af="a" value="${f.a||''}" style="width:auto" title="Al">
+    <select data-af="st" style="width:auto"><option value="">Tutte</option><option value="att"${f.st==='att'?' selected':''}>In attesa incasso</option><option value="mat"${f.st==='mat'?' selected':''}>Maturate da pagare</option><option value="liq"${f.st==='liq'?' selected':''}>Liquidate</option></select><span class="muted">Totale: <b>${eur(tot)}</b></span></div>
+    ${tbl([{h:'Data',v:r=>dIT(r.o.data)},{h:'Ordine',v:r=>esc(r.o.numero)},{h:'Tipo',v:r=>`<span class="badge">${r.o.tipo==='agenzia'?'mandato':'vendita'}</span>`},{h:'Cliente',v:r=>esc(DB.get('clienti',r.o.cliente_id)?.rag_soc)},{h:'Agente',v:r=>esc(r.ag.nome)},{h:'Imponibile',n:1,v:r=>eur(r.imp)},{h:'Provvigione',n:1,v:r=>`<b>${eur(r.pv)}</b>`},
+      {h:'Stato',v:r=>`<span class="badge ${sb[r.st][1]}">${sb[r.st][0]}${r.st==='liq'?' '+dIT(r.o.agente_liq):''}</span>`},{h:'',a:1,v:r=>r.st==='att'?'':B('ag-liq',r.st==='liq'?'Annulla liq.':I('ok')+'Liquidata',r.o.id)}],rows)}`}
+  const R=agentRows({da:y+'-01-01'}),by=id=>R.filter(r=>r.o.agente_id===id);
+  return `<div class="bar"><h2>Agenti</h2>${tb}${search('agenti')}${B('new',I('plus')+'Nuovo agente','','pri','data-c="agenti"')}</div>
+  ${tbl([{h:'Agente',v:a=>`<b>${esc(a.nome)}</b>${a.attivo===false?' <span class="badge">non attivo</span>':''}`},{h:'Tipo',v:a=>esc(a.tipo)},{h:'Zona',v:a=>esc(a.zona)},{h:'Clienti',n:1,v:a=>DB.all('clienti').filter(c=>c.agente_id===a.id).length},{h:'Venduto '+y,n:1,v:a=>eur(by(a.id).reduce((s,r)=>s+r.imp,0))},{h:'Provvigioni '+y,n:1,v:a=>eur(by(a.id).reduce((s,r)=>s+r.pv,0))},{h:'Da pagare',n:1,v:a=>{const v=agentRows({ag:a.id,st:'mat'}).reduce((s,r)=>s+r.pv,0);return v?`<b class="d-dn">${eur(v)}</b>`:eur(0)}},{h:'Contratto',v:a=>a.data_fine?`<span class="badge ${a.data_fine<addDays(today(),60)?'b-warn':''}">fino al ${dIT(a.data_fine)}</span>`:''},
+    {h:'',a:1,v:a=>B('ag-open',I('eur')+'Provvigioni',a.id)+B('edit',I('edit'),a.id,'sm','data-c="agenti"','Modifica')+B('del',I('del'),a.id,'sm','data-c="agenti"','Elimina')}],DB.all('agenti').filter(a=>match('agenti',a)).sort((a,b)=>a.nome.localeCompare(b.nome)))}
+  <p class="muted">Assegna l'agente nella scheda cliente: gli ordini di quel cliente lo prendono in automatico (modificabile per singolo ordine).</p>`};
+function printAg(){const f=st.af,rows=agentRows(f).filter(r=>r.st!=='att');if(!rows.length)return toast('Nessuna provvigione maturata nel filtro');const ag=f.ag&&DB.get('agenti',f.ag),tot=r2(rows.reduce((s,r)=>s+r.pv,0));
+  let calc='';if(ag){const rit=r2(tot*(+ag.ritenuta_pct||0)/100),en=ag.enasarco&&ag.enasarco_pct?r2(tot*ag.enasarco_pct/200):0;
+    calc=`<table style="width:auto;margin-left:auto"><tbody><tr><td>Provvigioni</td><td class="n">${eur(tot)}</td></tr>${rit?`<tr><td>Ritenuta d'acconto (${num(ag.ritenuta_pct)}%)</td><td class="n">− ${eur(rit)}</td></tr>`:''}${en?`<tr><td>Enasarco quota agente (${num(ag.enasarco_pct/2)}%)</td><td class="n">− ${eur(en)}</td></tr>`:''}<tr><th>Netto da corrispondere (stima)</th><th class="n">${eur(tot-rit-en)}</th></tr></tbody></table><p class="muted">Calcolo indicativo, IVA esclusa: ritenuta ed Enasarco vanno verificati con il consulente sulla fattura dell'agente.</p>`}
+  printPage('Estratto conto provvigioni agente',`<p>${ag?`Agente: <b>${esc(ag.nome)}</b>${ag.piva?' · P.IVA '+esc(ag.piva):''}<br>`:''}Periodo: ${f.da?dIT(f.da):'inizio'} – ${f.a?dIT(f.a):dIT(today())}</p>
+  <table><thead><tr><th>Data</th><th>Ordine</th><th>Tipo</th><th>Cliente</th>${ag?'':'<th>Agente</th>'}<th class="n">Imponibile</th><th class="n">Provvigione</th><th>Stato</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${dIT(r.o.data)}</td><td>${esc(r.o.numero)}</td><td>${r.o.tipo==='agenzia'?'Mandato':'Vendita'}</td><td>${esc(DB.get('clienti',r.o.cliente_id)?.rag_soc)}</td>${ag?'':`<td>${esc(r.ag.nome)}</td>`}<td class="n">${eur(r.imp)}</td><td class="n">${eur(r.pv)}</td><td>${r.st==='liq'?'Liquidata':'Maturata'}</td></tr>`).join('')}</tbody></table>${calc}`)}
+
+/* ================= FALLATE ================= */
+const FLCAT=['Foto bottiglia','Foto etichetta / lotto','Corrispondenza','Nota di credito','Altro'];
+const flOpen=x=>!['Chiusa','Respinta','Sostituita','Nota di credito'].includes(x.stato)||['Da segnalare','Segnalata'].includes(x.stato_forn);
+VIEWS.fallate=()=>{const T=today(),y=T.slice(0,4),all=DB.all('fallate'),rows=all.filter(x=>(st.ftab==='tutte'||flOpen(x))&&match('fl',{...x,p:label('prodotti',DB.get('prodotti',x.prodotto_id)),c:DB.get('clienti',x.cliente_id)?.rag_soc})).sort((a,b)=>b.data.localeCompare(a.data));
+  const ya=all.filter(x=>x.data?.startsWith(y)),perP={},perD={};for(const x of ya){const n=DB.get('fornitori',x.fornitore_id)?.rag_soc||'?';perP[n]=(perP[n]||0)+(+x.qta||0);perD[x.difetto]=(perD[x.difetto]||0)+(+x.qta||0)}
+  const K=(v,l)=>`<div class="kpi"><b>${v}</b><span>${l}</span></div>`,attesa=x=>x.stato_forn==='Segnalata'&&x.data_segn?ggDiff(T,x.data_segn):null;
+  const cb={Aperta:'b-warn',Sostituita:'b-ok','Nota di credito':'b-ok',Respinta:'b-bad',Chiusa:''},fb={'Da segnalare':'b-bad',Segnalata:'b-warn','Accettata – credito':'b-ok','Accettata – sostituzione':'b-ok',Respinta:'b-bad','Non necessaria':''};
+  return `<div class="bar"><h2>Fallate & segnalazioni</h2>${tabs('ftab',[['aperte','Aperte'],['tutte','Tutte']])}${search('fl')}${B('new',I('plus')+'Nuova segnalazione','','pri','data-c="fallate"')}</div>
+  <div class="kpis">${K(all.filter(flOpen).length,'Pratiche aperte')}${K(all.filter(x=>x.stato_forn==='Da segnalare').length,'Da segnalare al fornitore')}${K(all.filter(x=>attesa(x)>14).length,'In attesa di risposta da oltre 14 gg')}${K(num(ya.reduce((s,x)=>s+(+x.qta||0),0)),'Bottiglie fallate '+y)}${K(eur(ya.reduce((s,x)=>s+(+x.credito||0),0)),'Crediti ottenuti '+y)}</div>
+  ${tbl([{h:'N°',v:x=>`<b>${esc(x.num)}</b>`},{h:'Data',v:x=>dIT(x.data)},{h:'Cliente',v:x=>esc(DB.get('clienti',x.cliente_id)?.rag_soc)},{h:'Referenza',v:x=>esc(label('prodotti',DB.get('prodotti',x.prodotto_id)))+(x.lotto?` <span class="muted">lotto ${esc(x.lotto)}</span>`:'')},{h:'Bt',n:1,v:x=>num(x.qta)},{h:'Problema',v:x=>esc(x.difetto)},
+    {h:'Cliente',v:x=>`<span class="badge ${cb[x.stato]}">${esc(x.stato)}</span>`},{h:'Fornitore',v:x=>`<span class="badge ${fb[x.stato_forn]}">${esc(x.stato_forn)}</span>${attesa(x)!=null?` <span class="${attesa(x)>14?'d-dn':'muted'}">da ${attesa(x)} gg</span>`:''}`},
+    {h:'',a:1,v:x=>B('edit',I('edit'),x.id,'sm','data-c="fallate"','Modifica')+(x.stato==='Aperta'?B('fl-sost',I('ok')+'Sostituisci',x.id,'sm','','Registra la bottiglia sostitutiva in uscita'):'')+(['Da segnalare','Segnalata'].includes(x.stato_forn)?B('fl-mail',I('inb')+(x.stato_forn==='Segnalata'?'Sollecita':'Segnala'),x.id):'')+B('fl-files',I('doc')+((x.files||[]).length||''),x.id,'sm','','Foto e documenti')+B('del',I('del'),x.id,'sm','data-c="fallate"','Elimina')}],rows)}
+  <div class="cols" style="margin-top:14px"><div class="card"><h3>Bottiglie fallate per produttore · ${y}</h3>${bars(perP,num)}</div><div class="card"><h3>Per tipo di problema · ${y}</h3>${bars(perD,num)}</div></div>`};
+function flMail(x){const f=DB.get('fornitori',x.fornitore_id),p=DB.get('prodotti',x.prodotto_id),a=DB.settings().azienda||{},soll=x.stato_forn==='Segnalata';
+  const body=`Buongiorno${f?.referente?' '+f.referente:''},\n\n${soll?`torniamo sulla segnalazione inviata il ${dIT(x.data_segn)}: `:''}vi segnaliamo ${x.qta} ${+x.qta===1?'bottiglia':'bottiglie'} di ${label('prodotti',p)}${x.lotto?` (lotto ${x.lotto})`:''} con il seguente problema: ${x.difetto.toLowerCase()}.${x.descr?'\n'+x.descr:''}\nIl cliente ce lo ha segnalato il ${dIT(x.data)}${x.rif?` (rif. ${x.rif})`:''}.\n\nVi chiediamo come preferite procedere: sostituzione o nota di credito. Conserviamo le bottiglie per eventuali verifiche e possiamo inviarvi le foto.\n\nGrazie,\n${a.rag_soc||CONFIG.nome}`;
+  const subj=`${soll?'Sollecito – ':''}Segnalazione bottiglie difettose – ${p?.nome||''} ${x.num}`;
+  if(f?.email)location.href=`mailto:${encodeURIComponent(f.email)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  else{navigator.clipboard?.writeText(subj+'\n\n'+body);alert('Il fornitore non ha email in anagrafica: testo copiato negli appunti.')}
+  if(!soll){x.stato_forn='Segnalata';x.data_segn=today();DB.upsert('fallate',x);render()}}
+
+/* ================= SCADENZARIO & PROMEMORIA =================
+   Fasce: scaduto · prossimi 7 giorni · entro fine mese · mese prossimo. */
+const ggDiff=(a,b)=>Math.round((new Date(a+'T12:00')-new Date(b+'T12:00'))/864e5);
+function scad(){const T=today(),y=+T.slice(0,4),m=+T.slice(5,7),e7=addDays(T,7),fm=iso(y,m+1,0),fmn=iso(y,m+2,0);
+  const items=[...DB.all('documenti').filter(d=>d.tipo==='fattura'&&!d.pagata).map(d=>({k:'in',id:d.id,s:d.scadenza||d.data,v:totals(d.righe).tot,c:DB.get('clienti',d.cliente_id),rif:`FT ${d.numero}/${d.anno}`})),
+    ...DB.all('passive').filter(x=>!x.pagata).map(x=>({k:'out',id:x.id,s:x.scadenza||x.data,v:+x.totale||0,c:DB.get('fornitori',x.fornitore_id),rif:x.numero,val:x.valuta&&x.valuta!=='EUR'?x.valuta:''}))];
+  const B={scad:{in:0,out:0,n:0},w:{in:0,out:0,n:0},fm:{in:0,out:0,n:0},nm:{in:0,out:0,n:0}};
+  for(const i of items){i.b=i.s<T?'scad':i.s<=e7?'w':i.s<=fm?'fm':i.s<=fmn?'nm':'';i.g=ggDiff(i.s,T);if(i.b){B[i.b][i.k]+=i.v;B[i.b].n++}}
+  return{items:items.sort((a,b)=>a.s.localeCompare(b.s)),B,T,fm,fmn}}
+function remBanner(SC){if(st.hideRem)return'';const s=SC.B.scad,w=SC.B.w;if(!s.n&&!w.n)return'';
+  const parts=[s.n?`<b>${s.n} ${s.n>1?'fatture scadute':'fattura scaduta'}</b> (${s.in?eur(s.in)+' da incassare':''}${s.in&&s.out?' · ':''}${s.out?eur(s.out)+' da pagare':''})`:'',w.n?`${w.n} in scadenza nei prossimi 7 giorni (${w.in?eur(w.in)+' in entrata':''}${w.in&&w.out?' · ':''}${w.out?eur(w.out)+' in uscita':''})`:''].filter(Boolean).join(' · ');
+  return `<div class="rem${s.n?' bad':''}">${I('warn')}<p>${parts}</p>${st.view!=='amministrazione'?'<button class="sm" data-view="amministrazione">Apri scadenzario</button>':''}<button class="sm" data-act="rem-x" title="Nascondi fino al prossimo avvio">${I('x')}</button></div>`}
+function cashBoxes(){const{B,fm,fmn}=scad(),inM=B.scad.in+B.w.in+B.fm.in,outM=B.scad.out+B.w.out+B.fm.out,pvR=provvRows({st:'mat'}),pv=pvR.filter(r=>!provvAttesa(r.o)).reduce((s,r)=>s+r.pv,0),pvA=pvR.filter(r=>provvAttesa(r.o)).reduce((s,r)=>s+r.pv,0);
+  const C=(cls,t,v,sub)=>`<div class="cb ${cls}"><span>${t}</span><b>${eur(v)}</b><small>${sub}</small></div>`;
+  return `<div class="cash">${C('in','Da incassare entro il '+dIT(fm).slice(0,5),inM,`${eur(B.w.in)} nei prossimi 7 gg${B.scad.in?` · <span class="d-dn">${eur(B.scad.in)} già scaduti</span>`:''}`)}
+  ${C('out','Da pagare entro il '+dIT(fm).slice(0,5),outM,`${eur(B.w.out)} nei prossimi 7 gg${B.scad.out?` · <span class="d-dn">${eur(B.scad.out)} già scaduti</span>`:''}`)}
+  ${C('tot','Saldo previsto a fine mese',inM-outM,'incassi − pagamenti, scaduti compresi')}
+  ${C(B.scad.n?'bad':'','Scaduto',B.scad.in+B.scad.out,`${eur(B.scad.in)} crediti · ${eur(B.scad.out)} debiti`)}
+  ${C('','Mese prossimo (al '+dIT(fmn).slice(0,5)+')',B.nm.in-B.nm.out,`+${eur(B.nm.in)} incassi · −${eur(B.nm.out)} pagamenti`)}
+  ${C('in','Provvigioni mandati da incassare',pv,`maturate, da fatturare ai mandanti${pvA?` · ${eur(pvA)} in attesa del pagamento dei clienti`:''}`)}${C('out','Provvigioni agenti da pagare',agentRows({st:'mat'}).reduce((s,r)=>s+r.pv,0),'maturate, non ancora liquidate')}</div>`}
+function remList(){const SC=scad(),rows=SC.items.filter(i=>i.b==='scad'||i.b==='w');if(!rows.length)return'<p class="muted">Nessuna fattura scaduta o in scadenza nei prossimi 7 giorni.</p>';
+  return `<h3 style="margin:8px 0 10px;font-size:15px">Promemoria scadenze</h3>${tbl([{h:'',v:i=>`<span class="badge ${i.k==='in'?'b-ok':'b-warn'}">${i.k==='in'?'Incasso':'Pagamento'}</span>`},{h:'Controparte',v:i=>esc(i.c?.rag_soc)},{h:'Rif.',v:i=>esc(i.rif)},{h:'Scadenza',v:i=>`${dIT(i.s)} <span class="${i.g<0?'d-dn':'muted'}">${i.g<0?`scaduta da ${-i.g} gg`:i.g===0?'oggi':`tra ${i.g} gg`}</span>`},{h:'Importo',n:1,v:i=>i.val?num(i.v)+' '+i.val:eur(i.v)},
+    {h:'',a:1,v:i=>i.k==='in'?(i.c?.email&&i.g<=0?B('rem-mail',I('inb')+'Sollecita',i.id):'')+B('d-pay',I('ok')+'Incassata',i.id):B('a-pay',I('ok')+'Pagata',i.id)}],rows)}`}
+
+/* ================= CALCOLO PREZZI =================
+   Margine = utile / prezzo netto sconto, dopo provvigione agente, costi vari e consegna.
+   P = (costo + consegna) / (1 − margine − provv − varie) / (1 − sconto), arrotondato per eccesso. */
+const PRZD={m_horeca:35,m_ingr:20,m_int:12,trasp:0.5,provv:0,varie:1,sconto:0,round:'0.5'};
+const przSet=()=>({...PRZD,...(DB.settings().pricing||{})});
+const LISTINI=[['prezzo','HoReCa / listino base','m_horeca'],['prezzo_ingr','Ingrosso / distributori','m_ingr'],['prezzo_int','Gruppo interno','m_int']];
+const r4=x=>Math.round(x*1e4)/1e4;
+const prezzoCliente=(p,c)=>c?.gruppo&&c.gruppo!=='Esterno'&&p.prezzo_int!=null?p.prezzo_int:c?.listino==='Ingrosso'&&p.prezzo_ingr!=null?p.prezzo_ingr:p.prezzo;
+function roundUp(v,r){if(r==='.90')return r2(Math.ceil(v-0.9-1e-9)+0.9);const s=+r||0.01;return r2(Math.ceil(v/s-1e-9)*s)}
+function suggest(C,m,o){const den=1-((+m||0)+(+o.provv||0)+(+o.varie||0))/100;if(den<=0.05||!(C>0))return null;return roundUp((C+(+o.trasp||0))/den/(1-(+o.sconto||0)/100),o.round)}
+function brk(P,C,o){const net=P*(1-(+o.sconto||0)/100),pv=net*(+o.provv||0)/100,va=net*(+o.varie||0)/100,tr=+o.trasp||0,ut=net-pv-va-tr-C;return{net,ut,marg:net?ut/net*100:0,ric:C?(P-C)/C*100:0,coef:C?P/C:0}}
+let PC={};
+VIEWS.prezzi=()=>{const o=przSet(),sm=stockMap(),pr=DB.all('prodotti').filter(p=>p.canale!=='Mandato agenzia').sort(somCmp);
+  const inp=(k,l,v)=>`<label><span>${l}</span><input data-pc="${k}" type="number" step="any" inputmode="decimal" value="${v??''}"></label>`;
+  const rows=pr.map(p=>{const C=avgCost(p,sm[p.id]),sug=suggest(C,o.m_horeca,o),b=p.prezzo&&C?brk(p.prezzo,C,o):null;return{p,C,sug,b}});
+  return `<div class="bar"><h2>Calcolo prezzi</h2></div>
+  <div class="cols" id="pcalc"><div class="card"><h3>Costo della bottiglia</h3><div class="grid">
+  <label class="full"><span>Referenza (facoltativa)</span><select id="pc-pid"><option value=""></option>${pr.map(p=>`<option value="${p.id}">${esc((p.sku?p.sku+' · ':'')+label('prodotti',p))}</option>`).join('')}</select></label>
+  ${inp('pf','Prezzo fornitore (in valuta)','')}${inp('cambio','Cambio (1 valuta = € …)',1)}${inp('base','Costo base € (FIFO o standard)','')}${inp('extra','Extra per bottiglia € (trasporto import, CONAI, etichette)',0)}</div></div>
+  <div class="card"><h3>Parametri</h3><div class="grid">${inp('m_horeca','Margine HoReCa %',o.m_horeca)}${inp('m_ingr','Margine ingrosso %',o.m_ingr)}${inp('m_int','Margine gruppo interno %',o.m_int)}${inp('trasp','Consegna per bottiglia €',o.trasp)}${inp('provv','Provvigione agente %',o.provv)}${inp('varie','Costi vari / insoluti %',o.varie)}${inp('sconto','Sconto medio concesso %',o.sconto)}
+  <label><span>Arrotonda per eccesso a</span><select data-pc="round">${[['0.01','centesimo'],['0.1','10 centesimi'],['0.5','50 centesimi'],['1','euro intero'],['.90','x,90']].map(([v,l])=>`<option value="${v}"${o.round===v?' selected':''}>${l}</option>`).join('')}</select></label></div><p>${B('pc-save',I('ok')+'Salva come predefiniti','','sm')}</p></div></div>
+  <div id="pcout" style="margin-top:14px"></div>
+  <h3 style="margin:22px 0 6px;font-size:15px">Verifica listino</h3><p class="muted">Margine reale dei prezzi HoReCa attuali con i parametri predefiniti (obiettivo ${num(o.m_horeca)}%).</p>
+  ${tbl([{h:'Referenza',v:x=>esc(label('prodotti',x.p))},{h:'Costo',n:1,v:x=>x.C?eur(x.C):'—'},{h:'Prezzo',n:1,v:x=>x.p.prezzo!=null?eur(x.p.prezzo):'—'},{h:'Margine',n:1,v:x=>x.b?`<span class="${x.b.marg<0?'d-dn':x.b.marg>=o.m_horeca-0.05?'d-up':''}">${x.b.marg.toFixed(1)}%</span>`:''},{h:'Suggerito',n:1,v:x=>x.sug?eur(x.sug):''},
+    {h:'Stato',v:x=>!x.C?'<span class="badge">Senza costo</span>':x.p.prezzo==null?'<span class="badge b-warn">Senza prezzo</span>':x.b.marg<0?'<span class="badge b-bad">In perdita</span>':x.b.marg<o.m_horeca-0.05?'<span class="badge b-warn">Sotto obiettivo</span>':'<span class="badge b-ok">OK</span>'},
+    {h:'',a:1,v:x=>x.sug&&x.sug!==x.p.prezzo?B('pc-row',I('ok')+'Applica '+eur(x.sug),x.p.id):''}],rows,()=>'',x=>grpOf(x.p))}`};
+function pcUpdate(){const r=$('#pcalc');if(!r)return;const v=k=>{const el=r.querySelector(`[data-pc="${k}"]`);return k==='round'?el.value:el.value===''?null:+el.value};
+  const o={};for(const k of ['m_horeca','m_ingr','m_int','trasp','provv','varie','sconto','round'])o[k]=v(k);
+  const pf=v('pf');if(pf!=null)r.querySelector('[data-pc="base"]').value=r4(pf*(v('cambio')||1));
+  const C=r4((v('base')||0)+(v('extra')||0)),p=DB.get('prodotti',$('#pc-pid').value);PC={pid:p?.id,o,C,s:{}};
+  const rows=LISTINI.map(([k,l,mk])=>{const P=suggest(C,o[mk],o);PC.s[k]=P;return{k,l,m:o[mk]||0,P,b:P?brk(P,C,o):null,cur:p?.[k],bc:p?.[k]?brk(p[k],C,o):null,iva:p?.iva??22}});
+  $('#pcout').innerHTML=C>0?tbl([{h:'Listino',v:x=>`<b>${x.l}</b> <span class="muted">obiettivo ${num(x.m)}%</span>`},{h:'Suggerito',n:1,v:x=>x.P?`<b>${eur(x.P)}</b>`:'<span class="d-dn">percentuali troppo alte</span>'},{h:'IVA inclusa',n:1,v:x=>x.P?eur(x.P*(1+x.iva/100)):''},{h:'Utile / bottiglia',n:1,v:x=>x.b?eur(x.b.ut):''},{h:'Margine',n:1,v:x=>x.b?x.b.marg.toFixed(1)+'%':''},{h:'Ricarico',n:1,v:x=>x.b?`${x.b.ric.toFixed(0)}% · ×${x.b.coef.toFixed(2).replace('.',',')}`:''},
+    {h:'Attuale',n:1,v:x=>x.bc?`${eur(x.cur)} <span class="${x.bc.marg<x.m-0.05?'d-dn':'d-up'}">${x.bc.marg.toFixed(1)}%</span>`:'—'},{h:'',a:1,v:x=>p&&x.P&&x.P!==x.cur?B('pc-apply',I('ok')+'Applica',x.k):''}],rows)
+    +`<p class="muted">Costo pieno ${eur(C)} · consegna ${eur(o.trasp||0)}/bt. Margine = utile ÷ prezzo al netto dello sconto, dopo provvigione e costi vari. Ricarico = (prezzo − costo) ÷ costo.</p>`:'<p class="muted">Scegli una referenza o inserisci un costo.</p>'}
+
+/* ================= CRM WINE ALCHEMIST · collegamento diretto =================
+   Legge dal Supabase del CRM (schema crm) con il tuo account: nessuna password salvata, solo la sessione.
+   Ordini confermati/evasi -> ordini "agenzia" sul mandato scelto; aggiornamento in realtime + ogni 2 minuti. */
+const WA_DEF={url:'https://xnzqutbfmaofvsurmkxf.supabase.co',key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuenF1dGJmbWFvZnZzdXJta3hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MjcxNzUsImV4cCI6MjEwNTMwMzE3NX0.mUJ5g-6QNLTnk5hCfHPjwTN45unJauaZOg2Pg_AIkkA',schema:'crm',cdn:'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js'};
+const WA={sb:null,ok:false,busy:false,agents:[],err:'',user:''};
+const waCfg=()=>DB.settings().wa||(DB.settings().wa={});
+const loadJS=src=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(Error('Libreria Supabase non caricata: controlla la connessione'));document.head.append(s)});
+async function waClient(){if(WA.sb)return WA.sb;if(!window.supabase?.createClient)await loadJS(WA_DEF.cdn);
+  return WA.sb=window.supabase.createClient(WA_DEF.url,WA_DEF.key,{db:{schema:WA_DEF.schema},auth:{persistSession:true,autoRefreshToken:true,storageKey:_lsKey('wa_auth')}})}
+async function waInit(){try{const sb=await waClient(),{data}=await sb.auth.getSession();WA.ok=!!data?.session;WA.user=data?.session?.user?.email||'';
+    if(!WA.ok){WA.err='Sessione scaduta: accedi di nuovo da Impostazioni';return waStatus()}
+    const r=await sb.from('agents').select('id,nome,attivo');WA.agents=(r.data||[]).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+    waLive();await waSync()}catch(e){WA.err=e.message||String(e);waStatus()}}
+function waLive(){if(WA.live)return;WA.live=true;const kick=()=>{clearTimeout(WA.t);WA.t=setTimeout(()=>waSync(),2500)};
+  try{WA.sb.channel('gl-wa-ordini').on('postgres_changes',{event:'*',schema:WA_DEF.schema,table:'orders'},kick).on('postgres_changes',{event:'*',schema:WA_DEF.schema,table:'order_items'},kick).subscribe()}catch(e){}
+  setInterval(()=>{if(!document.hidden)waSync()},120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)kick()})}
+async function waIn(table,cols,ids,size=100){const out=[];for(let i=0;i<ids.length;i+=size){const r=await WA.sb.from(table).select(cols).in(table==='order_items'?'order_id':'id',ids.slice(i,i+size));if(r.error)throw r.error;out.push(...r.data)}return out}
+function waCliente(c,waId){const all=DB.all('clienti');let x=all.find(k=>k.wa_id===waId);if(x)return x;
+  const nm=(c?.ragione_sociale||c?.insegna||'Cliente WA '+String(waId).slice(0,6)).trim(),lc=s=>String(s||'').trim().toLowerCase();
+  x=all.find(k=>lc(k.rag_soc)===lc(nm)||(c?.insegna&&lc(k.rag_soc)===lc(c.insegna)));if(x){x.wa_id=waId;return DB.upsert('clienti',x)}
+  return DB.upsert('clienti',{rag_soc:nm,tipo:'Ristorante',gruppo:'Esterno',wa_id:waId,piva:c?.p_iva||'',cf:c?.codice_fiscale||'',indirizzo:c?.indirizzo||'',cap:c?.cap||'',citta:c?.citta||'',email:c?.email||'',sdi:c?.codice_sdi||c?.pec||'',tel:c?.telefono||'',note:(c?.insegna&&c.insegna!==nm?'Insegna: '+c.insegna+'. ':'')+'Dal CRM Wine Alchemist'})}
+async function waSync(manual){const cfg=waCfg();if(WA.busy||!WA.ok||!DB.ready())return;if(!cfg.mandato_id){WA.err='Scegli il mandato Wine Alchemist in Impostazioni';return waStatus()}
+  WA.busy=true;waStatus();
+  try{const da=cfg.da||DB.get('mandati',cfg.mandato_id)?.data_inizio||'';let q=WA.sb.from('v_ordini').select('*').in('stato',['confermato','evaso','annullato']).order('created_at',{ascending:false}).limit(2000);if(da)q=q.gte('created_at',da);
+    const {data:ords,error}=await q;if(error)throw error;
+    const mine=DB.all('ordini').filter(o=>o.fonte==='CRM Wine Alchemist'),byExt=new Map(mine.map(o=>[o.ext_id,o])),byNum=new Map(mine.map(o=>[o.rif_esterno,o]));
+    const list=(ords||[]).filter(o=>(!(cfg.agenti||[]).length||cfg.agenti.includes(o.agent_id))&&(o.stato!=='annullato'||byExt.has('wa:'+o.id)||byNum.has(o.numero)));
+    const items=await waIn('order_items','order_id,wine_id,qty,qty_omaggio,prezzo_unitario,sconto_pct',list.filter(o=>o.dettaglio!==false).map(o=>o.id));
+    const wines=new Map((await waIn('wines','id,nome,produttore,annata,prezzo_listino',[...new Set(items.map(i=>i.wine_id))])).map(w=>[w.id,w]));
+    const clis=new Map((await waIn('clients','id,ragione_sociale,insegna,p_iva,codice_fiscale,indirizzo,cap,citta,email,pec,codice_sdi,telefono',[...new Set(list.map(o=>o.client_id))])).map(c=>[c.id,c]));
+    /* dalla tabella orders (la vista v_ordini non li espone): sconto per pagamento anticipato (importo), data di pagamento, provvigione liquidata */
+    const ox=new Map((await waIn('orders','id,pagamento,sconto_pagamento,imponibile,pagato_at,provvigione_pagata_at',list.map(o=>o.id))).map(x=>[x.id,x]));
+    let nNew=0,nUpd=0;
+    for(const o of list){const eid='wa:'+o.id,ex=byExt.get(eid)||byNum.get(o.numero),stato={confermato:'Confermato',evaso:'Evaso',annullato:'Annullato'}[o.stato];
+      const X=ox.get(o.id)||{},fp=+X.sconto_pagamento>0&&+X.imponibile>0?(+X.imponibile-+X.sconto_pagamento)/+X.imponibile:1;
+      const righe=o.dettaglio===false?[{descr:`Ordine ${o.numero} (dettaglio riservato all'agente)`,qta:1,prezzo:r2(+o.totale||0),sconto:0,iva:22}]
+        :items.filter(i=>i.order_id===o.id).flatMap(i=>{const w=wines.get(i.wine_id)||{},d=[w.produttore,w.nome,w.annata].filter(Boolean).join(' ')||'Referenza WA',om=+i.qty_omaggio||0,paid=(+i.qty||0)-om,out=[];
+          if(paid>0)out.push({descr:d,qta:paid,prezzo:+(i.prezzo_unitario??w.prezzo_listino)||0,sconto:Math.round((1-(1-(+i.sconto_pct||0)/100)*fp)*1e6)/1e4,iva:22});if(om>0)out.push({descr:d+' (omaggio)',qta:om,prezzo:0,sconto:0,iva:22});return out});
+      const cli=waCliente(clis.get(o.client_id),o.client_id),data=String(o.inviato_at||o.created_at||today()).slice(0,10),agente_id=cfg.map?.[o.agent_id]||cli.agente_id||null;
+      const wa_pagato=X.pagato_at?String(X.pagato_at).slice(0,10):X.pagamento==='anticipato'?data:null,liq=X.provvigione_pagata_at?String(X.provvigione_pagata_at).slice(0,10):null,sig=JSON.stringify([stato,righe,cli.id,agente_id,data,wa_pagato,liq]);
+      if(ex){if(ex.wa_sig===sig&&ex.ext_id===eid)continue;ex.ext_id=eid;ex.wa_pagato=wa_pagato;if(liq&&!ex.provv_liq)ex.provv_liq=liq;
+        if(ex.provv_liq){ex.stato=stato}else Object.assign(ex,{stato,righe,cliente_id:cli.id,agente_id,data,rif_esterno:o.numero});
+        if(stato==='Evaso'&&!ex.data_evasione)ex.data_evasione=data;ex.wa_sig=sig;DB.upsert('ordini',ex);nUpd++}
+      else if(stato!=='Annullato'){const y=data.slice(0,4);DB.upsert('ordini',{tipo:'agenzia',numero:`AG-${y}-${String(DB.nextNum('ordagenzia',y)).padStart(4,'0')}`,data,data_evasione:stato==='Evaso'?data:null,stato,cliente_id:cli.id,mandato_id:cfg.mandato_id,agente_id,righe,fonte:'CRM Wine Alchemist',ext_id:eid,rif_esterno:o.numero,wa_sig:sig,wa_pagato,provv_liq:liq});nNew++}}
+    cfg.last=new Date().toISOString();WA.err='';DB.saveSettings();
+    if(nNew||nUpd){toast(`CRM Wine Alchemist: ${nNew} nuovi, ${nUpd} aggiornati`);if(!$('#dlg').open)render()}else if(manual)toast('CRM Wine Alchemist: tutto allineato')}
+  catch(e){WA.err=e.message||String(e)}finally{WA.busy=false;waStatus()}}
+function waStatusTxt(){const c=waCfg();return WA.busy?'Sincronizzazione…':WA.err?'Errore: '+WA.err:c.last?'CRM aggiornato alle '+new Date(c.last).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):'CRM in collegamento…'}
+function waStatus(){for(const el of document.querySelectorAll('[data-wast]')){el.textContent=waStatusTxt();el.className='badge '+(WA.err?'b-bad':WA.busy?'':'b-ok')}}
+const waChip=()=>waCfg().enabled?`<span data-wast class="badge ${WA.err?'b-bad':'b-ok'}">${esc(waStatusTxt())}</span>${B('wa-sync','Aggiorna','','')}`:B('wa-go',I('ul')+'Collega CRM Wine Alchemist','','')+B('o-imp','Import CSV','','');
+function waCard(){const cfg=waCfg();
+  if(!WA.ok)return `<div class="card" style="margin-top:14px"><h3>Collegamento CRM Wine Alchemist</h3><p class="muted">Accedi con il tuo account del CRM: gli ordini confermati ed evasi entrano da soli come ordini in agenzia, con le provvigioni del mandato, e si aggiornano in tempo reale. Viene salvata solo la sessione, mai la password.</p>${WA.err?`<p class="d-dn">${esc(WA.err)}</p>`:''}${B('wa-login',I('ul')+'Accedi al CRM','','pri')}</div>`;
+  const gl=DB.all('agenti');
+  return `<div class="card" style="margin-top:14px"><h3>Collegamento CRM Wine Alchemist</h3><p><span class="badge b-ok">Collegato</span> ${esc(WA.user)} · <span data-wast class="badge">${esc(waStatusTxt())}</span></p>
+  <div class="grid">${fieldHTML(['wa_mandato','Mandato a cui attribuire gli ordini','ref:mandati',1],cfg.mandato_id)}<label><span>Importa gli ordini dal (vuoto = inizio mandato)</span><input type="date" name="wa_da" value="${esc(cfg.da||'')}"></label></div>
+  <h4>Agenti Wine Alchemist</h4><p class="muted">Spunta quelli i cui ordini rientrano nel mandato Growing Liquids (nessuna spunta = tutti gli ordini visibili al tuo account). A destra, l'agente Growing Liquids a cui va la quota.</p>
+  ${tbl([{h:'Agente WA',v:a=>`<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-waag="${a.id}"${(cfg.agenti||[]).includes(a.id)?' checked':''}>${esc(a.nome)}</label>`},{h:'Agente Growing Liquids',v:a=>`<select data-wamap="${a.id}" style="width:auto;min-width:160px"><option value=""></option>${gl.map(g=>`<option value="${g.id}"${cfg.map?.[a.id]===g.id?' selected':''}>${esc(g.nome)}</option>`).join('')}</select>`}],WA.agents)}
+  <p class="tabs">${B('wa-save',I('ok')+'Salva e sincronizza','','pri')}${B('wa-sync','Aggiorna ora','','')}${B('wa-logout','Esci dal CRM','','')}</p></div>`}
+
+/* ================= ACCESSO (Supabase Auth, progetto Growing Liquids) =================
+   Senza sessione valida e profilo attivo in gl.profili non si vede nulla. Le email abilitate stanno in gl.accessi_autorizzati.
+   Primo accesso: link d'invito via email -> scelta password. Password dimenticata: link di recupero -> nuova password. */
+const GL_SB={url:'https://ekkghbbudywqznqmgpwy.supabase.co',key:'sb_publishable_OlmsOfBYMpXVkJe-DbjcnA_Sssy3XAT',schema:'gl'};
+const AUTH={sb:null,user:null,prof:null,mode:'login',em:'',err:''};
+const AUTH_TYPE=(/[#&]type=(invite|recovery)/.exec(location.hash)||[])[1]||'';
+async function glClient(){if(AUTH.sb)return AUTH.sb;if(!window.supabase?.createClient)await loadJS(WA_DEF.cdn);
+  return AUTH.sb=window.supabase.createClient(GL_SB.url,GL_SB.key,{db:{schema:GL_SB.schema},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:_lsKey('auth')}})}
+const authMsg=x=>{const m=x?.message||String(x);return/invalid login/i.test(m)?'Email o password non corrette.':/rate limit|security purposes/i.test(m)?'Troppi tentativi: riprova tra qualche minuto.':/weak|at least|characters/i.test(m)?'Password troppo debole: usa almeno 10 caratteri, con lettere e numeri.':/different from the old|same/i.test(m)?'La nuova password deve essere diversa dalla precedente.':/failed to fetch|network|non caricata/i.test(m)?'Servizio non raggiungibile: controlla la connessione.':m};
+function authShell(inner){$('#nav').hidden=true;$('#nav').innerHTML='';$('#app').innerHTML=`<div class="auth"><img src="${esc(LOGO)}" alt="${esc(CONFIG.nome)}">${inner}</div>`}
+function authScreen(msg=''){const m=AUTH.mode,err=AUTH.err;AUTH.err='';
+  const t={login:['Accedi','Entra con l\'email e la password del tuo account.'],reset:['Primo accesso o password dimenticata','Inserisci la tua email: ti mandiamo un link per scegliere la password.'],set:['Scegli la password',AUTH_TYPE==='invite'?'Primo accesso: scegli la password del tuo account.':'Scegli una nuova password per il tuo account.']}[m];
+  authShell(`<form id="authf" class="card" novalidate><h2>${t[0]}</h2><p class="muted">${t[1]}</p>
+    ${m!=='set'?`<label><span>Email</span><input name="em" type="email" required autocomplete="username" value="${esc(AUTH.em)}"></label>`:''}
+    ${m!=='reset'?`<label><span>Password</span><input name="pw" type="password" required autocomplete="${m==='set'?'new-password':'current-password'}"></label>`:''}
+    ${m==='set'?`<label><span>Ripeti la password</span><input name="pw2" type="password" required autocomplete="new-password"></label><p class="muted" style="font-size:12px">Almeno 10 caratteri, con lettere e numeri.</p>`:''}
+    ${err?`<p class="d-dn">${esc(err)}</p>`:''}${msg?`<p class="d-up">${esc(msg)}</p>`:''}
+    <button class="pri">${m==='login'?'Accedi':m==='reset'?'Inviami il link':'Salva la password'}</button>
+    ${m==='login'?'<button type="button" class="lnk" data-auth="reset">Primo accesso o password dimenticata</button>':m==='reset'?'<button type="button" class="lnk" data-auth="login">Torna all\'accesso</button>':''}</form>`);
+  $('#authf input')?.focus()}
+async function authReady(){const sb=await glClient(),{data:{session}}=await sb.auth.getSession();if(!session){AUTH.mode='login';return authScreen()}
+  AUTH.user=session.user;const{data,error}=await sb.from('profili').select('nome,ruolo,attivo').eq('user_id',session.user.id).maybeSingle();
+  if(error){AUTH.err='Impossibile verificare l\'account: '+authMsg(error);return authScreen()}
+  if(!data?.attivo){AUTH.err='Questo account non è abilitato al gestionale. Chiedi a un amministratore di Growing Liquids.';AUTH.mode='login';return sb.auth.signOut()}
+  AUTH.prof=data;$('#nav').hidden=false;if(!VIEWS[st.view]&&!S[st.view])st.view='dashboard';if(location.hash.slice(1)!==st.view)history.replaceState(null,'',location.pathname+location.search+'#'+st.view);
+  render();try{await DB.start()}catch(x){toast('Server non raggiungibile: lavori sulla copia locale')}if(waCfg().enabled)waInit()}
+async function authStart(){const h=location.hash;
+  if(/error_description=/.test(h)){const d=decodeURIComponent((/error_description=([^&]+)/.exec(h)||[])[1]||'').replace(/\+/g,' '),scad=/expired|invalid/i.test(d);history.replaceState(null,'',location.pathname+location.search);
+    AUTH.mode=scad?'reset':'login';AUTH.err=scad?'Il link è scaduto o è già stato usato: chiedine uno nuovo qui sotto.':d;return authScreen()}
+  authShell('<p class="muted" style="text-align:center">Verifica dell\'accesso…</p>');
+  try{const sb=await glClient();
+    sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY'){AUTH.mode='set';setTimeout(authScreen)}else if(ev==='SIGNED_OUT'){AUTH.user=AUTH.prof=null;if(AUTH.mode==='set')AUTH.mode='login';setTimeout(authScreen)}});
+    const{data:{session}}=await sb.auth.getSession();
+    if(session&&AUTH_TYPE){AUTH.mode='set';st.view='dashboard';history.replaceState(null,'',location.pathname+location.search);return authScreen()}
+    if(session)return authReady();AUTH.mode='login';authScreen()}
+  catch(x){AUTH.err=authMsg(x);AUTH.mode='login';authScreen()}}
+document.addEventListener('click',e=>{const g=e.target.closest('[data-navg]');if(!g)return;const k=g.dataset.navg;navOpen[k]=!g.classList.contains('open');try{localStorage.setItem(_lsKey('nav'),JSON.stringify(navOpen))}catch{}render()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-auth]');if(!b)return;AUTH.mode=b.dataset.auth;const em=$('#authf [name=em]');if(em)AUTH.em=em.value.trim();authScreen()});
+document.addEventListener('submit',async e=>{if(e.target.id!=='authf')return;e.preventDefault();const E=e.target.elements,b=e.target.querySelector('button.pri');b.disabled=true;
+  try{const sb=await glClient();
+    if(AUTH.mode!=='set'){AUTH.em=E.em.value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(AUTH.em))throw Error('Inserisci un indirizzo email valido.')}
+    if(AUTH.mode==='login'){const{error}=await sb.auth.signInWithPassword({email:AUTH.em,password:E.pw.value});if(error)throw error;return authReady()}
+    if(AUTH.mode==='reset'){const{error}=await sb.auth.resetPasswordForEmail(AUTH.em,{redirectTo:location.origin+location.pathname});if(error)throw error;AUTH.mode='login';return authScreen('Se l\'indirizzo è abilitato riceverai a breve un\'email con il link. Controlla anche lo spam.')}
+    const pw=E.pw.value;if(pw.length<10||!/[a-z]/i.test(pw)||!/\d/.test(pw))throw Error('Password troppo debole: usa almeno 10 caratteri, con lettere e numeri.');if(pw!==E.pw2.value)throw Error('Le due password non coincidono.');
+    const{error}=await sb.auth.updateUser({password:pw});if(error)throw error;AUTH.mode='login';toast('Password salvata');return authReady()}
+  catch(x){AUTH.err=authMsg(x);authScreen()}});
+
+/* ================= EVENTI ================= */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[data-act]');if(!b||b.closest('dialog'))return;
+  if(b.dataset.view){st.view=b.dataset.view;location.hash=st.view;return render()}
+  const id=b.dataset.id,c=b.dataset.c,o=()=>DB.get('ordini',id),dc=()=>DB.get('documenti',id);
+  ({new:()=>crudForm(c),edit:()=>crudForm(c,DB.get(c,id)),
+    del:()=>{if(c==='pl'){const p=DB.get('pl',id);if(p.qr_stampato&&!confirm('Il QR di questa etichetta è già in stampa. Eliminare comunque la scheda?'))return}if(c!=='movimenti'&&inUse(c,id))return alert('Elemento collegato ad altri dati: non eliminabile.');if(confirm(c==='movimenti'?'Annullare il movimento? Resta nel ledger come annullato.':'Eliminare?')){if(c==='pl'||c==='fallate')(DB.get(c,id).files||[]).forEach(m=>FS.del(m.id).catch(()=>{}));DB.remove(c,id);render()}},
+    csv:()=>{const f=S[c].f,txt=v=>new DOMParser().parseFromString(v,'text/html').body.textContent||(v.includes('<svg')?'sì':'');download(c+'.csv','\ufeff'+[f.map(x=>x[1]),...DB.all(c).map(x=>f.map(ff=>txt(cell(ff,x[ff[0]]))))].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\n'),'text/csv')},
+    tab:()=>{st[c]=id;render()},
+    'o-new':()=>orderForm(),'o-edit':()=>orderForm(o()),'o-evadi':()=>evadi(o()),'o-ddt':()=>creaDoc(o(),'ddt'),'o-fatt':()=>creaDoc(o(),'fattura'),'o-imp':importWA,'o-man':()=>manifesto(o()),
+    'o-ftric':()=>{const x=o(),t=totals(x.righe),k=+x.cambio||1;crudForm('passive',{fornitore_id:x.fornitore_id,ordine_id:x.id,rif_ordine:x.numero,data:today(),valuta:'EUR',imponibile:r2(t.imp*k+(+x.costi_acc||0)),iva:r2(t.iva*k),pagamento:DB.get('fornitori',x.fornitore_id)?.pagamento||''})},
+    'o-del':()=>{const x=o(),mv=DB.all('movimenti').filter(m=>m.ordine_id===id);if(DB.all('documenti').some(d=>d.ordine_id===id)||DB.all('passive').some(p=>p.ordine_id===id))return alert('Ordine con documenti collegati: impostalo come Annullato invece di eliminarlo.');
+      if(confirm(`Eliminare ${x.numero}?${mv.length?` I ${mv.length} movimenti collegati verranno annullati nel ledger.`:''}`)){mv.forEach(m=>DB.remove('movimenti',m.id));DB.remove('ordini',id);render()}},
+    'd-new':newDoc,'d-edit':()=>docForm(dc()),'d-print':()=>printDoc(dc()),'d-pay':()=>{const d=dc();d.pagata=true;d.data_incasso=today();DB.upsert('documenti',d);render()},
+    'd-del':()=>{const d=dc();if(DB.seqOf(d.tipo+d.anno)!==+d.numero)return alert(`Si può eliminare solo l'ultimo numero emesso (${DB.seqOf(d.tipo+d.anno)}/${d.anno}). Per correggere questo documento emetti una nota di credito o un nuovo documento.`);if(!confirm('Eliminare il documento?'))return;DB.remove('documenti',id);render()},
+    'db-import':()=>{const n=DB.vecchi();if(!confirm(`Caricare su Supabase i ${n} record salvati in questo browser dal vecchio gestionale? Quelli già presenti vengono saltati.`))return;toast(DB.importaVecchi()+' record in caricamento');render()},
+    'a-pay':()=>{const x=DB.get('passive',id);x.pagata=true;x.data_pag=today();DB.upsert('passive',x);render()},
+    'pl-qr':()=>plQR(DB.get('pl',id)),'pl-files':()=>filesModal('pl',DB.get('pl',id)),'fl-files':()=>filesModal('fallate',DB.get('fallate',id)),
+    'pl-prev':()=>{const p=DB.get('pl',id),w=plCheck(p);modal('Anteprima · '+p.nome,`${w?`<p><span class="badge b-warn">${esc(w)}</span></p>`:''}<iframe srcdoc="${esc(elabelHTML(p))}" style="width:100%;max-width:420px;height:70vh;border:1px solid var(--line);border-radius:10px;display:block;margin:0 auto;background:#fff"></iframe>`,()=>{},'Chiudi')},
+    'pl-page':()=>{const p=DB.get('pl',id),w=plCheck(p);if(w&&!confirm(w+' Scaricare comunque?'))return;download(p.slug+'.html',elabelHTML(p),'text/html');toast('Pagina '+p.slug+'.html scaricata')},
+'pc-apply':()=>{const p=DB.get('prodotti',PC.pid),val=PC.s[id];if(!p||!val)return;const l=LISTINI.find(x=>x[0]===id)[1];if(!confirm(`${label('prodotti',p)}: ${l} a ${eur(val)}?`))return;p[id]=val;DB.upsert('prodotti',p);toast('Prezzo aggiornato');pcUpdate()},
+    'pc-save':()=>{if(!PC.o)return;DB.settings().pricing={...PC.o};DB.saveSettings();toast('Parametri salvati')},
+    'pc-row':()=>{const p=DB.get('prodotti',id),o=przSet(),val=suggest(avgCost(p,stockMap()[id]),o.m_horeca,o);if(!val||!confirm(`${label('prodotti',p)}: prezzo HoReCa a ${eur(val)}?`))return;p.prezzo=val;DB.upsert('prodotti',p);toast('Prezzo aggiornato');render()},
+    'pc-go':()=>{st.view='prezzi';location.hash='prezzi';render();const s=$('#pc-pid');s.value=id;s.dispatchEvent(new Event('change',{bubbles:true}))},
+'fl-mail':()=>flMail(DB.get('fallate',id)),
+    'fl-sost':()=>{const x=DB.get('fallate',id),p=DB.get('prodotti',x.prodotto_id);if(!confirm(`Registrare l'uscita di ${num(x.qta)} ${label('prodotti',p)} in sostituzione al cliente?`))return;
+      DB.upsert('movimenti',{data:today(),prodotto_id:x.prodotto_id,tipo:'Sostituzione fallata',qta:+x.qta,rif:x.num,note:'Sostituzione a '+(DB.get('clienti',x.cliente_id)?.rag_soc||'cliente')});x.stato='Sostituita';DB.upsert('fallate',x);toast('Sostituzione registrata in magazzino');render()},
+    'ag-liq':()=>{const x=o();x.agente_liq=x.agente_liq?null:today();DB.upsert('ordini',x);render()},'ag-print':printAg,'ag-open':()=>{st.agtab='provv';st.af={ag:id};render()},
+    'wa-go':()=>{st.view='impostazioni';location.hash='impostazioni';render()},'wa-sync':()=>WA.ok?waSync(true):(st.view='impostazioni',render()),
+    'wa-login':()=>modal('Accedi al CRM Wine Alchemist',`<div class="grid"><label><span>Email</span><input name="em" type="email" required autocomplete="username"></label><label><span>Password</span><input name="pw" type="password" required autocomplete="current-password"></label></div><p class="muted">Stesso account con cui entri nel CRM. La password non viene salvata.</p>`,f=>{const em=f.elements.em.value.trim(),pw=f.elements.pw.value;
+      waClient().then(sb=>sb.auth.signInWithPassword({email:em,password:pw})).then(({error})=>{if(error)throw error;const c=waCfg();c.enabled=true;if(!c.mandato_id)c.mandato_id=DB.all('mandati').find(m=>/alchemist/i.test(label('mandati',m)))?.id||'';DB.saveSettings();WA.err='';toast('Collegato al CRM Wine Alchemist');return waInit()}).then(render).catch(e=>{WA.err=/invalid/i.test(e.message)?'Email o password non corrette':e.message;render()})},'Accedi'),
+    'wa-save':()=>{const c=waCfg(),r=$('#app');c.mandato_id=r.querySelector('[name=wa_mandato]').value;c.da=r.querySelector('[name=wa_da]').value;c.agenti=[...r.querySelectorAll('[data-waag]:checked')].map(x=>x.dataset.waag);c.map={};r.querySelectorAll('[data-wamap]').forEach(s=>{if(s.value)c.map[s.dataset.wamap]=s.value});c.enabled=true;DB.saveSettings();if(!c.mandato_id)return alert('Scegli il mandato a cui attribuire gli ordini');toast('Impostazioni salvate');waSync(true)},
+    'wa-logout':()=>{if(!confirm('Scollegare il CRM? Gli ordini già importati restano.'))return;WA.sb?.auth.signOut();WA.ok=false;waCfg().enabled=false;DB.saveSettings();render()},
+    'cm-imp':cmImport,'inv-scheda':()=>invScheda(DB.get('prodotti',id)),'inv-reset':()=>{st.inv={sort:st.inv.sort};render()},
+    'mv-new':()=>crudForm('movimenti',{data:today(),prodotto_id:id,tipo:b.dataset.t}),
+    'rem-x':()=>{st.hideRem=true;render()},
+    logout:()=>{if(confirm('Uscire dal gestionale?'))AUTH.sb?.auth.signOut()},
+    'rem-mail':()=>{const d=dc(),c=DB.get('clienti',d.cliente_id)||{},a=DB.settings().azienda||{},t=totals(d.righe);
+      const body=`Gentili ${c.referente||c.rag_soc},\n\nda un controllo risulta ancora aperta la fattura n. ${d.numero}/${d.anno} del ${dIT(d.data)}, di ${eur(t.tot)}, scaduta il ${dIT(d.scadenza)}.\nVi chiediamo cortesemente di provvedere al saldo${a.iban?` tramite bonifico all'IBAN ${a.iban}`:''}, o di ignorare questo messaggio se il pagamento è già stato effettuato.\n\nGrazie e buona giornata,\n${a.rag_soc||CONFIG.nome}`;
+      location.href=`mailto:${encodeURIComponent(c.email)}?subject=${encodeURIComponent(`Promemoria pagamento fattura ${d.numero}/${d.anno}`)}&body=${encodeURIComponent(body)}`},
+    'p-liq':()=>{const x=o();x.provv_liq=x.provv_liq?null:today();DB.upsert('ordini',x);render()},'p-print':printProvv,
+    backup:()=>download(`${CONFIG.lsPrefix}backup-${today()}.json`,DB.dump(),'application/json'),
+    reset:()=>{if(DB.pending())return alert('Ci sono modifiche non ancora inviate al server: aspetta che la connessione torni prima di svuotare la copia locale.');if(confirm('Svuotare la copia locale e ricaricare tutto dal server? I dati sul server non vengono toccati.'))DB.reset()}
+  })[b.dataset.act]?.()});
+document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpdate();const k=e.target.dataset.q;if(k===undefined)return;st.q[k]=e.target.value;const pos=e.target.selectionStart;render();const n=$(`[data-q="${k}"]`);n.focus();n.setSelectionRange(pos,pos)});
+document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))return;
+  if(t.id==='pc-pid'){const p=DB.get('prodotti',t.value),r=$('#pcalc');r.querySelector('[data-pc="pf"]').value='';r.querySelector('[data-pc="base"]').value=p?r4(avgCost(p,stockMap()[p.id])):'';return pcUpdate()}
+  if(t.closest('#pcalc'))return pcUpdate();
+  if(t.dataset.s){st[t.dataset.s]=t.value;render()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;render()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;render()}
+  else if(t.id==='restore'&&t.files[0])t.files[0].text().then(j=>{if(!confirm('Ripristinare il backup? I record del file sostituiscono quelli con lo stesso codice sul server, per tutte le postazioni.'))return;try{toast(DB.load(j)+' record in ripristino');render()}catch(err){alert(err.message)}})});
+document.addEventListener('submit',e=>{if(e.target.id!=='setf')return;e.preventDefault();const s=DB.settings();s.azienda=readForm(e.target,AZF,s.azienda||{});DB.saveSettings();toast('Dati salvati');render()});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==st.view&&!/=/.test(h)){st.view=h;render()}});
+authStart();
+</script>
+</body>
+</html>
