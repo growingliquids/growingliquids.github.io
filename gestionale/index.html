@@ -132,7 +132,7 @@ button.lnk{border:0;background:none;color:var(--mut);text-decoration:underline;p
 #nav{display:flex;flex-direction:column}
 #nav .gh{margin-top:14px;padding:6px 14px;font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--mut);font-weight:600;border-radius:999px}
 #nav .gh span:first-child{flex:1}#nav .gh .ic{width:14px;height:14px;transition:transform .15s;transform:rotate(-90deg)}#nav .gh.open .ic{transform:none}#nav .gh:hover{color:var(--ink)}
-#nav .gi.closed{display:none}#nav .navnew{justify-content:center;margin:4px 0 10px}#nav .navnew .ic{stroke:#fff}
+#nav .gi.closed{display:none}#nav .navnew,#nav .navnew:hover{justify-content:center;margin:4px 0 10px;background:var(--ink);color:#fff;border-radius:999px;font-weight:600}#nav .navnew .ic{stroke:#fff}#nav .navnew:hover{opacity:.88}
 .qn{display:grid;grid-template-columns:1fr 1fr;gap:8px}.qn button{justify-content:flex-start;padding:12px 14px}.guida h3{margin:18px 0 6px}.guida p,.guida li{line-height:1.55}.guida ol{padding-left:20px;margin:0}#nav .foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
 #nav .who{padding:10px 14px 0;font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis}
 @media(max-width:760px){.qn{grid-template-columns:1fr}#nav .navnew{margin:0}#nav{flex-direction:row}#nav .who,#nav .gh{display:none!important}#nav .gi,#nav .gi.closed,#nav .foot{display:contents}.auth{margin-top:4vh}}
