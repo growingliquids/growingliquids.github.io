@@ -170,7 +170,7 @@ const I=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor
    svuotata appena c'è rete (copia locale + coda in localStorage: si lavora anche offline).
    Aggiornamento in tempo reale dalle altre postazioni. 'movimenti' = registro: remove imposta deleted_at.
    Le righe degli ordini stanno in gl.ordini_righe; i campi senza colonna dedicata in extra (o dati). */
-const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH={documenti:'dati',pl:'dati'},KC=_lsKey('cache_v2'),KQ=_lsKey('coda_v2');
+const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH={documenti:'dati',pl:'dati'},KC=_lsKey('cache_v2'),KQ=_lsKey('coda_v2'),KS=_lsKey('sospese_v1');
   const C_=s=>Object.fromEntries(s.split(',').map(x=>x.split(':')));
   const COLS={fornitori:C_('id:u,rag_soc:t,cantina:t,tipo:t,paese:t,piva:t,eori:t,accisa:t,valuta:t,incoterm:t,pagamento:t,iban:t,email:t,tel:t,referente:t,indirizzo:t,citta:t,note:t,created_at:ts'),
     agenti:C_('id:u,nome:t,tipo:t,zona:t,piva:t,cf:t,email:t,tel:t,indirizzo:t,iban:t,pct_vendita:n,quota_mandati:n,maturazione:t,liquidazione:t,enasarco:b,enasarco_pct:n,ritenuta_pct:n,data_inizio:d,data_fine:d,attivo:b,doc_url:t,note:t,created_at:ts'),
@@ -189,7 +189,10 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   const TSC=new Set(['agenti','clienti','fallate','fornitori','mandati','ordini','pl','prodotti']),tk=(c,id)=>c+':'+id;
   let d={},seq={},q=[],ts={},shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
   try{const c=JSON.parse(localStorage.getItem(KC));if(c){d=c.d||{};seq=c.seq||{};ts=c.ts||{};shared=c.shared||''}}catch{}try{q=JSON.parse(localStorage.getItem(KQ))||[]}catch{q=[]}
-  const raw=c=>d[c]||(d[c]=[]),save=()=>{try{localStorage.setItem(KC,JSON.stringify({d,seq,ts,shared}));localStorage.setItem(KQ,JSON.stringify(q))}catch(e){console.warn('Copia locale non salvata',e)}};
+  /* modifiche rifiutate dal server: mai scartate in silenzio, restano qui finché l'utente non le riprova, esporta o scarta (revisione CM, punto 5) */
+  let sosp=[];try{sosp=JSON.parse(localStorage.getItem(KS))||[]}catch{sosp=[]}
+  const sospendi=(op,motivo)=>sosp.push({op,motivo,at:new Date().toISOString()});
+  const raw=c=>d[c]||(d[c]=[]),save=()=>{try{localStorage.setItem(KC,JSON.stringify({d,seq,ts,shared}));localStorage.setItem(KQ,JSON.stringify(q));localStorage.setItem(KS,JSON.stringify(sosp))}catch(e){console.warn('Copia locale non salvata',e)}};
   const conv=(t,v)=>t==='n'?(v===''||v==null||isNaN(+v)?null:+v):t==='d'?(v?String(v).slice(0,10):null):t==='u'||t==='ts'?(v||null):t==='b'?!!v:t==='j'?v:(v==null?null:String(v));
   function toRow(c,o){const cols=COLS[c],k=CATCH[c]||'extra',row={},ex={};
     for(const[f,v]of Object.entries(o)){if(f==='updated_at'||(c==='ordini'&&f==='righe'))continue;const t=cols[f];if(!t){if(v!==undefined)ex[f]=v;continue}if(t==='b'&&v==null)continue;row[f]=conv(t,v)}
@@ -197,7 +200,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   function fromRow(c,r){const k=CATCH[c]||'extra',o={...(r[k]||{}),...r};delete o[k];delete o.creato_da;return o}
   const sharedOf=s=>JSON.stringify({...Object.fromEntries(SHARED.map(k=>[k,s[k]||null])),wa:Object.fromEntries(WASH.map(k=>[k,s.wa?.[k]??null]))});
   const put=(c,o)=>{const a=raw(c),i=a.findIndex(x=>x.id===o.id);i<0?a.push(o):a[i]=o};
-  const status=()=>{for(const el of document.querySelectorAll('[data-dbst]'))el.textContent=q.length?`${q.length} ${q.length>1?'modifiche':'modifica'} da inviare`:(ready?'Dati sincronizzati':'Caricamento dati…')};
+  const status=()=>{for(const el of document.querySelectorAll('[data-dbst]'))el.textContent=(q.length?`${q.length} ${q.length>1?'modifiche':'modifica'} da inviare`:(ready?'Dati sincronizzati':'Caricamento dati…'))+(sosp.length?` · ${sosp.length} in sospeso`:'')};
   const enqueue=op=>{q.push(op);save();status();clearTimeout(tFl);tFl=setTimeout(flush,300)};
   const sb=()=>AUTH.sb;
   async function fetchAll(t,sel='*'){const out=[];for(let i=0;;i+=1000){const{data,error}=await sb().from(t).select(sel).range(i,i+999);if(error)throw error;out.push(...data);if(data.length<1000)return out}}
@@ -206,8 +209,8 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
         if(op.op==='up'){const tb=TB[op.c]||op.c,key=tk(op.c,op.o.id),cond=TSC.has(op.c)&&op.base;
           r=cond?await sb().from(tb).update(toRow(op.c,op.o)).eq('id',op.o.id).eq('updated_at',op.base).select('updated_at')
                 :await sb().from(tb).upsert(toRow(op.c,op.o)).select(TSC.has(op.c)?'updated_at':'id');
-          if(!r.error&&cond&&!r.data?.length){q.shift();save();const nome=op.o.numero||op.o.rag_soc||op.o.nome||op.o.num||'il record';
-            alert(`Modifica non salvata: ${nome} è stato modificato nel frattempo da un'altra postazione.\n\nRicarico i dati aggiornati: controlla e, se serve, rifai la modifica.`);await sync();continue}
+          if(!r.error&&cond&&!r.data?.length){q.shift();sospendi(op,'Record modificato nel frattempo da un\'altra postazione');save();const nome=op.o.numero||op.o.rag_soc||op.o.nome||op.o.num||'il record';
+            alert(`Modifica non salvata: ${nome} è stato modificato nel frattempo da un'altra postazione.\n\nRicarico i dati aggiornati. La tua modifica resta in «Modifiche in sospeso» (in fondo al menù): puoi riprovarla o esportarla.`);await sync();continue}
           const nt=r.data?.[0]?.updated_at;if(!r.error&&nt){for(const x of q.slice(1))if(x.op==='up'&&x.c===op.c&&x.o.id===op.o.id&&x.base===op.base)x.base=nt;ts[key]=nt}
           if(!r.error&&op.c==='ordini')r=await sb().rpc('sostituisci_righe',{p_ordine:op.o.id,p_righe:(op.o.righe||[]).map(x=>({prodotto_id:x.prodotto_id||'',descr:x.descr||'',qta:x.qta,prezzo:x.prezzo,sconto:x.sconto,iva:x.iva}))})}
         else if(op.op==='canc')r=await sb().from(TB[op.c]||op.c).update({deleted_at:op.at}).eq('id',op.id);
@@ -215,7 +218,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
         else if(op.op==='num')r=await sb().rpc('allinea_contatore',{p_chiave:op.k,p_valore:op.v});
         else if(op.op==='set')r=await sb().from('impostazioni').upsert({chiave:'app',valore:JSON.parse(op.v)});
         if(r?.error){const m=r.error.message||'';if(/fetch|network|Failed|timeout/i.test(m)||!r.error.code)break;
-          q.shift();save();alert('Il server ha rifiutato una modifica e i dati sono stati ricaricati.\n\n'+(r.error.code==='23505'?'Numero o codice già usato da un\'altra postazione.':m));await sync();continue}
+          q.shift();sospendi(op,r.error.code==='23505'?'Numero o codice già usato da un\'altra postazione':m);save();alert('Il server ha rifiutato una modifica: i dati sono stati ricaricati e la modifica è in «Modifiche in sospeso» (in fondo al menù), dove puoi riprovarla o esportarla.\n\n'+(r.error.code==='23505'?'Numero o codice già usato da un\'altra postazione.':m));await sync();continue}
         q.shift();save()}}
     catch(e){console.warn('Coda non svuotata',e)}finally{busy=false;status()}}
   /* carica tutto dal server, poi riapplica le modifiche ancora in coda */
@@ -246,6 +249,10 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
     saveSettings(){save();const s=sharedOf(this.settings());if(s!==shared&&AUTH.prof?.ruolo==='admin'){shared=s;enqueue({op:'set',v:s})}},
     nextNum(key,y=''){const k=key+y,v=(seq[k]||0)+1;seq[k]=v;enqueue({op:'num',k,v});return v},
     seqOf:k=>seq[k]||0,
+    sospese:()=>sosp,
+    /* riprova: chi la rilancia dopo un conflitto sceglie consapevolmente di sovrascrivere la versione attuale */
+    riprova(i){const s=sosp.splice(i,1)[0];if(!s)return;const op=s.op;if(op.op==='up'){if(TSC.has(op.c))op.base=ts[tk(op.c,op.o.id)]||null;put(op.c,structuredClone(op.o))}enqueue(op)},
+    scarta(i){sosp.splice(i,1);save();status()},
     async start(){await flush();await sync();live();await flush();render();setInterval(flush,30000);addEventListener('online',flush)},
     pending:()=>q.length,ready:()=>ready,status,
     /* dati del vecchio gestionale (solo browser, chiave gl_db_v1) da caricare su Supabase */
@@ -381,7 +388,7 @@ function render(){if(!AUTH.prof)return;
   $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`
     +`<button class="pri navnew" data-act="q-new">${I('plus')}<span>Nuovo</span></button>`+NAVG.map(([g,all])=>{const items=all.filter(x=>!navHide.has(x[0]));if(!items.length)return'';if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
       return `<button class="gh${open?' open':''}" data-navg="${g}" aria-expanded="${open}"><span>${g}</span>${!open&&n?`<span class="nb">${n}</span>`:''}${I('chev')}</button><div class="gi${open?'':' closed'}">${items.map(item).join('')}</div>`}).join('')
-    +`<div class="foot">${item(['guida','Guida','doc'])}${item(['impostazioni','Impostazioni','gear'])}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst></span></div></div>`;
+    +`<div class="foot">${item(['guida','Guida','doc'])}${item(['impostazioni','Impostazioni','gear'])}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst data-act="sospese" style="cursor:pointer"></span></div></div>`;
   const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);tblHint=st.view==='magazzino'&&st.mtab!=='giac'?'':EMPTY[st.view]||'';$('#app').innerHTML=remBanner(SC)+v()+(st.view==='dashboard'?PLANCIA_AIUTO:'');tblHint='';if(st.view==='prezzi')pcUpdate();DB.status()}
 /* pagine vuote: la prima tabella della pagina spiega cosa fare invece di "Nessun dato" */
 const EMPTY={ordini:'Nessun ordine qui. Crea il primo con «Nuovo ordine»; gli ordini Wine Alchemist arrivano da soli dal CRM.',magazzino:'Nessuna referenza. Aggiungine una con «Nuova referenza» o dal pulsante Nuovo.',documenti:'Nessun documento. Fatture e DDT si creano dai pulsanti di un ordine di vendita, oppure con «Nuovo documento».',provvigioni:'Nessuna provvigione con questi filtri. Arrivano dagli ordini in agenzia (CRM Wine Alchemist) e dagli ordini con un agente.',privatelabel:'Nessuna etichetta. Crea la scheda del primo vino a marchio con «Nuova etichetta».',fallate:'Nessuna fallata aperta. Quando un cliente segnala una bottiglia difettosa, registrala con «Nuova segnalazione».',clienti:'Nessun cliente. Aggiungilo con «Nuovo»; i clienti del CRM si creano da soli con i loro ordini.',fornitori:'Nessun elemento. Aggiungilo con «Nuovo».',agenti:'Nessun agente. Aggiungilo con «Nuovo agente», poi assegnalo ai suoi clienti.'};
@@ -594,6 +601,17 @@ function evadi(o){if(o.mov)return toast('Movimenti già generati');const T=today
       else{m.tipo='Scarico';m.costo_unit=fifoTake(sm[r.prodotto_id],r.qta,DB.get('prodotti',r.prodotto_id));m.prezzo_unit=Math.round(lt/r.qta*1e4)/1e4}
       DB.upsert('movimenti',m)}o.mov=true}
   o.stato='Evaso';o.data_evasione=T;DB.upsert('ordini',o);toast(o.numero+' evaso');render()}
+
+/* Modifiche in sospeso: rifiutate dal server, visibili finché non vengono riprovate, esportate o scartate */
+function sospeseView(){const L=DB.sospese();if(!L.length)return toast('Nessuna modifica in sospeso');
+  const nomeOp=o=>o.op==='up'?`${o.c}: ${o.o.numero||o.o.rag_soc||o.o.nome||o.o.num||o.o.id}`:o.op==='canc'?`${o.c}: annullamento`:o.op==='del'?`${o.c}: eliminazione`:o.op==='num'?`contatore ${o.k}`:'impostazioni';
+  const f=modal('Modifiche in sospeso',`<p class="muted">Il server non ha accettato queste modifiche. Riprova (sovrascrive la versione attuale), esportale per conservarle, oppure scartale.</p>
+    ${tbl([{h:'Modifica',v:x=>esc(nomeOp(x.op))},{h:'Motivo',v:x=>esc(x.motivo||'')},{h:'Quando',v:x=>esc(dIT(x.at.slice(0,10))+' '+new Date(x.at).toTimeString().slice(0,5))},{h:'',v:x=>{const i=L.indexOf(x);return`<button type="button" data-sr="${i}">Riprova</button> <button type="button" data-ss="${i}">Scarta</button>`}}],L)}
+    <p><button type="button" data-sx>Esporta tutte (JSON)</button></p>`,()=>true,'Chiudi');
+  f.onclick=e=>{const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.sx!=null)download(`modifiche-in-sospeso-${today()}.json`,JSON.stringify(L,null,2),'application/json');
+    else if(b.dataset.sr!=null){DB.riprova(+b.dataset.sr);$('#dlg').close();render();toast('Modifica rimessa in coda')}
+    else if(b.dataset.ss!=null&&confirm('Scartare definitivamente questa modifica? Se non l\'hai esportata andrà persa.')){DB.scarta(+b.dataset.ss);$('#dlg').close();render();sospeseView()}}}
 
 /* manifesto .json per Trasferimenti → Ricevi del Cantina Manager (mode "ordine") */
 function manifesto(o){const c=DB.get('clienti',o.cliente_id)||{},from=(DB.settings().azienda||{}).rag_soc||CONFIG.nome;
@@ -1077,6 +1095,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
       modal('Nuovo',`<div class="qn">${Q.map(([k,l,ic])=>B('q-go',I(ic)+l,k,'','type="button"')).join('')}</div>`,()=>true,'Chiudi');
       $('#dlg .qn').onclick=e=>{const k=e.target.closest('[data-id]')?.dataset.id;if(!k)return;$('#dlg').close();const T=today();({ov:()=>{st.otipo='vendita';orderForm()},oa:()=>{st.otipo='acquisto';orderForm()},doc:newDoc,pas:()=>crudForm('passive',{data:T}),mov:()=>crudForm('movimenti',{data:T,tipo:'Carico'}),prod:()=>crudForm('prodotti'),cli:()=>crudForm('clienti'),for:()=>crudForm('fornitori'),fal:()=>crudForm('fallate',{data:T})})[k]?.()}},
     logout:()=>{if(confirm('Uscire dal gestionale?'))AUTH.sb?.auth.signOut()},
+    sospese:()=>sospeseView(),
     'rem-mail':()=>{const d=dc(),c=DB.get('clienti',d.cliente_id)||{},a=DB.settings().azienda||{},t=totals(d.righe);
       const body=`Gentili ${c.referente||c.rag_soc},\n\nda un controllo risulta ancora aperta la fattura n. ${d.numero}/${d.anno} del ${dIT(d.data)}, di ${eur(docTot(d))}, scaduta il ${dIT(d.scadenza)}.\nVi chiediamo cortesemente di provvedere al saldo${a.iban?` tramite bonifico all'IBAN ${a.iban}`:''}, o di ignorare questo messaggio se il pagamento è già stato effettuato.\n\nGrazie e buona giornata,\n${a.rag_soc||CONFIG.nome}`;
       location.href=`mailto:${encodeURIComponent(c.email)}?subject=${encodeURIComponent(`Promemoria pagamento fattura ${d.numero}/${d.anno}`)}&body=${encodeURIComponent(body)}`},
