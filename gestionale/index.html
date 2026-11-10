@@ -352,12 +352,12 @@ function inUse(c,id){const fk={agenti:['agente_id'],clienti:['cliente_id'],forni
 /* menù a gruppi: il lavoro di tutti i giorni in alto, l'amministrazione raccolta, le anagrafiche in fondo */
 const NAVG=[[null,[['dashboard','Plancia','dash'],['ordini','Ordini','ord']]],
   ['Vini',[['magazzino','Magazzino','box'],['privatelabel','Private label','tag'],['prezzi','Calcolo prezzi','calc'],['fallate','Fallate','flag']]],
-  ['Amministrazione',[['amministrazione','Scadenze','wal'],['documenti','Fatture e DDT','doc'],['provvigioni','Provvigioni','eur'],['agenti','Agenti','agt']]],
-  ['Contatti',[['clienti','Clienti','usr'],['fornitori','Fornitori e contratti','trk']]]];
+  ['Amministrazione',[['amministrazione','Scadenze','wal'],['documenti','Fatture e DDT','doc'],['provvigioni','Provvigioni','eur']]],
+  ['Contatti',[['clienti','Clienti','usr'],['fornitori','Fornitori e contratti','trk'],['agenti','Agenti','agt']]]];
 const NAV=[...NAVG.flatMap(g=>g[1]),['impostazioni','Impostazioni','gear']];
 const VALIAS={prodotti:'magazzino',mandati:'fornitori'};   /* vecchi indirizzi: la vista confluita */
 const navOpen=(()=>{try{return JSON.parse(localStorage.getItem(_lsKey('nav')))||{}}catch{return{}}})();
-const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori'};
+const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori',ptab:'mandati'};
 function render(){if(!AUTH.prof)return;
   if(st.view==='mandati')st.fotab='mandati';if(VALIAS[st.view])st.view=VALIAS[st.view];
   const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length,badge={amministrazione:nUrg,fallate:nFl};
@@ -366,8 +366,11 @@ function render(){if(!AUTH.prof)return;
     +NAVG.map(([g,items])=>{if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
       return `<button class="gh${open?' open':''}" data-navg="${g}" aria-expanded="${open}"><span>${g}</span>${!open&&n?`<span class="nb">${n}</span>`:''}${I('chev')}</button><div class="gi${open?'':' closed'}">${items.map(item).join('')}</div>`}).join('')
     +`<div class="foot">${item(['impostazioni','Impostazioni','gear'])}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst></span></div></div>`;
-  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);$('#app').innerHTML=remBanner(SC)+v();if(st.view==='prezzi')pcUpdate();DB.status()}
-const tbl=(cols,rows,rowAttr=()=>'',grpBy)=>{let last;return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th class="${c.n?'n':''}">${c.h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(o=>{let g='';if(grpBy){const k=grpBy(o);if(k!==last){last=k;g=`<tr class="grp"><td colspan="${cols.length}">${esc(k)}</td></tr>`}}return g+`<tr ${rowAttr(o)}>${cols.map(c=>`<td class="${c.n?'n':''}${c.a?' act':''}" data-l="${esc(c.h)}">${c.v(o)}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${cols.length}" class="muted">Nessun dato</td></tr>`}</tbody></table></div>`};
+  const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);tblHint=st.view==='magazzino'&&st.mtab!=='giac'?'':EMPTY[st.view]||'';$('#app').innerHTML=remBanner(SC)+v();tblHint='';if(st.view==='prezzi')pcUpdate();DB.status()}
+/* pagine vuote: la prima tabella della pagina spiega cosa fare invece di "Nessun dato" */
+const EMPTY={ordini:'Nessun ordine qui. Crea il primo con «Nuovo ordine»; gli ordini Wine Alchemist arrivano da soli dal CRM.',magazzino:'Nessuna referenza. Aggiungine una con «Nuova referenza» o importale dal Cantina Manager.',documenti:'Nessun documento. Fatture e DDT si creano dai pulsanti di un ordine di vendita, oppure con «Nuovo documento».',provvigioni:'Nessuna provvigione con questi filtri. Arrivano dagli ordini in agenzia (CRM Wine Alchemist) e dagli ordini con un agente.',privatelabel:'Nessuna etichetta. Crea la scheda del primo vino a marchio con «Nuova etichetta».',fallate:'Nessuna fallata aperta. Quando un cliente segnala una bottiglia difettosa, registrala con «Nuova segnalazione».',clienti:'Nessun cliente. Aggiungilo con «Nuovo»; i clienti del CRM si creano da soli con i loro ordini.',fornitori:'Nessun elemento. Aggiungilo con «Nuovo».',agenti:'Nessun agente. Aggiungilo con «Nuovo agente», poi assegnalo ai suoi clienti.'};
+let tblHint='';
+const tbl=(cols,rows,rowAttr=()=>'',grpBy)=>{let last;const vuoto=tblHint||'Nessun dato';tblHint='';return `<div class="tw"><table><thead><tr>${cols.map(c=>`<th class="${c.n?'n':''}">${c.h}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(o=>{let g='';if(grpBy){const k=grpBy(o);if(k!==last){last=k;g=`<tr class="grp"><td colspan="${cols.length}">${esc(k)}</td></tr>`}}return g+`<tr ${rowAttr(o)}>${cols.map(c=>`<td class="${c.n?'n':''}${c.a?' act':''}" data-l="${esc(c.h)}">${c.v(o)}</td>`).join('')}</tr>`}).join(''):`<tr><td colspan="${cols.length}" class="muted">${esc(vuoto)}</td></tr>`}</tbody></table></div>`};
 const search=k=>`<input type="search" placeholder="Cerca…" value="${esc(st.q[k]||'')}" data-q="${k}" style="max-width:220px">`;
 const match=(k,o)=>{const q=(st.q[k]||'').toLowerCase();return!q||JSON.stringify(o).toLowerCase().includes(q)};
 const B=(act,html,id='',cls='sm',extra='',title='')=>`<button class="${cls}" data-act="${act}" data-id="${id}" ${extra}${title?` title="${esc(title)}"`:''}>${html}</button>`;
@@ -500,8 +503,8 @@ amministrazione(){const T=today(),lim=addDays(T,7),all=DB.all('passive');
   <h3 style="margin:22px 0 10px;font-size:15px">Fatture emesse da incassare</h3>
   ${tbl([{h:'N°',v:d=>d.numero+'/'+d.anno},{h:'Cliente',v:d=>esc(DB.get('clienti',d.cliente_id)?.rag_soc)},{h:'Data',v:d=>dIT(d.data)},{h:'Scadenza',v:d=>`<span class="badge ${d.scadenza<T?'b-bad':'b-warn'}">${dIT(d.scadenza)}</span>`},{h:'Totale',n:1,v:d=>eur(totals(d.righe).tot)},{h:'',a:1,v:d=>B('d-pay',I('ok')+'Incassata',d.id)}],att)}`},
 
-provvigioni(){const f=st.pf,rows=provvRows(f),imp=rows.reduce((s,r)=>s+r.imp,0),pv=rows.reduce((s,r)=>s+r.pv,0);
-  return `<div class="bar"><h2>Provvigioni</h2>${waChip()}${B('p-print',I('prt')+'Estratto conto','','pri')}</div>
+provvigioni(){if(st.ptab==='agenti')return VIEWS.agenti();const f=st.pf,rows=provvRows(f),imp=rows.reduce((s,r)=>s+r.imp,0),pv=rows.reduce((s,r)=>s+r.pv,0);
+  return `<div class="bar"><h2>Provvigioni</h2>${ptabs()}${waChip()}${B('p-print',I('prt')+'Estratto conto','','pri')}</div>
   <div class="bar"><select data-pf="m" style="width:auto"><option value="">Tutti i mandati</option>${DB.all('mandati').map(m=>`<option value="${m.id}"${f.m===m.id?' selected':''}>${esc(label('mandati',m))}</option>`).join('')}</select>
   <input type="date" data-pf="da" value="${f.da||''}" style="width:auto" title="Dal"><input type="date" data-pf="a" value="${f.a||''}" style="width:auto" title="Al">
   <select data-pf="st" style="width:auto"><option value="">Tutte</option><option value="mat"${f.st==='mat'?' selected':''}>Da liquidare</option><option value="liq"${f.st==='liq'?' selected':''}>Liquidate</option></select>
@@ -703,9 +706,11 @@ function filesModal(c,p){const CAT=c==="pl"?PLCAT:FLCAT;const rows=p.files||[];
     else if(confirm('Eliminare '+meta.name+'?')){await FS.del(fid);x.files=x.files.filter(m=>m.id!==fid);DB.upsert(c,x);$('#dlg').close();render();filesModal(c,x)}})}
 
 /* ================= AGENTI ================= */
-VIEWS.agenti=()=>{const y=today().slice(0,4),f=st.af,tb=tabs('agtab',[['anag','Rete agenti'],['provv','Provvigioni agenti']]);
-  if(st.agtab==='provv'){const rows=agentRows(f),tot=rows.reduce((s,r)=>s+r.pv,0),sb={att:['In attesa incasso',''],mat:['Maturata','b-warn'],liq:['Liquidata','b-ok']};
-    return `<div class="bar"><h2>Agenti</h2>${tb}${B('ag-print',I('prt')+'Estratto conto','','pri')}</div>
+/* provvigioni in un'unica voce: da incassare dai mandanti, da pagare agli agenti */
+const ptabs=()=>tabs('ptab',[['mandati','Da incassare (mandanti)'],['agenti','Da pagare (agenti)']]);
+VIEWS.agenti=()=>{const y=today().slice(0,4),f=st.af,tb='';
+  if(st.view==='provvigioni'){const rows=agentRows(f),tot=rows.reduce((s,r)=>s+r.pv,0),sb={att:['In attesa incasso',''],mat:['Maturata','b-warn'],liq:['Liquidata','b-ok']};
+    return `<div class="bar"><h2>Provvigioni</h2>${ptabs()}${B('ag-print',I('prt')+'Estratto conto','','pri')}</div>
     <div class="bar"><select data-af="ag" style="width:auto"><option value="">Tutti gli agenti</option>${DB.all('agenti').map(a=>`<option value="${a.id}"${f.ag===a.id?' selected':''}>${esc(a.nome)}</option>`).join('')}</select><input type="date" data-af="da" value="${f.da||''}" style="width:auto" title="Dal"><input type="date" data-af="a" value="${f.a||''}" style="width:auto" title="Al">
     <select data-af="st" style="width:auto"><option value="">Tutte</option><option value="att"${f.st==='att'?' selected':''}>In attesa incasso</option><option value="mat"${f.st==='mat'?' selected':''}>Maturate da pagare</option><option value="liq"${f.st==='liq'?' selected':''}>Liquidate</option></select><span class="muted">Totale: <b>${eur(tot)}</b></span></div>
     ${tbl([{h:'Data',v:r=>dIT(r.o.data)},{h:'Ordine',v:r=>esc(r.o.numero)},{h:'Tipo',v:r=>`<span class="badge">${r.o.tipo==='agenzia'?'mandato':'vendita'}</span>`},{h:'Cliente',v:r=>esc(DB.get('clienti',r.o.cliente_id)?.rag_soc)},{h:'Agente',v:r=>esc(r.ag.nome)},{h:'Imponibile',n:1,v:r=>eur(r.imp)},{h:'Provvigione',n:1,v:r=>`<b>${eur(r.pv)}</b>`},
@@ -932,7 +937,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
 'fl-mail':()=>flMail(DB.get('fallate',id)),
     'fl-sost':()=>{const x=DB.get('fallate',id),p=DB.get('prodotti',x.prodotto_id);if(!confirm(`Registrare l'uscita di ${num(x.qta)} ${label('prodotti',p)} in sostituzione al cliente?`))return;
       DB.upsert('movimenti',{data:today(),prodotto_id:x.prodotto_id,tipo:'Sostituzione fallata',qta:+x.qta,rif:x.num,note:'Sostituzione a '+(DB.get('clienti',x.cliente_id)?.rag_soc||'cliente')});x.stato='Sostituita';DB.upsert('fallate',x);toast('Sostituzione registrata in magazzino');render()},
-    'ag-liq':()=>{const x=o();x.agente_liq=x.agente_liq?null:today();DB.upsert('ordini',x);render()},'ag-print':printAg,'ag-open':()=>{st.agtab='provv';st.af={ag:id};render()},
+    'ag-liq':()=>{const x=o();x.agente_liq=x.agente_liq?null:today();DB.upsert('ordini',x);render()},'ag-print':printAg,'ag-open':()=>{st.view='provvigioni';location.hash='provvigioni';st.ptab='agenti';st.af={ag:id};render()},
     'wa-go':()=>{st.view='impostazioni';location.hash='impostazioni';render()},'wa-sync':()=>WA.ok?waSync(true):(st.view='impostazioni',render()),
     'wa-login':()=>modal('Accedi al CRM Wine Alchemist',`<div class="grid"><label><span>Email</span><input name="em" type="email" required autocomplete="username"></label><label><span>Password</span><input name="pw" type="password" required autocomplete="current-password"></label></div><p class="muted">Stesso account con cui entri nel CRM. La password non viene salvata.</p>`,f=>{const em=f.elements.em.value.trim(),pw=f.elements.pw.value;
       waClient().then(sb=>sb.auth.signInWithPassword({email:em,password:pw})).then(({error})=>{if(error)throw error;const c=waCfg();c.enabled=true;if(!c.mandato_id)c.mandato_id=DB.all('mandati').find(m=>/alchemist/i.test(label('mandati',m)))?.id||'';DB.saveSettings();WA.err='';toast('Collegato al CRM Wine Alchemist');return waInit()}).then(render).catch(e=>{WA.err=/invalid/i.test(e.message)?'Email o password non corrette':e.message;render()})},'Accedi'),
