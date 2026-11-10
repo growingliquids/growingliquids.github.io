@@ -953,7 +953,9 @@ document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpd
 document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))return;
   if(t.id==='pc-pid'){const p=DB.get('prodotti',t.value),r=$('#pcalc');r.querySelector('[data-pc="pf"]').value='';r.querySelector('[data-pc="base"]').value=p?r4(avgCost(p,stockMap()[p.id])):'';return pcUpdate()}
   if(t.closest('#pcalc'))return pcUpdate();
-  if(t.dataset.s){st[t.dataset.s]=t.value;render()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;render()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;render()}
+  /* nei campi data il ridisegno aspetta l'uscita dal campo: altrimenti mentre si scrive l'anno il cursore si perde */
+  const rr=()=>{if(t.type==='date'&&document.activeElement===t){t.onblur=()=>{t.onblur=null;render()};return}render()};
+  if(t.dataset.s){st[t.dataset.s]=t.value;rr()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;rr()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;rr()}
   else if(t.id==='restore'&&t.files[0])t.files[0].text().then(j=>{if(!confirm('Ripristinare il backup? I record del file sostituiscono quelli con lo stesso codice sul server, per tutte le postazioni.'))return;try{toast(DB.load(j)+' record in ripristino');render()}catch(err){alert(err.message)}})});
 document.addEventListener('submit',e=>{if(e.target.id!=='setf')return;e.preventDefault();const s=DB.settings();s.azienda=readForm(e.target,AZF,s.azienda||{});DB.saveSettings();toast('Dati salvati');render()});
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==st.view&&!/=/.test(h)){st.view=h;render()}});
