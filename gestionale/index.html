@@ -655,10 +655,20 @@ const fN=v=>{v=+v||0;return v<0.5?'0':v<10?String(r1(v)).replace('.',','):String
 const fmtSize=b=>b>1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
 const plBase=()=>{const b=(DB.settings().azienda||{}).elabel_base||CONFIG.elabelBase||'';return b&&!b.endsWith('/')?b+'/':b};
 const plUrl=p=>plBase()&&p.slug?plBase()+p.slug+'.html':'';
-/* archivio file: IndexedDB (localStorage non regge PDF e immagini) */
+/* archivio file: Supabase Storage, bucket privato 'allegati' (percorso f/<id>), condiviso tra le postazioni.
+   I file rimasti nel vecchio archivio del browser (IndexedDB) vengono caricati da soli al primo accesso. */
 const FS=(()=>{let dbp;const open=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open(_lsKey('files'),1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
   const tx=async(mode,fn)=>{const db=await open();return new Promise((res,rej)=>{const t=db.transaction('f',mode),q=fn(t.objectStore('f'));t.oncomplete=()=>res(q.result);t.onerror=()=>rej(t.error)})};
-  return{put:(id,b)=>tx('readwrite',s=>s.put(b,id)),get:id=>tx('readonly',s=>s.get(id)),del:id=>tx('readwrite',s=>s.delete(id))}})();
+  const bk=()=>AUTH.sb.storage.from('allegati'),P=id=>'f/'+id,up=(id,b)=>bk().upload(P(id),b,{contentType:b.type||'application/octet-stream',upsert:false});
+  const dup=e=>/exist|duplicate|409/i.test(e?.message||e?.statusCode||'');
+  return{
+    async put(id,b){if(b.size>26214400)throw Error(`${b.name||'Il file'} supera 25 MB`);const{error}=await up(id,b);if(error)throw error},
+    async get(id){const{data}=await bk().download(P(id));if(data)return data;
+      const loc=await tx('readonly',s=>s.get(id)).catch(()=>null);if(loc)up(id,loc).catch(()=>{});return loc||null},
+    async del(id){const{error}=await bk().remove([P(id)]);if(error)throw error;tx('readwrite',s=>s.delete(id)).catch(()=>{})},
+    async migra(){const keys=await tx('readonly',s=>s.getAllKeys()).catch(()=>[]);let n=0;
+      for(const k of keys||[]){const b=await tx('readonly',s=>s.get(k)).catch(()=>null);if(!b)continue;const{error}=await up(k,b);if(!error||dup(error)){n++;await tx('readwrite',s=>s.delete(k)).catch(()=>{})}}
+      if(n)toast(n+' allegati spostati dal browser allo spazio condiviso');return n}}})();
 VIEWS.privatelabel=()=>{const rows=DB.all('pl').filter(p=>match('pl',p)).sort((a,b)=>a.nome.localeCompare(b.nome));
   return `<div class="bar"><h2>Private label</h2>${search('pl')}${B('new',I('plus')+'Nuova etichetta','','pri','data-c="pl"')}</div>
   ${plBase()?'':'<p class="muted">Imposta in Impostazioni l\'indirizzo base delle e-label (la pagina GitHub Pages di Growing Liquids) per generare link e QR.</p>'}
@@ -684,12 +694,12 @@ function plQR(p){const url=plUrl(p);if(!url)return alert('Imposta prima in Impos
   f.addEventListener('click',e=>{const k=e.target.closest('[data-qx]')?.dataset.qx;if(!k)return;const nm='qr-'+p.slug;
     if(k==='svg')download(nm+'.svg',svg,'image/svg+xml');else if(k==='png')svgPng(svg,1200,nm+'.png');else navigator.clipboard?.writeText(url).then(()=>toast('Link copiato'))})}
 function filesModal(c,p){const CAT=c==="pl"?PLCAT:FLCAT;const rows=p.files||[];
-  const f=modal('File · '+(p.nome||p.num),`<div class="grid">${fieldHTML(['cat','Categoria','sel',0,CAT],CAT[0])}<label class="full"><span>Aggiungi file (anche più di uno)</span><input type="file" name="up" multiple></label></div><h4>Archivio (${rows.length})</h4>${tbl([{h:'File',v:x=>esc(x.name)},{h:'Categoria',v:x=>esc(x.cat)},{h:'Peso',n:1,v:x=>fmtSize(x.size)},{h:'Data',v:x=>dIT(x.added)},{h:'',a:1,v:x=>`<button type="button" class="sm" data-fx="get" data-fid="${x.id}" title="Scarica">${I('dl')}</button><button type="button" class="sm" data-fx="del" data-fid="${x.id}" title="Elimina">${I('del')}</button>`}],rows)}<p class="muted">I file sono salvati in questo browser e non entrano nel backup JSON. Con Supabase passeranno sullo Storage condiviso.</p>`,f=>{
+  const f=modal('File · '+(p.nome||p.num),`<div class="grid">${fieldHTML(['cat','Categoria','sel',0,CAT],CAT[0])}<label class="full"><span>Aggiungi file (anche più di uno)</span><input type="file" name="up" multiple></label></div><h4>Archivio (${rows.length})</h4>${tbl([{h:'File',v:x=>esc(x.name)},{h:'Categoria',v:x=>esc(x.cat)},{h:'Peso',n:1,v:x=>fmtSize(x.size)},{h:'Data',v:x=>dIT(x.added)},{h:'',a:1,v:x=>`<button type="button" class="sm" data-fx="get" data-fid="${x.id}" title="Scarica">${I('dl')}</button><button type="button" class="sm" data-fx="del" data-fid="${x.id}" title="Elimina">${I('del')}</button>`}],rows)}<p class="muted">I file sono salvati nello spazio protetto di Growing Liquids (Supabase), visibili da tutte le postazioni con accesso. Massimo 25 MB a file. Non entrano nel backup JSON.</p>`,f=>{
     const files=[...f.elements.up.files];if(!files.length)return true;const cat=f.elements.cat.value;navigator.storage?.persist?.();
     Promise.all(files.map(async fl=>{const id=uid();await FS.put(id,fl);return{id,name:fl.name,type:fl.type,size:fl.size,cat,added:today()}}))
       .then(meta=>{const x=DB.get(c,p.id);x.files=[...(x.files||[]),...meta];DB.upsert(c,x);toast(meta.length+' file salvati');render();filesModal(c,x)}).catch(e=>alert('Errore nel salvataggio: '+e.message))},'Carica');
   f.addEventListener('click',async e=>{const b=e.target.closest('[data-fx]');if(!b)return;const fid=b.dataset.fid,x=DB.get(c,p.id),meta=x.files.find(m=>m.id===fid);
-    if(b.dataset.fx==='get'){const blob=await FS.get(fid);if(!blob)return alert('File non presente in questo browser.');const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=meta.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5e3)}
+    if(b.dataset.fx==='get'){const blob=await FS.get(fid);if(!blob)return alert('File non trovato nello spazio condiviso: potrebbe essere stato caricato da un browser che non è ancora entrato nel nuovo gestionale.');const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=meta.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5e3)}
     else if(confirm('Eliminare '+meta.name+'?')){await FS.del(fid);x.files=x.files.filter(m=>m.id!==fid);DB.upsert(c,x);$('#dlg').close();render();filesModal(c,x)}})}
 
 /* ================= AGENTI ================= */
@@ -874,7 +884,7 @@ async function authReady(){const sb=await glClient(),{data:{session}}=await sb.a
   if(error){AUTH.err='Impossibile verificare l\'account: '+authMsg(error);return authScreen()}
   if(!data?.attivo){AUTH.err='Questo account non è abilitato al gestionale. Chiedi a un amministratore di Growing Liquids.';AUTH.mode='login';return sb.auth.signOut()}
   AUTH.prof=data;$('#nav').hidden=false;if(!VIEWS[st.view]&&!S[st.view])st.view='dashboard';if(location.hash.slice(1)!==st.view)history.replaceState(null,'',location.pathname+location.search+'#'+st.view);
-  render();try{await DB.start()}catch(x){toast('Server non raggiungibile: lavori sulla copia locale')}if(waCfg().enabled)waInit()}
+  render();try{await DB.start()}catch(x){toast('Server non raggiungibile: lavori sulla copia locale')}if(waCfg().enabled)waInit();if(['admin','ufficio'].includes(data.ruolo))FS.migra().catch(()=>{})}
 async function authStart(){const h=location.hash;
   if(/error_description=/.test(h)){const d=decodeURIComponent((/error_description=([^&]+)/.exec(h)||[])[1]||'').replace(/\+/g,' '),scad=/expired|invalid/i.test(d);history.replaceState(null,'',location.pathname+location.search);
     AUTH.mode=scad?'reset':'login';AUTH.err=scad?'Il link è scaduto o è già stato usato: chiedine uno nuovo qui sotto.':d;return authScreen()}
@@ -943,7 +953,9 @@ document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpd
 document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))return;
   if(t.id==='pc-pid'){const p=DB.get('prodotti',t.value),r=$('#pcalc');r.querySelector('[data-pc="pf"]').value='';r.querySelector('[data-pc="base"]').value=p?r4(avgCost(p,stockMap()[p.id])):'';return pcUpdate()}
   if(t.closest('#pcalc'))return pcUpdate();
-  if(t.dataset.s){st[t.dataset.s]=t.value;render()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;render()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;render()}
+  /* nei campi data il ridisegno aspetta l'uscita dal campo: altrimenti mentre si scrive l'anno il cursore si perde */
+  const rr=()=>{if(t.type==='date'&&document.activeElement===t){t.onblur=()=>{t.onblur=null;render()};return}render()};
+  if(t.dataset.s){st[t.dataset.s]=t.value;rr()}else if(t.dataset.pf){st.pf[t.dataset.pf]=t.value||undefined;rr()}else if(t.dataset.inv){st.inv[t.dataset.inv]=t.value;render()}else if(t.dataset.af){st.af[t.dataset.af]=t.value||undefined;rr()}
   else if(t.id==='restore'&&t.files[0])t.files[0].text().then(j=>{if(!confirm('Ripristinare il backup? I record del file sostituiscono quelli con lo stesso codice sul server, per tutte le postazioni.'))return;try{toast(DB.load(j)+' record in ripristino');render()}catch(err){alert(err.message)}})});
 document.addEventListener('submit',e=>{if(e.target.id!=='setf')return;e.preventDefault();const s=DB.settings();s.azienda=readForm(e.target,AZF,s.azienda||{});DB.saveSettings();toast('Dati salvati');render()});
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==st.view&&!/=/.test(h)){st.view=h;render()}});
