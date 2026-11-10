@@ -14,7 +14,7 @@ window.GL_CONFIG={nome:'Growing Liquids',sub:'Distribuzione & agenzia vini',skuP
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';document.head.appendChild(s)"></script>
 <style>
 :root{--bg:#f4f3f0;--card:#fff;--ink:#1c1c1a;--mut:#73716b;--line:#e2dfd8;--acc:#5b2333;--acc2:#f2e8ea;--ok:#2f7d4f;--warn:#a96a12;--bad:#b42318;--side:#1c1c1a}
-*{box-sizing:border-box}[hidden]{display:none!important}.mb h4{margin:18px 0 8px;padding-top:12px;border-top:1px solid var(--line,#e5e5e5)}.mb h4:first-child{margin-top:0;padding-top:0;border-top:0}.dtot{text-align:right;font-family:Tinos,'Times New Roman',serif;font-size:17px;margin:10px 0 0}em,i{font-style:normal}
+*{box-sizing:border-box}[hidden]{display:none!important}.mb h4{margin:18px 0 8px;padding-top:12px;border-top:1px solid var(--line,#e5e5e5)}.mb h4:first-child{margin-top:0;padding-top:0;border-top:0}.docnum{margin:0 0 4px;font-family:Tinos,'Times New Roman',serif;font-size:17px}.docnum:empty{display:none}.dtot{text-align:right;font-family:Tinos,'Times New Roman',serif;font-size:17px;margin:10px 0 0}em,i{font-style:normal}
 body{margin:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
 .ic{width:16px;height:16px;vertical-align:-3px;flex:none}
 #nav{width:220px;flex:none;background:var(--side);color:#fff;padding:18px 10px;position:sticky;top:0;height:100vh;overflow:auto}
@@ -509,7 +509,7 @@ impostazioni(){const a=DB.settings().azienda||{};
   ${DB.vecchi()&&!localStorage.getItem(_lsKey('db_v1_caricato'))?`<p class="rem" style="border-radius:16px"><span>In questo browser ci sono ${DB.vecchi()} record del vecchio gestionale, salvati solo qui.</span>${B('db-import',I('ul')+'Carica su Supabase','','pri')}</p>`:''}
   ${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('x')+'Svuota la copia locale','','','','Ricarica tutto dal server')}</div>`}
 };
-const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA'],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['banca','Banca'],['capitale','Capitale sociale € (stampato sui documenti)'],['socio','Compagine sociale','sel',0,['Socio unico','Più soci']],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
+const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA (ufficio e numero, es. MI-2789012)'],['regime','Regime fiscale','sel',0,['RF01 · Ordinario','RF19 · Forfettario','RF02 · Contribuenti minimi']],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['banca','Banca'],['capitale','Capitale sociale € (stampato sui documenti)'],['socio','Compagine sociale','sel',0,['Socio unico','Più soci']],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
 function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
 
 /* testi d'aiuto: statici, nessun dato */
@@ -587,7 +587,10 @@ function evadi(o){if(o.mov)return toast('Movimenti già generati');const T=today
 function manifesto(o){const c=DB.get('clienti',o.cliente_id)||{},from=(DB.settings().azienda||{}).rag_soc||CONFIG.nome;
   const refs=o.righe.filter(r=>r.qta>0).map(r=>{const p=DB.get('prodotti',r.prodotto_id)||{};return{produttore:fname(p.produttore_id),nomeVino:p.nome||r.descr,vitigni:p.vitigni||'',annata:String(p.annata||''),tipologia:p.tipologia||'Rosso',formato:parseFloat(p.formato)||0.75,nazione:p.paese||'Italia',regione:p.regione||'',zona:p.zona||'',prezzoAcq:Math.round(lineTot(r)/r.qta*100)/100,iva:parseInt(r.iva)||22,prezzoCarta:0,qty:parseInt(r.qta)||1,scontoRef:0}});
   o.manifest_id||=uid();DB.upsert('ordini',o);
-  const man={v:1,type:'cantina-order',mode:'ordine',transferId:o.manifest_id,from,fromDbUser:'growing-liquids',dest:c.rag_soc||'',data:today(),ordine:{dataOrdine:o.data,fornitore:from,note:`Ordine ${o.numero}${o.rif_esterno?' · rif. '+o.rif_esterno:''}`,sconto:0,categoria:'',referenze:refs},lines:refs.map(r=>({nome:r.nomeVino,produttore:r.produttore,annata:r.annata,qty:r.qty}))};
+  /* Il Cantina Manager ignora numero, totale e condizioni di fattura: l'unico testo che arriva è ordine.note */
+  const ft=DB.all('documenti').filter(d=>d.ordine_id===o.id&&d.tipo==='fattura'&&!isNC(d)).sort((a,b)=>(b.data||'').localeCompare(a.data||''))[0],pg=ft?.pagamento||c.pagamento||'';
+  const nota=[`Ordine ${o.numero}`,o.rif_esterno&&'rif. '+o.rif_esterno,ft&&`Fattura ${ft.numero}/${ft.anno} del ${dIT(ft.data)}`,pg&&'Pagamento: '+pg,ft?.scadenza&&'scadenza '+dIT(ft.scadenza)].filter(Boolean).join(' · ');
+  const man={v:1,type:'cantina-order',mode:'ordine',transferId:o.manifest_id,from,fromDbUser:'growing-liquids',dest:c.rag_soc||'',data:today(),ordine:{dataOrdine:o.data,fornitore:from,note:nota,sconto:0,categoria:'',referenze:refs},lines:refs.map(r=>({nome:r.nomeVino,produttore:r.produttore,annata:r.annata,qty:r.qty}))};
   const txt=JSON.stringify(man);navigator.clipboard?.writeText(txt).catch(()=>{});download(`manifesto-${o.numero}.json`,JSON.stringify(man,null,2),'application/json');toast('Manifesto copiato e scaricato: incollalo in Trasferimenti → Ricevi')}
 
 /* ================= IMPORT CRM WINE ALCHEMIST (CSV) ================= */
@@ -624,8 +627,8 @@ const docNome=d=>d.tipo==='ddt'?'DDT':TD[d.td]||'Fattura';
 const MODP=['Bonifico','RiBa','Contanti','Carta di pagamento','Assegno','SEPA Direct Debit'];
 const CAUS_DDT=['Vendita','Conto visione','Conto deposito','Campionatura','Omaggio','Reso da cliente','Reso a fornitore','Trasferimento tra sedi'];
 const ASPETTO=['Cartoni','Casse in legno','Pallet','Sfuso','Confezioni regalo'];
-const CLIF=[['rag_soc','Ragione sociale','text',1],['piva','P.IVA'],['cf','Codice fiscale'],['sdi','Codice SDI'],['pec','PEC','email'],['indirizzo','Indirizzo sede'],['cap','CAP'],['citta','Comune'],['prov','Prov.'],['paese','Nazione'],['email','Email','email'],['tel','Telefono']];
-function cliSnap(c){const s=String(c.sdi||'').trim(),pec=s.includes('@');return{rag_soc:c.rag_soc||'',piva:c.piva||'',cf:c.cf||'',sdi:pec?'':s,pec:pec?s:'',indirizzo:c.indirizzo||'',cap:c.cap||'',citta:c.citta||'',prov:c.prov||'',paese:c.paese||'IT',email:c.email||'',tel:c.tel||''}}
+const CLIF=[['rag_soc','Ragione sociale'],['nome','Nome (se privato)'],['cognome','Cognome'],['piva','P.IVA'],['cf','Codice fiscale'],['sdi','Codice SDI'],['pec','PEC','email'],['indirizzo','Indirizzo sede'],['cap','CAP'],['citta','Comune'],['prov','Prov.'],['paese','Nazione'],['email','Email','email'],['tel','Telefono']];
+function cliSnap(c){const s=String(c.sdi||'').trim(),pec=s.includes('@');return{rag_soc:c.rag_soc||'',nome:'',cognome:'',piva:c.piva||'',cf:c.cf||'',sdi:pec?'':s,pec:pec?s:'',indirizzo:c.indirizzo||'',cap:c.cap||'',citta:c.citta||'',prov:c.prov||'',paese:c.paese||'IT',email:c.email||'',tel:c.tel||''}}
 const docCli=d=>d.cli||cliSnap(DB.get('clienti',d.cliente_id)||{});
 /* bollo 2 € dovuto se le operazioni senza IVA superano 77,47 € (DPR 642/1972), salvo scelta manuale */
 function bolloDovuto(d){if(d.tipo!=='fattura'||d.bollo==='no')return false;if(d.bollo==='si')return true;return totals(d.righe).det.filter(x=>!x.a).reduce((s,x)=>s+x.imp,0)>77.47}
@@ -635,6 +638,7 @@ const ivaIT=c=>!c.paese||/^(it|ita|italia|italy)$/i.test(c.paese.trim());
 function ibanOk(s){s=String(s).replace(/\s/g,'').toUpperCase();if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s))return false;let m=0;for(const ch of (s.slice(4)+s.slice(0,4)).replace(/[A-Z]/g,c=>c.charCodeAt(0)-55))m=(m*10+ +ch)%97;return m===1}
 /* validazione: restituisce il primo errore bloccante, altrimenti '' */
 function docCheck(c,d){const it=ivaIT(c),pi=String(c.piva||'').replace(/^IT/i,'').replace(/\s/g,'');
+  if(!c.rag_soc&&!(c.nome&&c.cognome))return'Indica la ragione sociale del cliente, oppure nome e cognome se è un privato.';
   if(d.tipo==='fattura'&&!pi&&!c.cf)return'Per la fattura serve la P.IVA o il codice fiscale del cliente.';
   if(pi&&it&&!/^\d{11}$/.test(pi))return'P.IVA non valida: servono 11 cifre.';
   if(c.cf&&!/^([A-Z0-9]{16}|\d{11})$/i.test(c.cf))return'Codice fiscale non valido: 16 caratteri (persona) o 11 cifre (società).';
@@ -651,48 +655,83 @@ function docDefaults(tipo,c,righe,td='TD01'){const a=DB.settings().azienda||{},b
   if(tipo==='fattura'){const p=c.pagamento||'';return{...base,td,pagamento:p,scadenza:dueDate(today(),p),pagata:false,esig:'I',bollo:'auto',bollo_add:false,modalita:/riba/i.test(p)?'RiBa':/bonifico/i.test(p)?'Bonifico':'',iban:a.iban||'',banca:a.banca||''}}
   const cart=righe.reduce((s,r)=>{const p=DB.get('prodotti',r.prodotto_id);return s+(p?.cartone?Math.ceil(r.qta/p.cartone):0)},0);
   return{...base,causale:'Vendita',aspetto:'Cartoni',vettore:'Mittente',porto:'Franco',data_trasp:today(),colli:cart||null,valorizzato:false}}
-function creaDoc(o,tipo){const y=today().slice(0,4),c=DB.get('clienti',o.cliente_id)||{};
+/* Editor unico di fatture, note di credito e DDT (modello: Cantina Manager di Osteria Lagrandissima).
+   Tre casi: nuovo documento libero (righe e cliente modificabili), nuovo da ordine (righe e cliente dell'ordine),
+   documento già emesso (righe e cliente bloccati, come impone la guardia sul server).
+   Il numero si assegna solo al salvataggio: chiudere senza salvare non consuma numeri.
+   Le sezioni valide per un solo tipo hanno data-only: nascoste e disabilitate (quindi non validate né lette) per gli altri tipi. */
+const KINDS=[['TD01','Fattura'],['TD24','Fattura differita'],['TD04','Nota di credito'],['ddt','DDT (documento di trasporto)']];
+const kindOf=d=>d.tipo==='ddt'?'ddt':d.td||'TD01';
+const FT='TD01 TD24 TD04';
+const DOC_SOLO_F=['td','pagamento','scadenza','pagata','esig','bollo','bollo_add','modalita','iban','banca','rif_fattura','rif_ddt'],DOC_SOLO_D=['causale','vettore','vettore_nome','data_trasp','ora','colli','peso','aspetto','porto','mvv','valorizzato'];
+function creaDoc(o,tipo){const c=DB.get('clienti',o.cliente_id)||{};
   if(DB.all('documenti').some(d=>d.ordine_id===o.id&&d.tipo===tipo&&!isNC(d))&&!confirm(`Esiste già ${tipo==='ddt'?'un DDT':'una fattura'} per questo ordine. Crearne un altro?`))return;
   /* fattura dopo un DDT dello stesso ordine = fattura differita con il riferimento al DDT */
   const ddts=tipo==='fattura'?DB.all('documenti').filter(x=>x.tipo==='ddt'&&x.ordine_id===o.id):[];
-  const d=Object.assign({tipo,anno:y,data:today(),cliente_id:o.cliente_id,ordine_id:o.id,righe:structuredClone(o.righe)},docDefaults(tipo,c,o.righe,ddts.length?'TD24':'TD01'));
+  const d=Object.assign({tipo,data:today(),cliente_id:o.cliente_id,ordine_id:o.id,righe:structuredClone(o.righe)},docDefaults(tipo,c,o.righe,ddts.length?'TD24':'TD01'));
   if(ddts.length)d.rif_ddt=ddts.map(x=>`${x.numero}/${x.anno} del ${dIT(x.data)}`).join(', ');
-  d.numero=DB.nextNum(tipo,y);DB.upsert('documenti',d);toast(`${docNome(d)} ${d.numero}/${y} creata`);st.view='documenti';location.hash='documenti';render();docForm(d)}
-/* documento composto a mano (senza ordine): referenze da menù a tendina */
-function newDoc(){const t0=st.dtipo==='ddt'?'ddt':'TD01';let read;
-  const f=modal('Nuovo documento',`<div class="grid">${fieldHTML(['tipo','Tipo documento','sel',1,[...Object.entries(TD),['ddt','DDT (documento di trasporto)']]],t0)}${fieldHTML(['cliente_id','Cliente','ref:clienti',1])}${fieldHTML(['scarica','Scarica dal magazzino (FIFO)','chk'],t0==='ddt')}</div>${linesHTML()}<p class="muted">Dopo «Crea» si apre la scheda completa: dati del cliente, pagamento, trasporto e note.</p>`,f=>{
-    const E=f.elements,righe=read();if(!righe.length)return alert('Aggiungi almeno una riga'),false;const v=E.tipo.value,t=v==='ddt'?'ddt':'fattura',c=DB.get('clienti',E.cliente_id.value)||{},y=today().slice(0,4);
-    let ordine_id=null;if(E.scarica.checked&&v!=='TD04'&&righe.some(r=>r.prodotto_id)){const o=DB.upsert('ordini',{tipo:'vendita',data:today(),stato:'Confermato',cliente_id:c.id,agente_id:c.agente_id||null,righe,numero:`OV-${y}-${String(DB.nextNum('ordvendita',y)).padStart(4,'0')}`,note:'Generato da documento'});evadi(o);ordine_id=o.id}
-    const d=Object.assign({tipo:t,anno:y,data:today(),cliente_id:c.id,ordine_id,righe},docDefaults(t,c,righe,t==='fattura'?v:undefined));d.numero=DB.nextNum(t,y);DB.upsert('documenti',d);toast(`${docNome(d)} ${d.numero}/${y} creata`);setTimeout(()=>docForm(d))},'Crea');
-  /* la nota di credito non scarica il magazzino: il reso si registra come movimento a parte */
-  f.elements.tipo.addEventListener('change',()=>{const nc=f.elements.tipo.value==='TD04';f.elements.scarica.disabled=nc;if(nc)f.elements.scarica.checked=false});
-  read=linesEditor(f,[],{tipo:()=>'vendita',cliente:()=>f.elements.cliente_id.value})}
-function docSecs(d){const F=d.tipo==='fattura',nc=isNC(d);
-  const fatt=DB.all('documenti').filter(x=>x.tipo==='fattura'&&!isNC(x)&&x.cliente_id===d.cliente_id).sort((a,b)=>b.data.localeCompare(a.data)).map(x=>[`${x.numero}/${x.anno} del ${dIT(x.data)}`,`${x.numero}/${x.anno} del ${dIT(x.data)} (${eur(docTot(x))})`]);
-  return[['Documento',[['data','Data','date',1],...(nc?[['rif_fattura','Fattura stornata','sel',1,fatt]]:[]),...(d.td==='TD24'?[['rif_ddt','DDT di riferimento (numero e data)']]:[])]],
-    [F?'Cliente (cessionario)':'Destinatario',[...CLIF.map(([k,...r])=>['c_'+k,...r]),['salva_cli','Aggiorna la scheda cliente con questi dati','chk']]],
-    ['Luogo di destinazione',[['dest_div','Luogo di destinazione diverso dalla sede','chk'],['destinazione','Indirizzo di destinazione']]],
-    ...(F?[['IVA e pagamento',[['esig','Esigibilità IVA','sel',1,[['I','Immediata'],['D','Differita'],['S','Scissione pagamenti (split payment)']]],['bollo','Bollo 2 €','sel',1,[['auto','Automatico (oltre 77,47 € esenti IVA)'],['si','Sì'],['no','No']]],['bollo_add','Addebita il bollo al cliente','chk'],['modalita','Modalità di pagamento','sel',0,MODP],['pagamento','Termini','sel',0,PAG],['scadenza','Scadenza','date'],['iban','IBAN'],['banca','Banca'],['pagata',nc?'Rimborsata o compensata':'Incassata','chk']]]]
-      :[['Trasporto',[['causale','Causale trasporto','sel',1,CAUS_DDT],['vettore','Trasporto a cura del','sel',1,['Mittente','Destinatario','Vettore']],['vettore_nome','Vettore (ragione sociale, sede, P.IVA)'],['data_trasp','Data inizio trasporto','date'],['ora','Ora inizio trasporto','time'],['colli','N. colli','num'],['peso','Peso kg','num'],['aspetto','Aspetto dei beni','sel',0,ASPETTO],['porto','Porto','sel',0,['Franco','Assegnato']],['mvv','MVV-E / e-AD n.'],['valorizzato','DDT valorizzato (stampa i prezzi)','chk']]]]),
-    ['Causale e note',[['causale_txt',F?'Causale (stampata in fattura)':'Causale (testo libero)'],['note','Note (solo stampa)','area']]]]}
-function docForm(d){const secs=docSecs(d),all=secs.flatMap(s=>s[1]),cli=docCli(d),F=d.tipo==='fattura',val=k=>k.startsWith('c_')?cli[k.slice(2)]:d[k];
-  const rows=tbl([{h:'Descrizione',v:r=>esc(r.descr)},{h:'Q.tà',n:1,v:r=>num(r.qta)},{h:'Prezzo',n:1,v:r=>eur(r.prezzo)},{h:'Sc.',n:1,v:r=>num(r.sconto)},{h:'IVA',n:1,v:r=>r.iva+'%'},{h:'Totale',n:1,v:r=>eur(lineTot(r))}],d.righe);
-  const f=modal(`${docNome(d)} ${d.numero}/${d.anno}`,secs.map(([t,fs])=>`<h4>${esc(t)}</h4><div class="grid">${fs.map(x=>fieldHTML(x,val(x[0]))).join('')}</div>`).join('')+`<h4>Righe</h4>${rows}${F?`<p class="dtot" data-dtot></p>`:''}<p class="muted">Le righe sono fotografate all'emissione: per correggerle emetti una nota di credito o un nuovo documento.</p>`,f=>{
-    const tmp=readForm(f,all,{}),c={};for(const k of Object.keys(tmp))if(k.startsWith('c_')){c[k.slice(2)]=tmp[k];delete tmp[k]}
-    const salva=tmp.salva_cli;delete tmp.salva_cli;if(tmp.iban)tmp.iban=tmp.iban.replace(/\s/g,'').toUpperCase();if(c.prov)c.prov=c.prov.toUpperCase();if(c.cf)c.cf=c.cf.toUpperCase();if(c.sdi)c.sdi=c.sdi.toUpperCase();
-    const err=docCheck(c,{...d,...tmp});if(err)return alert(err),false;
-    const sc=f.elements.scadenza,touched=sc&&sc.value!==sc.defaultValue,oldD=d.data,oldP=d.pagamento;
-    Object.assign(d,tmp,{cli:c});if(F&&!touched&&(d.data!==oldD||d.pagamento!==oldP))d.scadenza=dueDate(d.data,d.pagamento);
-    if(d.pagata&&!d.data_incasso)d.data_incasso=today();DB.upsert('documenti',d);
-    if(salva){const k=DB.get('clienti',d.cliente_id);if(k){for(const x of ['rag_soc','piva','cf','indirizzo','cap','citta','prov','paese','email','tel'])if(c[x])k[x]=c[x];if(c.sdi||c.pec)k.sdi=c.sdi||c.pec;if(d.dest_div&&d.destinazione)k.dest=d.destinazione;DB.upsert('clienti',k)}}
-    if(f.dataset.p)setTimeout(()=>printDoc(d))});
-  /* «Salva e stampa» accanto a Salva; destinazione visibile solo se diversa dalla sede; totale aggiornato in diretta */
-  const ok=$('footer .pri',f),sp=ok.cloneNode();sp.textContent='Salva e stampa';sp.classList.remove('pri');sp.onclick=()=>{f.dataset.p=1};ok.before(sp);
-  const E=f.elements,dst=()=>{E.destinazione.closest('label').hidden=!E.dest_div.checked};E.dest_div.addEventListener('change',dst);dst();
-  if(F){const upd=()=>{const x={...d,esig:E.esig.value,bollo:E.bollo.value,bollo_add:E.bollo_add.checked},t=totals(d.righe),b=bolloDovuto(x);
-      $('[data-dtot]',f).textContent=`Imponibile ${eur(t.imp)} · IVA ${eur(t.iva)}${x.esig==='S'?' (versata dal cliente)':''}${b?` · bollo 2 €${x.bollo_add?' addebitato':' a carico nostro'}`:''} · ${isNC(d)?'Totale nota di credito':'Totale da incassare'} ${eur(Math.abs(docTot(x)))}`};
-    ['esig','bollo','bollo_add'].forEach(k=>E[k].addEventListener('change',upd));upd()}
-  return f}
+  st.view='documenti';location.hash='documenti';render();docForm(d)}
+function newDoc(){const k=st.dtipo==='ddt'?'ddt':'TD01';
+  docForm({...docDefaults('ddt',{},[]),...docDefaults('fattura',{},[],'TD01'),tipo:k==='ddt'?'ddt':'fattura',data:today(),righe:[],cliente_id:null,ordine_id:null})}
+function docSecs(nuovo){return[
+  ['Documento','',[...(nuovo?[['tipo_k','Tipo documento','sel',1,KINDS]]:[]),['data','Data','date',1],['rif_fattura','Fattura stornata','sel',1,[],'TD04'],['rif_ddt','DDT di riferimento (numero e data)','text',0,null,'TD24']]],
+  ['Cliente','',[['cliente_id','Da rubrica','ref:clienti',1],...CLIF.map(([k,...r])=>['c_'+k,...r]),['salva_cli','Aggiorna la scheda in rubrica con questi dati','chk']]],
+  ['Luogo di destinazione','',[['dest_div','Luogo di destinazione diverso dalla sede','chk'],['destinazione','Indirizzo di destinazione']]],
+  ['RIGHE'],
+  ['IVA e pagamento',FT,[['esig','Esigibilità IVA','sel',1,[['I','Immediata'],['D','Differita'],['S','Scissione pagamenti (split payment)']]],['bollo','Bollo 2 €','sel',1,[['auto','Automatico (oltre 77,47 € esenti IVA)'],['si','Sì'],['no','No']]],['bollo_add','Addebita il bollo al cliente','chk'],['modalita','Modalità di pagamento','sel',0,MODP],['pagamento','Termini','sel',0,PAG],['scadenza','Scadenza','date'],['iban','IBAN'],['banca','Banca'],['pagata','Incassata','chk']]],
+  ['Trasporto','ddt',[['causale','Causale trasporto','sel',1,CAUS_DDT],['vettore','Trasporto a cura del','sel',1,['Mittente','Destinatario','Vettore']],['vettore_nome','Vettore (ragione sociale, sede, P.IVA)'],['data_trasp','Data inizio trasporto','date'],['ora','Ora inizio trasporto','time'],['colli','N. colli (vuoto = calcolo dai cartoni)','num'],['peso','Peso kg','num'],['aspetto','Aspetto dei beni','sel',0,ASPETTO],['porto','Porto','sel',0,['Franco','Assegnato']],['mvv','MVV-E / e-AD n.'],['valorizzato','DDT valorizzato (stampa i prezzi)','chk']]],
+  ['Causale e note','',[['causale_txt','Causale (stampata sul documento)'],['note','Note (solo stampa)','area']]]]}
+function docForm(d){const nuovo=!d.numero,libero=nuovo&&!d.ordine_id,secs=docSecs(libero),cli=docCli(d);let read=null;
+  const val=k=>k==='tipo_k'?kindOf(d):k.startsWith('c_')?cli[k.slice(2)]:d[k];
+  const fh=x=>{const h=fieldHTML(x,val(x[0]));return x[5]?`<div data-only="${x[5]}" style="display:contents">${h}</div>`:h};
+  const fisse=()=>`<h4>Righe</h4>${tbl([{h:'Descrizione',v:r=>esc(r.descr)},{h:'Q.tà',n:1,v:r=>num(r.qta)},{h:'Prezzo',n:1,v:r=>eur(r.prezzo)},{h:'Sc.',n:1,v:r=>num(r.sconto)},{h:'IVA',n:1,v:r=>r.iva+'%'},{h:'Totale',n:1,v:r=>eur(lineTot(r))}],d.righe)}<p class="muted">${nuovo?'Righe dell\'ordine collegato.':'Le righe sono fotografate all\'emissione: per correggerle emetti una nota di credito o un nuovo documento.'}</p>`;
+  const body=`<p class="docnum" data-num></p>`+secs.map(([t,only,fs])=>t==='RIGHE'?(libero?linesHTML()+`<div data-only="TD01 TD24 ddt" style="display:contents">${fieldHTML(['scarica','Scarica dal magazzino (FIFO) e crea l\'ordine di vendita','chk'],d.tipo==='ddt')}</div>`:fisse())
+    :`<section${only?` data-only="${only}"`:''}><h4>${esc(t)}</h4><div class="grid">${fs.map(fh).join('')}</div></section>`).join('')+`<p class="dtot" data-dtot></p>`;
+  const f=modal(nuovo?'Nuovo documento':`${docNome(d)} ${d.numero}/${d.anno}`,body,f=>{
+    const k=kind(),tipo=k==='ddt'?'ddt':'fattura',righe=libero?read():d.righe;if(!righe.length)return alert('Aggiungi almeno una riga con quantità'),false;
+    const cid=libero?E.cliente_id.value:d.cliente_id;if(!cid)return alert('Scegli il cliente dalla rubrica'),false;
+    const flds=secs.filter(s=>s[2]).flatMap(s=>s[2]).filter(x=>!['tipo_k','cliente_id'].includes(x[0])&&(!x[5]||x[5].split(' ').includes(k))&&!(f.querySelector(`[name="${x[0]}"]`)?.closest('section')?.hidden));
+    const tmp=readForm(f,flds,{}),c={};for(const x of Object.keys(tmp))if(x.startsWith('c_')){c[x.slice(2)]=tmp[x];delete tmp[x]}
+    const salva=tmp.salva_cli;delete tmp.salva_cli;if(tmp.iban)tmp.iban=tmp.iban.replace(/\s/g,'').toUpperCase();for(const x of ['prov','cf','sdi'])if(c[x])c[x]=c[x].toUpperCase();
+    if(tipo==='fattura')tmp.td=k;
+    const err=docCheck(c,{...d,...tmp,tipo});if(err)return alert(err),false;
+    if(nuovo){const y=tmp.data.slice(0,4),cl=DB.get('clienti',cid)||{};let ordine_id=d.ordine_id||null;
+      if(libero&&E.scarica.checked&&!E.scarica.disabled&&righe.some(r=>r.prodotto_id)){const o=DB.upsert('ordini',{tipo:'vendita',data:tmp.data,stato:'Confermato',cliente_id:cid,agente_id:cl.agente_id||null,righe,numero:`OV-${y}-${String(DB.nextNum('ordvendita',y)).padStart(4,'0')}`,note:'Generato da documento'});evadi(o);ordine_id=o.id}
+      Object.assign(d,tmp,{tipo,anno:y,cliente_id:cid,ordine_id,righe,cli:c});
+      for(const x of tipo==='ddt'?DOC_SOLO_F:DOC_SOLO_D)delete d[x];if(k!=='TD04')delete d.rif_fattura;if(k!=='TD24')delete d.rif_ddt;
+      if(tipo==='ddt'&&d.colli==null){const n=righe.reduce((s,r)=>{const p=DB.get('prodotti',r.prodotto_id);return s+(p?.cartone?Math.ceil(r.qta/p.cartone):0)},0);d.colli=n||null}
+      d.numero=DB.nextNum(tipo,y)}
+    else Object.assign(d,tmp,{cli:c});
+    if(d.pagata&&!d.data_incasso)d.data_incasso=today();
+    const sv=DB.upsert('documenti',d)||d;if(nuovo)toast(`${docNome(sv)} ${sv.numero}/${sv.anno} emessa`);
+    if(salva){const kc=DB.get('clienti',cid);if(kc){for(const x of ['rag_soc','piva','cf','indirizzo','cap','citta','prov','paese','email','tel'])if(c[x])kc[x]=c[x];if(c.sdi||c.pec)kc.sdi=c.sdi||c.pec;if(sv.dest_div&&sv.destinazione)kc.dest=sv.destinazione;DB.upsert('clienti',kc)}}
+    if(f.dataset.p)setTimeout(()=>printDoc(sv))},nuovo?'Emetti':'Salva');
+  const E=f.elements,kind=()=>libero?E.tipo_k.value||'TD01':kindOf(d);
+  if(!libero)E.cliente_id.disabled=true;
+  /* «Salva e stampa» accanto al salvataggio */
+  const ok=$('footer .pri',f),sp=ok.cloneNode();sp.textContent=nuovo?'Emetti e stampa':'Salva e stampa';sp.classList.remove('pri');sp.onclick=()=>{f.dataset.p=1};ok.before(sp);
+  const righeOra=()=>libero&&read?read():d.righe;
+  const upd=()=>{const k=kind(),x={...d,tipo:k==='ddt'?'ddt':'fattura',td:k,righe:righeOra()},el=$('[data-dtot]',f);
+    if(k==='ddt'){el.textContent=`${num(x.righe.reduce((s,r)=>s+(+r.qta||0),0))} pezzi`;return}
+    Object.assign(x,{esig:E.esig.value,bollo:E.bollo.value,bollo_add:E.bollo_add.checked});const t=totals(x.righe),b=bolloDovuto(x);
+    el.textContent=`Imponibile ${eur(t.imp)} · IVA ${eur(t.iva)}${x.esig==='S'?' (versata dal cliente)':''}${b?` · bollo 2 €${x.bollo_add?' addebitato':' a nostro carico'}`:''} · ${k==='TD04'?'Totale nota di credito':'Totale da incassare'} ${eur(Math.abs(docTot(x)))}`};
+  const rifF=()=>{const cid=E.cliente_id.value,cur=E.rif_fattura.value||d.rif_fattura||'';
+    E.rif_fattura.innerHTML='<option value=""></option>'+DB.all('documenti').filter(x=>x.tipo==='fattura'&&!isNC(x)&&x.cliente_id===cid).sort((a,b)=>b.data.localeCompare(a.data)).map(x=>{const v=`${x.numero}/${x.anno} del ${dIT(x.data)}`;return`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)} (${eur(docTot(x))})</option>`}).join('')};
+  const vis=()=>{const k=kind(),tipo=k==='ddt'?'ddt':'fattura';
+    for(const el of f.querySelectorAll('[data-only]')){const on=el.dataset.only.split(' ').includes(k);el.hidden=!on;el.querySelectorAll('input,select,textarea').forEach(i=>i.disabled=!on||(i.name==='cliente_id'&&!libero))}
+    E.pagata.closest('label').querySelector('span').textContent=k==='TD04'?'Rimborsata o compensata':'Incassata';
+    $('[data-num]',f).textContent=nuovo?`Sarà emesso come ${KINDS.find(x=>x[0]===k)[1].replace(/ \(.*/,'')} n. ${DB.seqOf(tipo+(E.data.value||today()).slice(0,4))+1}/${(E.data.value||today()).slice(0,4)}`:'';upd()};
+  /* scelta dalla rubrica: compila i dati del cliente, destinazione e pagamento */
+  E.cliente_id.addEventListener('change',()=>{const c=DB.get('clienti',E.cliente_id.value);if(!c)return;const s=cliSnap(c);
+    for(const [x] of CLIF)E['c_'+x].value=s[x]??'';E.dest_div.checked=!!c.dest;E.destinazione.value=c.dest||'';
+    const p=c.pagamento||'';E.pagamento.value=p;E.modalita.value=/riba/i.test(p)?'RiBa':/bonifico/i.test(p)?'Bonifico':'';if(!scMan)E.scadenza.value=dueDate(E.data.value,p);dst();rifF();upd()});
+  /* scadenza ricalcolata da data e termini finché non la si modifica a mano */
+  let scMan=!nuovo&&d.scadenza&&d.scadenza!==dueDate(d.data,d.pagamento);E.scadenza.addEventListener('input',()=>{scMan=true});
+  const rsc=()=>{if(!scMan&&!E.scadenza.disabled)E.scadenza.value=dueDate(E.data.value,E.pagamento.value)};E.data.addEventListener('change',()=>{rsc();vis()});E.pagamento.addEventListener('change',rsc);
+  const dst=()=>{E.destinazione.closest('label').hidden=!E.dest_div.checked};E.dest_div.addEventListener('change',dst);
+  ['esig','bollo','bollo_add'].forEach(x=>E[x].addEventListener('change',upd));if(libero)E.tipo_k.addEventListener('change',vis);
+  if(libero)read=linesEditor(f,d.righe,{tipo:()=>'vendita',cliente:()=>E.cliente_id.value,sync:upd});
+  rifF();dst();vis();return f}
 /* stampa via iframe (no popup: Safari/iOS) */
 function printPage(title,inner){const a=DB.settings().azienda||{};let fr=$('#prt');if(!fr){fr=document.createElement('iframe');fr.id='prt';fr.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';document.body.append(fr)}
   fr.onload=()=>{fr.contentWindow.focus();fr.contentWindow.print()};
@@ -702,7 +741,7 @@ function printDoc(d){const c=docCli(d),t=totals(d.righe),F=d.tipo==='fattura',nc
   const ddts=F&&d.ordine_id?DB.all('documenti').filter(x=>x.tipo==='ddt'&&x.ordine_id===d.ordine_id).map(x=>`${x.numero}/${x.anno} del ${dIT(x.data)}`):[];
   const rifDDT=[...(d.rif_ddt?[d.rif_ddt]:[]),...ddts.filter(x=>!(d.rif_ddt||'').includes(x))].join(', ');
   const sede=[c.indirizzo,[c.cap,c.citta].filter(Boolean).join(' '),c.prov&&'('+c.prov+')',c.paese&&!ivaIT(c)?c.paese:''].filter(Boolean).join(' ');
-  const cli=`<div class="box"><span class="muted">${F?'Cliente (cessionario)':'Destinatario'}</span><br><b>${esc(c.rag_soc)}</b><br>${esc(sede)}<br>${c.piva?'P.IVA '+esc(c.piva):''} ${c.cf?'· CF '+esc(c.cf):''}${F&&(c.sdi||c.pec)?'<br>'+(c.sdi?'SDI '+esc(c.sdi):'')+(c.sdi&&c.pec?' · ':'')+(c.pec?'PEC '+esc(c.pec):''):''}${d.dest_div&&d.destinazione?`<br><br><span class="muted">Luogo di destinazione</span><br>${esc(d.destinazione)}`:''}</div>`;
+  const cli=`<div class="box"><span class="muted">${F?'Cliente (cessionario)':'Destinatario'}</span><br><b>${esc(c.rag_soc||[c.nome,c.cognome].filter(Boolean).join(' '))}</b><br>${esc(sede)}<br>${c.piva?'P.IVA '+esc(c.piva):''} ${c.cf?'· CF '+esc(c.cf):''}${F&&(c.sdi||c.pec)?'<br>'+(c.sdi?'SDI '+esc(c.sdi):'')+(c.sdi&&c.pec?' · ':'')+(c.pec?'PEC '+esc(c.pec):''):''}${d.dest_div&&d.destinazione?`<br><br><span class="muted">Luogo di destinazione</span><br>${esc(d.destinazione)}`:''}</div>`;
   const rows=d.righe.map(r=>`<tr><td>${esc(r.descr)}</td><td class="n">${num(r.qta)}</td>${V?`<td class="n">${eur(r.prezzo)}</td><td class="n">${r.sconto?num(r.sconto)+'%':''}</td><td class="n">${r.iva}%</td><td class="n">${eur(lineTot(r))}</td>`:''}</tr>`).join('');
   const thead=`<thead><tr><th>Descrizione</th><th class="n">Q.tà${F?'':' (bott.)'}</th>${V?'<th class="n">Prezzo</th><th class="n">Sc.</th><th class="n">IVA</th><th class="n">Importo</th>':''}</tr></thead>`;
   const b=bolloDovuto(d),ba=b&&d.bollo_add,ESIG={D:'IVA a esigibilità differita (art. 6, c. 5, DPR 633/1972).',S:'Scissione dei pagamenti: IVA versata dal cessionario (art. 17-ter DPR 633/1972).'};
