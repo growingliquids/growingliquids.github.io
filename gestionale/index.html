@@ -328,8 +328,10 @@ function totals(righe=[]){const by={};let imp=0;for(const r of righe){const t=li
 /* FIFO per prodotto: lotti residui, valore, scoperto (scarichi oltre giacenza) */
 function stockMap(){const by={},m={};for(const x of DB.all('movimenti'))(by[x.prodotto_id]||=[]).push(x);
   for(const [pid,arr] of Object.entries(by)){const p=DB.get('prodotti',pid);arr.sort((a,b)=>a.data.localeCompare(b.data)||(SIGN[b.tipo]?1:0)-(SIGN[a.tipo]?1:0)||a.created_at.localeCompare(b.created_at));
+    /* over = scoperto ancora aperto: bottiglie scaricate oltre la giacenza. Il carico successivo lo copre prima di creare un lotto,
+       così la somma dei lotti resta sempre uguale a max(q, 0) e il valore di magazzino non si gonfia */
     const lots=[];let q=0,over=0;
-    for(const x of arr){const n=+x.qta||0;if(SIGN[x.tipo]){lots.push({q:n,c:x.costo_unit??(+p?.costo||0),l:x.lotto||''});q+=n}else{q-=n;let r=n;while(r>0&&lots.length){const L=lots[0],t=Math.min(r,L.q);L.q-=t;r-=t;if(!L.q)lots.shift()}over+=r}}
+    for(const x of arr){const n=+x.qta||0;if(SIGN[x.tipo]){const cop=Math.min(over,n);over-=cop;if(n-cop>0)lots.push({q:n-cop,c:x.costo_unit??(+p?.costo||0),l:x.lotto||''});q+=n}else{q-=n;let r=n;while(r>0&&lots.length){const L=lots[0],t=Math.min(r,L.q);L.q-=t;r-=t;if(!L.q)lots.shift()}over+=r}}
     m[pid]={q,lots,over,val:lots.reduce((s,L)=>s+L.q*L.c,0)}}return m}
 const avgCost=(p,s)=>s&&s.q>0?s.val/s.q:(+p?.costo||0);
 function fifoTake(s,qty,p){let r=qty,c=0;for(const L of s?.lots||[]){if(r<=0)break;const t=Math.min(r,L.q);c+=t*L.c;L.q-=t;r-=t}if(s)s.lots=s.lots.filter(L=>L.q>0);c+=r*(+p?.costo||0);return qty?Math.round(c/qty*1e4)/1e4:0}
