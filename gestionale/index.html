@@ -187,12 +187,14 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   /* ts: updated_at visto sul server per ogni record (chiave tabella:id). Le modifiche a record esistenti partono con quel valore
      e il server le accetta solo se nel frattempo nessun'altra postazione ha cambiato il record (revisione CM, punto 4) */
   const TSC=new Set(['agenti','clienti','fallate','fornitori','mandati','ordini','pl','prodotti']),tk=(c,id)=>c+':'+id;
-  let d={},seq={},q=[],ts={},shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
-  try{const c=JSON.parse(localStorage.getItem(KC));if(c){d=c.d||{};seq=c.seq||{};ts=c.ts||{};shared=c.shared||''}}catch{}try{q=JSON.parse(localStorage.getItem(KQ))||[]}catch{q=[]}
+  /* rj: righe dell'ordine come sono sul server (JSON). sostituisci_righe parte solo se le righe sono davvero cambiate (punto 6) */
+  const rjOf=rr=>JSON.stringify((rr||[]).map(x=>[x.prodotto_id||'',x.descr||'',+x.qta||0,+x.prezzo||0,+x.sconto||0,+x.iva||0]));
+  let rj={},d={},seq={},q=[],ts={},shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
+  try{const c=JSON.parse(localStorage.getItem(KC));if(c){d=c.d||{};seq=c.seq||{};ts=c.ts||{};rj=c.rj||{};shared=c.shared||''}}catch{}try{q=JSON.parse(localStorage.getItem(KQ))||[]}catch{q=[]}
   /* modifiche rifiutate dal server: mai scartate in silenzio, restano qui finché l'utente non le riprova, esporta o scarta (revisione CM, punto 5) */
   let sosp=[];try{sosp=JSON.parse(localStorage.getItem(KS))||[]}catch{sosp=[]}
   const sospendi=(op,motivo)=>sosp.push({op,motivo,at:new Date().toISOString()});
-  const raw=c=>d[c]||(d[c]=[]),save=()=>{try{localStorage.setItem(KC,JSON.stringify({d,seq,ts,shared}));localStorage.setItem(KQ,JSON.stringify(q));localStorage.setItem(KS,JSON.stringify(sosp))}catch(e){console.warn('Copia locale non salvata',e)}};
+  const raw=c=>d[c]||(d[c]=[]),save=()=>{try{localStorage.setItem(KC,JSON.stringify({d,seq,ts,rj,shared}));localStorage.setItem(KQ,JSON.stringify(q));localStorage.setItem(KS,JSON.stringify(sosp))}catch(e){console.warn('Copia locale non salvata',e)}};
   const conv=(t,v)=>t==='n'?(v===''||v==null||isNaN(+v)?null:+v):t==='d'?(v?String(v).slice(0,10):null):t==='u'||t==='ts'?(v||null):t==='b'?!!v:t==='j'?v:(v==null?null:String(v));
   function toRow(c,o){const cols=COLS[c],k=CATCH[c]||'extra',row={},ex={};
     for(const[f,v]of Object.entries(o)){if(f==='updated_at'||(c==='ordini'&&f==='righe'))continue;const t=cols[f];if(!t){if(v!==undefined)ex[f]=v;continue}if(t==='b'&&v==null)continue;row[f]=conv(t,v)}
@@ -212,7 +214,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
           if(!r.error&&cond&&!r.data?.length){q.shift();sospendi(op,'Record modificato nel frattempo da un\'altra postazione');save();const nome=op.o.numero||op.o.rag_soc||op.o.nome||op.o.num||'il record';
             alert(`Modifica non salvata: ${nome} è stato modificato nel frattempo da un'altra postazione.\n\nRicarico i dati aggiornati. La tua modifica resta in «Modifiche in sospeso» (in fondo al menù): puoi riprovarla o esportarla.`);await sync();continue}
           const nt=r.data?.[0]?.updated_at;if(!r.error&&nt){for(const x of q.slice(1))if(x.op==='up'&&x.c===op.c&&x.o.id===op.o.id&&x.base===op.base)x.base=nt;ts[key]=nt}
-          if(!r.error&&op.c==='ordini')r=await sb().rpc('sostituisci_righe',{p_ordine:op.o.id,p_righe:(op.o.righe||[]).map(x=>({prodotto_id:x.prodotto_id||'',descr:x.descr||'',qta:x.qta,prezzo:x.prezzo,sconto:x.sconto,iva:x.iva}))})}
+          if(!r.error&&op.c==='ordini'&&op.rc!==false)r=await sb().rpc('sostituisci_righe',{p_ordine:op.o.id,p_righe:(op.o.righe||[]).map(x=>({prodotto_id:x.prodotto_id||'',descr:x.descr||'',qta:x.qta,prezzo:x.prezzo,sconto:x.sconto,iva:x.iva}))})}
         else if(op.op==='canc')r=await sb().from(TB[op.c]||op.c).update({deleted_at:op.at}).eq('id',op.id);
         else if(op.op==='del')r=await sb().from(TB[op.c]||op.c).delete().eq('id',op.id);
         else if(op.op==='num')r=await sb().rpc('allinea_contatore',{p_chiave:op.k,p_valore:op.v});
@@ -227,6 +229,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
     ts={};for(const c of COLL)if(TSC.has(c))for(const r of res[COLL.indexOf(c)])if(r.updated_at)ts[tk(c,r.id)]=r.updated_at;
     const rg={};for(const r of res[COLL.length].sort((a,b)=>(a.pos||0)-(b.pos||0)))(rg[r.ordine_id]||=[]).push({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva});
     for(const o of nd.ordini)o.righe=rg[o.id]||[];
+    rj={};for(const o of nd.ordini)rj[o.id]=rjOf(o.righe);
     seq={};for(const r of res[COLL.length+1])seq[r.chiave]=r.valore;
     const st=res[COLL.length+2].data?.valore;if(st){for(const k of SHARED)if(st[k])nd.settings[k]=st[k];if(st.wa){nd.settings.wa=Object.assign(nd.settings.wa||{},st.wa)}shared=sharedOf(nd.settings)}
     d=nd;for(const op of q){if(op.op==='up')put(op.c,structuredClone(op.o));else if(op.op==='del')d[op.c]=raw(op.c).filter(x=>x.id!==op.id);else if(op.op==='canc'){const x=raw(op.c).find(x=>x.id===op.id);if(x)x.deleted_at=op.at}else if(op.op==='num')seq[op.k]=Math.max(seq[op.k]||0,op.v)}
@@ -236,13 +239,14 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
     ch=sb().channel('gl-dati').on('postgres_changes',{event:'*',schema:'gl'},async ev=>{const t=ev.table,c=Object.keys(TB).find(k=>TB[k]===t)||t,n=ev.new||{},o=ev.old||{};
       if(t==='contatori'){if(n.chiave)seq[n.chiave]=n.valore}
       else if(t==='impostazioni'){if(n.valore){const s=DB.settings();for(const k of SHARED)if(n.valore[k])s[k]=n.valore[k];if(n.valore.wa)s.wa=Object.assign(s.wa||{},n.valore.wa);shared=sharedOf(s)}}
-      else if(t==='ordini_righe'){const oid=n.ordine_id||o.ordine_id;if(oid&&!pend(oid)){const{data}=await sb().from('ordini_righe').select('*').eq('ordine_id',oid).order('pos');const x=raw('ordini').find(x=>x.id===oid);if(x&&data)x.righe=data.map(r=>({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva}))}}
+      else if(t==='ordini_righe'){const oid=n.ordine_id||o.ordine_id;if(oid&&!pend(oid)){const{data}=await sb().from('ordini_righe').select('*').eq('ordine_id',oid).order('pos');const x=raw('ordini').find(x=>x.id===oid);if(x&&data){x.righe=data.map(r=>({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva}));rj[oid]=rjOf(x.righe)}}}
       else if(COLS[c]){const id=n.id||o.id;if(!id||pend(id))return;if(ev.eventType==='DELETE')d[c]=raw(c).filter(x=>x.id!==id);else{const x=fromRow(c,n),p=raw(c).find(y=>y.id===id);if(TSC.has(c)&&n.updated_at)ts[tk(c,id)]=n.updated_at;if(c==='ordini')x.righe=p?.righe||[];put(c,x)}}
       save();later()}).subscribe()}
   return{
     all:c=>LEDGER.has(c)?raw(c).filter(x=>!x.deleted_at):raw(c),
     get:(c,id)=>id?raw(c).find(x=>x.id===id&&!x.deleted_at):undefined,
-    upsert(c,o){const now=new Date().toISOString();o.id||=uid();o.created_at||=now;o.updated_at=now;put(c,o);enqueue({op:'up',c,o:structuredClone(o),base:ts[tk(c,o.id)]||null});return o},
+    upsert(c,o){const now=new Date().toISOString();o.id||=uid();o.created_at||=now;o.updated_at=now;put(c,o);const op={op:'up',c,o:structuredClone(o),base:ts[tk(c,o.id)]||null};
+      if(c==='ordini'){const x=rjOf(o.righe);op.rc=rj[o.id]!==x;rj[o.id]=x}enqueue(op);return o},
     remove(c,id){const x=raw(c).find(x=>x.id===id);if(LEDGER.has(c)){if(x){x.deleted_at=new Date().toISOString();enqueue({op:'canc',c,id,at:x.deleted_at})}return}
       if(c==='documenti'&&x&&seq[x.tipo+x.anno]===+x.numero)seq[x.tipo+x.anno]--;d[c]=raw(c).filter(y=>y.id!==id);enqueue({op:'del',c,id})},
     settings:()=>d.settings||(d.settings={}),
