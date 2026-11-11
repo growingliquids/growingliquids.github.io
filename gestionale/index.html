@@ -189,7 +189,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   const TSC=new Set(['agenti','clienti','fallate','fornitori','mandati','ordini','pl','prodotti']),tk=(c,id)=>c+':'+id;
   /* rj: righe dell'ordine come sono sul server (JSON). sostituisci_righe parte solo se le righe sono davvero cambiate (punto 6) */
   const rjOf=rr=>JSON.stringify((rr||[]).map(x=>[x.prodotto_id||'',x.descr||'',+x.qta||0,+x.prezzo||0,+x.sconto||0,+x.iva||0]));
-  let rj={},d={},seq={},q=[],ts={},shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
+  let bloccata=false,rj={},d={},seq={},q=[],ts={},shared='',ready=false,ch=null,tFl=0,tRe=0,busy=false;
   try{const c=JSON.parse(localStorage.getItem(KC));if(c){d=c.d||{};seq=c.seq||{};ts=c.ts||{};rj=c.rj||{};shared=c.shared||''}}catch{}try{q=JSON.parse(localStorage.getItem(KQ))||[]}catch{q=[]}
   /* modifiche rifiutate dal server: mai scartate in silenzio, restano qui finché l'utente non le riprova, esporta o scarta (revisione CM, punto 5) */
   let sosp=[];try{sosp=JSON.parse(localStorage.getItem(KS))||[]}catch{sosp=[]}
@@ -202,7 +202,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   function fromRow(c,r){const k=CATCH[c]||'extra',o={...(r[k]||{}),...r};delete o[k];delete o.creato_da;return o}
   const sharedOf=s=>JSON.stringify({...Object.fromEntries(SHARED.map(k=>[k,s[k]||null])),wa:Object.fromEntries(WASH.map(k=>[k,s.wa?.[k]??null]))});
   const put=(c,o)=>{const a=raw(c),i=a.findIndex(x=>x.id===o.id);i<0?a.push(o):a[i]=o};
-  const status=()=>{for(const el of document.querySelectorAll('[data-dbst]'))el.textContent=(q.length?`${q.length} ${q.length>1?'modifiche':'modifica'} da inviare`:(ready?'Dati sincronizzati':'Caricamento dati…'))+(sosp.length?` · ${sosp.length} in sospeso`:'')};
+  const status=()=>{for(const el of document.querySelectorAll('[data-dbst]'))el.textContent=(q.length?`${q.length} ${q.length>1?'modifiche':'modifica'} da inviare`:(ready?'Dati sincronizzati':'Caricamento dati…'))+(sosp.length?` · ${sosp.length} in sospeso`:'')+(bloccata?' · sincronizzazione sospesa':'')};
   const enqueue=op=>{q.push(op);save();status();clearTimeout(tFl);tFl=setTimeout(flush,300)};
   const sb=()=>AUTH.sb;
   async function fetchAll(t,sel='*'){const out=[];for(let i=0;;i+=1000){const{data,error}=await sb().from(t).select(sel).range(i,i+999);if(error)throw error;out.push(...data);if(data.length<1000)return out}}
@@ -226,6 +226,13 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   /* carica tutto dal server, poi riapplica le modifiche ancora in coda */
   async function sync(){if(!sb())return;const res=await Promise.all([...COLL.map(c=>fetchAll(TB[c]||c)),fetchAll('ordini_righe'),fetchAll('contatori'),sb().from('impostazioni').select('*').eq('chiave','app').maybeSingle()]);
     const nd={settings:d.settings||{}};COLL.forEach((c,i)=>nd[c]=res[i].map(r=>fromRow(c,r)));
+    /* tripwire d'integrità (lezione del Cantina Manager, revisione CM punto 8): se il server farebbe sparire più del 20% dei record
+       di una collezione, o più di 25, non si sovrascrive in silenzio. Prima una copia di sicurezza dei dati locali, poi si chiede. */
+    if(ready||Object.values(d).some(v=>Array.isArray(v)&&v.length)){const pend=new Set(q.filter(x=>x.op==='up').map(x=>x.o.id));
+      const cali=COLL.map(c=>{const a=raw(c).filter(x=>!pend.has(x.id)).length,l=a-nd[c].length;return{c,a,l}}).filter(x=>x.l>25||(x.a>=5&&x.l/x.a>0.2));
+      if(cali.length){download(`${CONFIG.lsPrefix}copia-locale-${today()}.json`,JSON.stringify(d),'application/json');
+        if(!confirm(`Attenzione: rispetto a questa postazione, sul server mancano ${cali.map(x=>`${x.l} su ${x.a} ${x.c}`).join(', ')}.\n\nPotrebbe essere un errore. Ho scaricato una copia di sicurezza dei dati di questa postazione.\n\nOK = accetta i dati del server. Annulla = tieni i dati locali e non sincronizzare.`)){bloccata=true;status();return}}}
+    bloccata=false;
     ts={};for(const c of COLL)if(TSC.has(c))for(const r of res[COLL.indexOf(c)])if(r.updated_at)ts[tk(c,r.id)]=r.updated_at;
     const rg={};for(const r of res[COLL.length].sort((a,b)=>(a.pos||0)-(b.pos||0)))(rg[r.ordine_id]||=[]).push({prodotto_id:r.prodotto_id,descr:r.descr,qta:+r.qta,prezzo:+r.prezzo,sconto:+r.sconto,iva:+r.iva});
     for(const o of nd.ordini)o.righe=rg[o.id]||[];
@@ -258,7 +265,7 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
     riprova(i){const s=sosp.splice(i,1)[0];if(!s)return;const op=s.op;if(op.op==='up'){if(TSC.has(op.c))op.base=ts[tk(op.c,op.o.id)]||null;put(op.c,structuredClone(op.o))}enqueue(op)},
     scarta(i){sosp.splice(i,1);save();status()},
     async start(){await flush();await sync();live();await flush();render();setInterval(flush,30000);addEventListener('online',flush)},
-    pending:()=>q.length,ready:()=>ready,status,
+    pending:()=>q.length,ready:()=>ready,status,ricarica:()=>sync(),bloccata:()=>bloccata,
     /* dati del vecchio gestionale (solo browser, chiave gl_db_v1) da caricare su Supabase */
     vecchi(){try{const x=JSON.parse(localStorage.getItem(_lsKey('db_v1')))||{};return COLL.reduce((s,c)=>s+(x[c]||[]).length,0)}catch{return 0}},
     importaVecchi(){const x=JSON.parse(localStorage.getItem(_lsKey('db_v1'))||'{}');let n=0;
