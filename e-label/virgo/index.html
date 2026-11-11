@@ -29,6 +29,7 @@ td.i{padding-left:28px}
 p.ing{margin:0}
 .code{font-weight:700;white-space:nowrap}
 .small{font-size:.85rem;color:var(--muted)}
+img.label{display:block;width:100%;height:auto;margin:20px 0 4px;border-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
 footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);text-align:center;font-size:.8rem;color:var(--muted)}
 [data-l=en]{display:none}
 html[lang=en] [data-l=it]{display:none}
@@ -40,7 +41,8 @@ html[lang=en] [data-l=en]{display:revert}
 <header>
   <div class="brand"><span data-l="it">Growing Liquids presenta</span><span data-l="en">Growing Liquids presents</span></div>
   <h1>Virgo</h1>
-  <p class="sub">Etna Bianco DOC · 750 ml</p>
+  <p class="sub">Etna Bianco DOC · 2024 · 12,5% vol. · 75 cl</p>
+  <img class="label" src="etichetta.jpg" width="1200" height="901" alt="Etichetta Virgo Etna Bianco DOC 2024">
   <div class="lang"><button type="button" data-set="it" aria-pressed="true">IT</button><button type="button" data-set="en" aria-pressed="false">EN</button></div>
 </header>
 
@@ -79,7 +81,7 @@ html[lang=en] [data-l=en]{display:revert}
   <p class="small"><span data-l="it">Indicazioni valide per l'Italia. Verifica le disposizioni del tuo Comune. Separa le componenti e conferiscile correttamente.</span><span data-l="en">Disposal instructions valid for Italy. Check your local rules. Separate the components and dispose of them correctly.</span></p>
 </section>
 
-<footer>Growing Liquids</footer>
+<footer><span data-l="it">Imbottigliato a Castiglione di Sicilia (CT) per conto di</span><span data-l="en">Bottled in Castiglione di Sicilia (CT) on behalf of</span> Growing Liquids SRL, Milano</footer>
 </main>
 <script>
 (()=>{const h=document.documentElement,b=[...document.querySelectorAll('[data-set]')];
