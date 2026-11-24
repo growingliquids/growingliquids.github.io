@@ -301,7 +301,9 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
   }})();
 
 /* ================= DOMINIO ================= */
-const PAG=['Rimessa diretta','Anticipato','Bonifico 30gg','Bonifico 30gg FM','Bonifico 60gg','Bonifico 60gg FM','Bonifico 90gg FM','RiBa 60gg FM'];
+/* termini di pagamento: il primo è quello proposto in fattura quando il cliente non ne ha uno suo */
+const PAG_DEF='Bonifico 30gg FM';
+const PAG=['Bonifico 30gg FM','Rimessa diretta','Anticipato','Bonifico 30gg','Bonifico 60gg','Bonifico 60gg FM','Bonifico 90gg FM','RiBa 60gg FM'];
 const VAL=['EUR','USD','GBP','CHF','AUD','ZAR','NZD'];
 const STATI=['Bozza','Confermato','Evaso','Annullato'];
 const GRUPPI=['Balance F&B','Palinurobar','Furia','Esterno'];
@@ -771,7 +773,7 @@ function docCheck(c,d){const it=ivaIT(c),pi=String(c.piva||'').replace(/^IT/i,''
   if(d.colli!=null&&(d.colli<0||!Number.isInteger(d.colli)))return'Il numero di colli deve essere un intero positivo.';
   if(d.peso!=null&&d.peso<0)return'Il peso non può essere negativo.';return''}
 function docDefaults(tipo,c,righe,td='TD01'){const a=DB.settings().azienda||{},base={cli:cliSnap(c),dest_div:!!c.dest,destinazione:c.dest||''};
-  if(tipo==='fattura'){const p=c.pagamento||'';return{...base,td,pagamento:p,scadenza:dueDate(today(),p),pagata:false,esig:'I',bollo:'auto',bollo_add:false,modalita:/riba/i.test(p)?'RiBa':/bonifico/i.test(p)?'Bonifico':'',iban:a.iban||'',banca:a.banca||''}}
+  if(tipo==='fattura'){const p=c.pagamento||PAG_DEF;return{...base,td,pagamento:p,scadenza:dueDate(today(),p),pagata:false,esig:'I',bollo:'no',bollo_add:false,modalita:/riba/i.test(p)?'RiBa':/bonifico/i.test(p)?'Bonifico':'',iban:a.iban||'',banca:a.banca||''}}
   const cart=righe.reduce((s,r)=>{const p=DB.get('prodotti',r.prodotto_id);return s+(p?.cartone?Math.ceil(r.qta/p.cartone):0)},0);
   return{...base,causale:'Vendita',aspetto:'Cartoni',vettore:'Mittente',porto:'Franco',data_trasp:today(),colli:cart||null,valorizzato:false}}
 /* Editor unico di fatture, note di credito e DDT (modello: Cantina Manager di Osteria Lagrandissima).
@@ -797,7 +799,7 @@ function docSecs(nuovo){return[
   ['Cliente','',[['cliente_id','Da rubrica','ref:clienti',1],...CLIF.map(([k,...r])=>['c_'+k,...r]),['salva_cli','Aggiorna la scheda in rubrica con questi dati','chk']]],
   ['Luogo di destinazione','',[['dest_div','Luogo di destinazione diverso dalla sede','chk'],['destinazione','Indirizzo di destinazione']]],
   ['RIGHE'],
-  ['IVA e pagamento',FT,[['esig','Esigibilità IVA','sel',1,[['I','Immediata'],['D','Differita'],['S','Scissione pagamenti (split payment)']]],['bollo','Bollo 2 €','sel',1,[['auto','Automatico (oltre 77,47 € esenti IVA)'],['si','Sì'],['no','No']]],['bollo_add','Addebita il bollo al cliente','chk'],['modalita','Modalità di pagamento','sel',0,MODP],['pagamento','Termini','sel',0,PAG],['scadenza','Scadenza','date'],['iban','IBAN'],['banca','Banca'],['pagata','Incassata','chk']]],
+  ['IVA e pagamento',FT,[['esig','Esigibilità IVA','sel',1,[['I','Immediata'],['D','Differita'],['S','Scissione pagamenti (split payment)']]],['bollo','Bollo 2 €','sel',1,[['no','No (fatture con IVA)'],['auto','Automatico (oltre 77,47 € esenti IVA)'],['si','Sì']]],['bollo_add','Addebita il bollo al cliente','chk'],['modalita','Modalità di pagamento','sel',0,MODP],['pagamento','Termini','sel',0,PAG],['scadenza','Scadenza','date'],['iban','IBAN'],['banca','Banca'],['pagata','Incassata','chk']]],
   ['Trasporto','ddt',[['causale','Causale trasporto','sel',1,CAUS_DDT],['vettore','Trasporto a cura del','sel',1,['Mittente','Destinatario','Vettore']],['vettore_nome','Vettore (ragione sociale, sede, P.IVA)'],['data_trasp','Data inizio trasporto','date'],['ora','Ora inizio trasporto','time'],['colli','N. colli (vuoto = calcolo dai cartoni)','num'],['peso','Peso kg','num'],['aspetto','Aspetto dei beni','sel',0,ASPETTO],['porto','Porto','sel',0,['Franco','Assegnato']],['mvv','MVV-E / e-AD n.'],['valorizzato','DDT valorizzato (stampa i prezzi)','chk']]],
   ['Causale e note','',[['causale_txt','Causale (stampata sul documento)'],['note','Note (solo stampa)','area']]]]}
 function docForm(d){const nuovo=!d.numero,libero=nuovo&&!d.ordine_id,secs=docSecs(libero),cli=docCli(d);let read=null;
@@ -833,7 +835,7 @@ function docForm(d){const nuovo=!d.numero,libero=nuovo&&!d.ordine_id,secs=docSec
   const upd=()=>{const k=kind(),x={...d,tipo:k==='ddt'?'ddt':'fattura',td:k,righe:righeOra()},el=$('[data-dtot]',f);
     if(k==='ddt'){el.textContent=`${num(x.righe.reduce((s,r)=>s+(+r.qta||0),0))} pezzi`;return}
     Object.assign(x,{esig:E.esig.value,bollo:E.bollo.value,bollo_add:E.bollo_add.checked});const t=totals(x.righe),b=bolloDovuto(x);
-    el.textContent=`Imponibile ${eur(t.imp)} · IVA ${eur(t.iva)}${x.esig==='S'?' (versata dal cliente)':''}${b?` · bollo 2 €${x.bollo_add?' addebitato':' a nostro carico'}`:''} · ${k==='TD04'?'Totale nota di credito':'Totale da incassare'} ${eur(Math.abs(docTot(x)))}`};
+    el.textContent=`Imponibile ${eur(t.imp)} · IVA ${eur(t.iva)}${x.esig==='S'?' (versata dal cliente)':''}${b?` · bollo 2 €${x.bollo_add?' addebitato':' a nostro carico'}`:''}${x.tipo==='fattura'&&x.bollo==='no'&&totals(x.righe).det.filter(y=>!y.a).reduce((s,y)=>s+y.imp,0)>77.47?' · ATTENZIONE: oltre 77,47 € senza IVA, il bollo è dovuto (scegli Automatico)':''} · ${k==='TD04'?'Totale nota di credito':'Totale da incassare'} ${eur(Math.abs(docTot(x)))}`};
   const rifF=()=>{const cid=E.cliente_id.value,cur=E.rif_fattura.value||d.rif_fattura||'';
     E.rif_fattura.innerHTML='<option value=""></option>'+DB.all('documenti').filter(x=>x.tipo==='fattura'&&!isNC(x)&&x.cliente_id===cid).sort((a,b)=>b.data.localeCompare(a.data)).map(x=>{const v=`${x.numero}/${x.anno} del ${dIT(x.data)}`;return`<option value="${esc(v)}"${v===cur?' selected':''}>${esc(v)} (${eur(docTot(x))})</option>`}).join('')};
   const vis=()=>{const k=kind(),tipo=k==='ddt'?'ddt':'fattura';
@@ -843,7 +845,7 @@ function docForm(d){const nuovo=!d.numero,libero=nuovo&&!d.ordine_id,secs=docSec
   /* scelta dalla rubrica: compila i dati del cliente, destinazione e pagamento */
   E.cliente_id.addEventListener('change',()=>{const c=DB.get('clienti',E.cliente_id.value);if(!c)return;const s=cliSnap(c);
     for(const [x] of CLIF)E['c_'+x].value=s[x]??'';E.dest_div.checked=!!c.dest;E.destinazione.value=c.dest||'';
-    const p=c.pagamento||'';E.pagamento.value=p;E.modalita.value=/riba/i.test(p)?'RiBa':/bonifico/i.test(p)?'Bonifico':'';if(!scMan)E.scadenza.value=dueDate(E.data.value,p);dst();rifF();upd()});
+    const p=c.pagamento||PAG_DEF;E.pagamento.value=p;E.modalita.value=/riba/i.test(p)?'RiBa':/bonifico/i.test(p)?'Bonifico':'';if(!scMan)E.scadenza.value=dueDate(E.data.value,p);dst();rifF();upd()});
   /* scadenza ricalcolata da data e termini finché non la si modifica a mano */
   let scMan=!nuovo&&d.scadenza&&d.scadenza!==dueDate(d.data,d.pagamento);E.scadenza.addEventListener('input',()=>{scMan=true});
   const rsc=()=>{if(!scMan&&!E.scadenza.disabled)E.scadenza.value=dueDate(E.data.value,E.pagamento.value)};E.data.addEventListener('change',()=>{rsc();vis()});E.pagamento.addEventListener('change',rsc);
