@@ -423,7 +423,7 @@ const navOpen=(()=>{try{return JSON.parse(localStorage.getItem(_lsKey('nav')))||
 /* sezioni facoltative nascondibili da Impostazioni (preferenza di questo browser) */
 const NAVOPT=[['privatelabel','Private label'],['prezzi','Calcolo prezzi'],['fallate','Fallate'],['agenti','Agenti']];
 const navHide=(()=>{try{return new Set(JSON.parse(localStorage.getItem(_lsKey('navhide')))||[])}catch{return new Set()}})();
-const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori',ptab:'mandati'};
+const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',ofase:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori',ptab:'mandati'};
 function render(){if(!AUTH.prof)return;
   if(st.view==='mandati')st.fotab='mandati';if(VALIAS[st.view])st.view=VALIAS[st.view];
   const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length,badge={amministrazione:nUrg,fallate:nFl};
@@ -553,7 +553,9 @@ dashboard(){const R=plRange(),P=prevRange(R),s=stats(...R),p=stats(...P),T=today
   return `<div class="bar"><h2>Plancia</h2>${tabs('per',[['mese','Mese'],['mesep','Mese scorso'],['trim','Trimestre'],['anno','Anno'],['custom','Personalizzato']])}${st.per==='custom'?`<input type="date" data-s="pda" value="${st.pda}" style="width:auto"><input type="date" data-s="pa" value="${st.pa}" style="width:auto">`:''}<span class="muted">${dIT(R[0])} – ${dIT(R[1])}</span></div>
   <div class="kpis">${K(eur(s.ven),'Venduto diretto (imponibile)',dl(s.ven,p.ven))}${K(eur(s.marg),`Margine lordo · ${mp.toFixed(1)}%`,dl(s.marg,p.marg))}${K(num(s.bt),'Bottiglie vendute',dl(s.bt,p.bt))}${K(eur(s.ag),'Venduto in agenzia',dl(s.ag,p.ag))}${K(eur(s.pv),'Provvigioni su ordini del periodo',dl(s.pv,p.pv))}${K(eur(s.acq),'Acquisti (landed, €)',dl(s.acq,p.acq,1))}</div>
   ${cashBoxes()}<div class="kpis">${K(eur(val),'Valore magazzino (FIFO)')}${K(low.length,'Referenze sotto scorta')}${K(eur(daInc),'Crediti aperti totali')}${K(eur(daPag),'Debiti aperti totali')}</div>
-  <div class="cols"><div class="card"><h3>Bottiglie per tipologia</h3>${pie(s.tip)}</div>
+  <div class="cols"><div class="card"><h3>Ordini da ricevere dai produttori</h3>${ordAperTbl('acquisto')}<p>${B('o-fase','Vedi in Ordini','ric','sm')}</p></div>
+  <div class="card"><h3>Ordini da spedire ai clienti</h3>${ordAperTbl('vendita')}<p>${B('o-fase','Vedi in Ordini','spe','sm')}</p></div>
+  <div class="card"><h3>Bottiglie per tipologia</h3>${pie(s.tip)}</div>
   <div class="card"><h3>Venduto per gruppo cliente</h3>${bars(s.grp)}</div>
   <div class="card"><h3>Venduto per agente</h3>${bars(s.agt)}</div>
   <div class="card"><h3>Spesa per fornitore</h3>${bars(s.forn)}</div>
@@ -562,9 +564,10 @@ dashboard(){const R=plRange(),P=prevRange(R),s=stats(...R),p=stats(...P),T=today
   <div class="card"><h3>Sotto scorta</h3>${tbl([{h:'Referenza',v:x=>vinoLnk(x.p,esc(label('prodotti',x.p)))},{h:'Giac.',n:1,v:x=>num(x.q)},{h:'Min',n:1,v:x=>num(x.p.scorta_min)}],low)}</div>
   <div class="card"><h3>Mandati in scadenza (60 gg)</h3>${tbl([{h:'Mandato',v:m=>esc(label('mandati',m))},{h:'Scadenza',v:m=>`<span class="badge ${m.data_fine<T?'b-bad':'b-warn'}">${dIT(m.data_fine)}</span>`},{h:'Preavviso',n:1,v:m=>m.preavviso_gg?m.preavviso_gg+' gg':''}],mScad)}</div></div>`},
 
-ordini(){const rows=DB.all('ordini').filter(o=>(!st.otipo||o.tipo===st.otipo)&&(!st.ostato||o.stato===st.ostato)&&match('ordini',{...o,_c:counterpart(o)})).sort((a,b)=>b.data.localeCompare(a.data)||b.numero.localeCompare(a.numero));
+ordini(){const fase=st.ofase==='ric'?new Set(ordAperti('acquisto').map(o=>o.id)):st.ofase==='spe'?new Set(ordAperti('vendita').map(o=>o.id)):null;
+  const rows=DB.all('ordini').filter(o=>(!fase||fase.has(o.id))&&(!st.otipo||o.tipo===st.otipo)&&(!st.ostato||o.stato===st.ostato)&&match('ordini',{...o,_c:counterpart(o)})).sort((a,b)=>b.data.localeCompare(a.data)||b.numero.localeCompare(a.numero));
   const docs=DB.all('documenti'),pas=DB.all('passive'),sb={Bozza:'',Confermato:'b-warn',Evaso:'b-ok',Annullato:'b-bad'};
-  return `<div class="bar"><h2>Ordini</h2>${tabs('otipo',[['','Tutti'],['vendita','Vendita'],['acquisto','Acquisto'],['agenzia','Agenzia']])}
+  return `<div class="bar"><h2>Ordini</h2>${tabs('ofase',[['','Tutti'],['ric',`Da ricevere (${ordAperti('acquisto').length})`],['spe',`Da spedire (${ordAperti('vendita').length})`]])}${tabs('otipo',[['','Tutti'],['vendita','Vendita'],['acquisto','Acquisto'],['agenzia','Agenzia']])}
   <select data-s="ostato" style="width:auto"><option value="">Tutti gli stati</option>${STATI.map(s=>`<option${st.ostato===s?' selected':''}>${s}</option>`).join('')}</select>${search('ordini')}${waChip()}${B('o-new',I('plus')+'Nuovo ordine','','pri')}</div>
   ${tbl([{h:'N°',v:o=>`<b>${esc(o.numero)}</b>`},{h:'Data',v:o=>dIT(o.data)},{h:'Tipo',v:o=>`<span class="badge">${o.tipo}</span>`},{h:'Controparte',v:counterpart},{h:'Stato',v:o=>`<span class="badge ${sb[o.stato]}">${o.stato}</span>`},{h:'Imponibile',n:1,v:o=>eur(totals(o.righe).imp)+(o.tipo==='acquisto'&&o.valuta&&o.valuta!=='EUR'?' '+o.valuta:'')},
     {h:'Doc.',v:o=>[...docs.filter(d=>d.ordine_id===o.id).map(d=>`${d.tipo==='ddt'?'DDT':'FT'} ${d.numero}`),...pas.filter(x=>x.ordine_id===o.id).map(x=>'FT ric. '+x.numero)].map(esc).join(', ')},
@@ -619,6 +622,11 @@ impostazioni(){const a=DB.settings().azienda||{};
   ${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('x')+'Svuota la copia locale','','','','Ricarica tutto dal server')}</div>`}
 };
 const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA (ufficio e numero, es. MI-2789012)'],['regime','Regime fiscale','sel',0,['RF01 · Ordinario','RF19 · Forfettario','RF02 · Contribuenti minimi']],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['banca','Banca'],['capitale','Capitale sociale € (stampato sui documenti)'],['socio','Compagine sociale','sel',0,['Socio unico','Più soci']],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
+/* ordini aperti: acquisti non ancora ricevuti, vendite non ancora evase (le agenzie le spedisce il mandante) */
+const ordAperti=t=>DB.all('ordini').filter(o=>o.tipo===t&&!o.mov&&['Bozza','Confermato'].includes(o.stato)).sort((a,b)=>(a.consegna||a.data).localeCompare(b.consegna||b.data));
+const ggDa=d=>Math.round((new Date(today())-new Date(d))/864e5);
+const ordBt=o=>(o.righe||[]).reduce((s,r)=>s+(+r.qta||0),0);
+function ordAperTbl(t){const T=today();return tbl([{h:'N°',v:o=>B('o-edit',`<b>${esc(o.numero)}</b>`,o.id,'lnk','','Apri ordine')},{h:t==='acquisto'?'Fornitore':'Cliente',v:counterpart},{h:'Bottiglie',n:1,v:o=>num(ordBt(o))},{h:'Ordinato',v:o=>`${dIT(o.data)} <span class="muted">${ggDa(o.data)} gg fa</span>`},{h:t==='acquisto'?'Arrivo previsto':'Consegna prevista',v:o=>o.consegna?`<span class="${o.consegna<T?'d-dn':''}">${dIT(o.consegna)}</span>`:'<span class="muted">—</span>'}],ordAperti(t))}
 /* movimento -> fornitore (carichi) o cliente (scarichi) dell'ordine collegato */
 const movCp=m=>{const o=m.ordine_id&&DB.get('ordini',m.ordine_id);return o?counterpart(o):''};
 function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
@@ -1039,11 +1047,27 @@ VIEWS.prezzi=()=>{const o=przSet(),sm=stockMap(),pr=DB.all('prodotti').filter(p=
 function pcUpdate(){const r=$('#pcalc');if(!r)return;const v=k=>{const el=r.querySelector(`[data-pc="${k}"]`);return k==='round'?el.value:el.value===''?null:+el.value};
   const o={};for(const k of ['m_horeca','m_ingr','m_int','trasp','provv','varie','sconto','round'])o[k]=v(k);
   const pf=v('pf');if(pf!=null)r.querySelector('[data-pc="base"]').value=r4(pf*(v('cambio')||1));
-  const C=r4((v('base')||0)+(v('extra')||0)),p=DB.get('prodotti',$('#pc-pid').value);PC={pid:p?.id,o,C,s:{}};
-  const rows=LISTINI.map(([k,l,mk])=>{const P=suggest(C,o[mk],o);PC.s[k]=P;return{k,l,m:o[mk]||0,P,b:P?brk(P,C,o):null,cur:p?.[k],bc:p?.[k]?brk(p[k],C,o):null,iva:p?.iva??22}});
-  $('#pcout').innerHTML=C>0?tbl([{h:'Listino',v:x=>`<b>${x.l}</b> <span class="muted">obiettivo ${num(x.m)}%</span>`},{h:'Suggerito',n:1,v:x=>x.P?`<b>${eur(x.P)}</b>`:'<span class="d-dn">percentuali troppo alte</span>'},{h:'IVA inclusa',n:1,v:x=>x.P?eur(x.P*(1+x.iva/100)):''},{h:'Utile / bottiglia',n:1,v:x=>x.b?eur(x.b.ut):''},{h:'Margine',n:1,v:x=>x.b?x.b.marg.toFixed(1)+'%':''},{h:'Ricarico',n:1,v:x=>x.b?`${x.b.ric.toFixed(0)}% · ×${x.b.coef.toFixed(2).replace('.',',')}`:''},
-    {h:'Attuale',n:1,v:x=>p?przIn(p,x.k)+(x.bc?` <span class="${x.bc.marg<x.m-0.05?'d-dn':'d-up'}">${x.bc.marg.toFixed(1)}%</span>`:''):'—'},{h:'',a:1,v:x=>p&&x.P&&x.P!==x.cur?B('pc-apply',I('ok')+'Applica',x.k):''}],rows)
-    +`<p class="muted">Costo pieno ${eur(C)} · consegna ${eur(o.trasp||0)}/bt. Margine = utile ÷ prezzo al netto dello sconto, dopo provvigione e costi vari. Ricarico = (prezzo − costo) ÷ costo.</p>`:'<p class="muted">Scegli una referenza o inserisci un costo.</p>'}
+  const C=r4((v('base')||0)+(v('extra')||0)),p=DB.get('prodotti',$('#pc-pid').value),old=PC.pid===p?.id?PC.L||{}:{};
+  /* per ogni listino: margine e prezzo collegati; si modifica l'uno o l'altro (x.src), il resto si ricalcola. Le righe toccate a mano restano */
+  PC={pid:p?.id,o,C,L:{}};
+  for(const[k,l,mk]of LISTINI){const prev=old[k],x=prev?.man?{...prev}:{k,l,mk,m:o[mk]||0,src:'m',man:false};x.l=l;x.mk=mk;x.cur=p?.[k]??null;x.iva=p?.iva??22;if(!x.man)x.m=o[mk]||0;PC.L[k]=x;pcCalc(k)}
+  $('#pcout').innerHTML=C>0?`<div class="card"><h3>Prezzi${p?' · '+esc(labVPA(p)):''}</h3><p class="muted">Scrivi il margine e il prezzo si calcola, oppure scrivi il prezzo e si calcola il margine. Costo pieno ${eur(C)} + consegna ${eur(o.trasp||0)}/bt.</p>
+    ${tbl([{h:'Listino',v:x=>`<b>${x.l}</b>`},{h:'Margine %',v:x=>`<input data-pl="m" data-k="${x.k}" type="number" step="any" inputmode="decimal" value="${x.m!=null?r2(x.m):''}" style="max-width:90px">`},
+      {h:'Prezzo € (IVA escl.)',v:x=>`<input data-pl="p" data-k="${x.k}" type="number" step="any" inputmode="decimal" value="${x.P??''}" style="max-width:110px">`},
+      {h:'IVA inclusa',n:1,v:x=>`<span id="pc-${x.k}-iva"></span>`},{h:'Utile / bt',n:1,v:x=>`<span id="pc-${x.k}-ut"></span>`},{h:'Ricarico',n:1,v:x=>`<span id="pc-${x.k}-ric"></span>`},
+      {h:'Attuale',n:1,v:x=>p?`<span id="pc-${x.k}-cur"></span>`:'—'}],Object.values(PC.L))}
+    <div id="pc-act" style="margin-top:10px"></div></div>`:'<p class="muted">Scegli una referenza o inserisci un costo.</p>';
+  if(C>0){for(const k in PC.L)pcCells(k);pcAct()}}
+function pcCalc(k){const x=PC.L[k],o=PC.o,C=PC.C;if(x.src==='p'){x.b=x.P>0&&C?brk(x.P,C,o):null;x.m=x.b?r2(x.b.marg):null}else{x.P=suggest(C,x.m,o);x.b=x.P?brk(x.P,C,o):null}}
+function pcCells(k){const x=PC.L[k],t=(id,h)=>{const e=$(`#pc-${k}-${id}`);if(e)e.innerHTML=h};
+  t('iva',x.P?eur(x.P*(1+x.iva/100)):'');t('ut',x.b?`<span class="${x.b.ut<0?'d-dn':''}">${eur(x.b.ut)}</span>`:'');t('ric',x.b?`${x.b.ric.toFixed(0)}% · ×${x.b.coef.toFixed(2).replace('.',',')}`:'');
+  t('cur',x.cur!=null?eur(x.cur)+(x.P&&x.P!==x.cur?` <span class="muted">→ ${eur(x.P)}</span>`:''):'<span class="muted">vuoto</span>');
+  if(!x.P&&x.src==='m')t('iva','<span class="d-dn">percentuali troppo alte</span>')}
+const pcDiff=()=>PC.pid?Object.values(PC.L).filter(x=>x.P>0&&x.P!==x.cur):[];
+function pcAct(){const e=$('#pc-act');if(!e)return;const d=pcDiff();e.innerHTML=!PC.pid?'<p class="muted">Per applicare i prezzi scegli una referenza in alto.</p>':d.length?`<p>${B('pc-apply',I('ok')+`Applica ${d.length===1?'il prezzo':d.length+' prezzi'} a ${esc(labVPA(DB.get('prodotti',PC.pid)))}`,'','pri')} <span class="muted">${d.map(x=>`${x.l}: ${eur(x.P)}`).join(' · ')}</span></p>`:'<p class="muted">I prezzi della referenza coincidono già con il calcolo.</p>'}
+function pcEdit(t){const k=t.dataset.k,x=PC.L[k];if(!x)return;const v=t.value===''?null:+t.value;x.man=true;
+  if(t.dataset.pl==='m'){x.src='m';x.m=v}else{x.src='p';x.P=v!=null?r2(v):null}pcCalc(k);
+  const other=$(`#pcout [data-pl="${t.dataset.pl==='m'?'p':'m'}"][data-k="${k}"]`);if(other)other.value=t.dataset.pl==='m'?(x.P??''):(x.m!=null?r2(x.m):'');pcCells(k);pcAct()}
 
 /* ================= CRM WINE ALCHEMIST · collegamento diretto =================
    Legge dal Supabase del CRM (schema crm) con il tuo account: nessuna password salvata, solo la sessione.
@@ -1160,7 +1184,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
     csv:()=>{const f=S[c].f,txt=v=>new DOMParser().parseFromString(v,'text/html').body.textContent||(v.includes('<svg')?'sì':'');download(c+'.csv','\ufeff'+[f.map(x=>x[1]),...DB.all(c).map(x=>f.map(ff=>txt(cell(ff,x[ff[0]]))))].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\n'),'text/csv')},
     'fw-xlsx':fwExport,
     tab:()=>{st[c]=id;render()},
-    'o-new':()=>orderForm(),'o-edit':()=>orderForm(o()),'o-evadi':()=>evadi(o()),'o-ddt':()=>creaDoc(o(),'ddt'),'o-fatt':()=>creaDoc(o(),'fattura'),'o-imp':importWA,'o-man':()=>manifesto(o()),
+    'o-new':()=>orderForm(),'o-fase':()=>{st.ofase=id;st.otipo='';st.ostato='';st.view='ordini';location.hash='ordini';render()},'o-edit':()=>orderForm(o()),'o-evadi':()=>evadi(o()),'o-ddt':()=>creaDoc(o(),'ddt'),'o-fatt':()=>creaDoc(o(),'fattura'),'o-imp':importWA,'o-man':()=>manifesto(o()),
     'o-ftric':()=>{const x=o(),t=totals(x.righe),k=+x.cambio||1;crudForm('passive',{fornitore_id:x.fornitore_id,ordine_id:x.id,rif_ordine:x.numero,data:today(),valuta:'EUR',imponibile:r2(t.imp*k+(+x.costi_acc||0)),iva:r2(t.iva*k),pagamento:DB.get('fornitori',x.fornitore_id)?.pagamento||''})},
     'o-del':()=>{const x=o(),mv=DB.all('movimenti').filter(m=>m.ordine_id===id);if(DB.all('documenti').some(d=>d.ordine_id===id)||DB.all('passive').some(p=>p.ordine_id===id))return alert('Ordine con documenti collegati: impostalo come Annullato invece di eliminarlo.');
       if(confirm(`Eliminare ${x.numero}?${mv.length?` I ${mv.length} movimenti collegati verranno annullati nel ledger.`:''}`)){mv.forEach(m=>DB.remove('movimenti',m.id));DB.remove('ordini',id);render()}},
@@ -1171,7 +1195,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
     'pl-qr':()=>plQR(DB.get('pl',id)),'pl-files':()=>filesModal('pl',DB.get('pl',id)),'fl-files':()=>filesModal('fallate',DB.get('fallate',id)),
     'pl-prev':()=>{const p=DB.get('pl',id),w=plCheck(p);modal('Anteprima · '+p.nome,`${w?`<p><span class="badge b-warn">${esc(w)}</span></p>`:''}<iframe srcdoc="${esc(elabelHTML(p))}" style="width:100%;max-width:420px;height:70vh;border:1px solid var(--line);border-radius:10px;display:block;margin:0 auto;background:#fff"></iframe>`,()=>{},'Chiudi')},
     'pl-page':()=>{const p=DB.get('pl',id),w=plCheck(p);if(w&&!confirm(w+' Scaricare comunque?'))return;download(p.slug+'.html',elabelHTML(p),'text/html');toast('Pagina '+p.slug+'.html scaricata')},
-'pc-apply':()=>{const p=DB.get('prodotti',PC.pid),val=PC.s[id];if(!p||!val)return;const l=LISTINI.find(x=>x[0]===id)[1];if(!confirm(`${label('prodotti',p)}: ${l} a ${eur(val)}?`))return;p[id]=val;DB.upsert('prodotti',p);toast('Prezzo aggiornato');pcUpdate()},
+'pc-apply':()=>{const p=DB.get('prodotti',PC.pid),d=pcDiff();if(!p||!d.length)return;if(!confirm(`${labVPA(p)}\n\n${d.map(x=>`${x.l}: ${x.cur!=null?eur(x.cur):'vuoto'} → ${eur(x.P)}`).join('\n')}\n\nApplicare?`))return;for(const x of d)p[x.k]=x.P;DB.upsert('prodotti',p);toast(d.length===1?'Prezzo aggiornato':'Prezzi aggiornati');for(const x of Object.values(PC.L))x.man=false;pcUpdate()},
     'pc-save':()=>{if(!PC.o)return;DB.settings().pricing={...PC.o};DB.saveSettings();toast('Parametri salvati')},
     'pc-row':()=>{const p=DB.get('prodotti',id),o=przSet(),val=suggest(avgCost(p,stockMap()[id]),o.m_horeca,o);if(!val||!confirm(`${label('prodotti',p)}: prezzo HoReCa a ${eur(val)}?`))return;p.prezzo=val;DB.upsert('prodotti',p);toast('Prezzo aggiornato');render()},
     'pc-go':()=>{st.view='prezzi';location.hash='prezzi';render();const s=$('#pc-pid');s.value=id;s.dispatchEvent(new Event('change',{bubbles:true}))},
@@ -1199,7 +1223,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
     backup:()=>download(`${CONFIG.lsPrefix}backup-${today()}.json`,DB.dump(),'application/json'),
     reset:()=>{if(DB.pending())return alert('Ci sono modifiche non ancora inviate al server: aspetta che la connessione torni prima di svuotare la copia locale.');if(confirm('Svuotare la copia locale e ricaricare tutto dal server? I dati sul server non vengono toccati.'))DB.reset()}
   })[b.dataset.act]?.()});
-document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpdate();const k=e.target.dataset.q;if(k===undefined)return;st.q[k]=e.target.value;const pos=e.target.selectionStart;render();const n=$(`[data-q="${k}"]`);n.focus();n.setSelectionRange(pos,pos)});
+document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpdate();if(e.target.matches('#pcout [data-pl]'))return pcEdit(e.target);const k=e.target.dataset.q;if(k===undefined)return;st.q[k]=e.target.value;const pos=e.target.selectionStart;render();const n=$(`[data-q="${k}"]`);n.focus();n.setSelectionRange(pos,pos)});
 document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))return;
   if(t.dataset.prz){const p=DB.get('prodotti',t.dataset.id),k=t.dataset.prz,v=t.value===''?null:r2(t.value);if(!p)return;
     if(v!=null&&!(v>=0)){toast('Prezzo non valido');t.value=p[k]??'';return}
