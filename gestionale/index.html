@@ -346,7 +346,9 @@ S.agenti={t:'Agenti',t1:'agente',f:[['nome','Nome e cognome / ragione sociale','
 S.movimenti.onSave=o=>{if(o.tipo==='Carico')autoSoglia(o.prodotto_id,+o.qta)};
 const autoSoglia=(pid,q)=>{const p=DB.get('prodotti',pid);if(p&&p.scorta_min==null&&q>0){p.scorta_min=q>=12?6:q>=6?3:1;DB.upsert('prodotti',p)}};
 S.prodotti.onSave=o=>{o.formato=o.formato?fmtNorm(o.formato):o.formato;if(!o.sku)o.sku=CONFIG.skuPrefix+String(DB.nextNum('sku')).padStart(4,'0');if(!o.paese&&o.regione)o.paese=REG2P[o.regione.toLowerCase()]||''};
-const label=(c,o)=>!o?'':c==='prodotti'?[o.nome,o.annata,parseFloat(o.formato)&&parseFloat(o.formato)!==0.75&&fmtLbl(o.formato)].filter(Boolean).join(' · '):c==='mandati'?`${DB.get('fornitori',o.mandante_id)?.rag_soc||'?'} — ${o.tipo||''}`:o.rag_soc||o.nome||'';
+/* referenze sempre come nome vino · produttore · annata (· formato se non 0,75) */
+const prodNome=id=>{const f=id&&DB.get('fornitori',id);return f?f.cantina||f.rag_soc:''};
+const label=(c,o)=>!o?'':c==='prodotti'?[o.nome,prodNome(o.produttore_id),o.annata,parseFloat(o.formato)&&parseFloat(o.formato)!==0.75&&fmtLbl(o.formato)].filter(Boolean).join(' · '):c==='mandati'?`${DB.get('fornitori',o.mandante_id)?.rag_soc||'?'} — ${o.tipo||''}`:o.rag_soc||o.nome||'';
 const fieldOf=(c,k)=>S[c].f.find(f=>f[0]===k);
 function cell(f,v){const t=f[2]||'text';if(t.startsWith('ref:'))return esc(label(t.slice(4),DB.get(t.slice(4),v)));if(t==='num')return num(v);if(t==='date')return dIT(v);if(t==='chk')return v?I('ok'):'';return esc(v)}
 function dueDate(d,pag){if(!d)return'';const m=/(\d+)\s*gg/.exec(pag||'');let x=addDays(d,m?+m[1]:0);if(/FM/.test(pag||'')){const t=new Date(x+'T12:00');x=iso(t.getFullYear(),t.getMonth()+2,0)}return x}
@@ -450,7 +452,7 @@ const fname=id=>DB.get('fornitori',id)?.rag_soc||'';
 const FW_COLS=['CodiceArticolo','Descrizione','Nota ad uso operatore','UM','Prezzo','Sconto %','Tipo articolo','CodiceIVA','DescrizioneCodIVA','CodiceConto','DescrizioneCodiceConto','Trasmissione TS','Tipologia Spesa TS','Assistenza Diretta','Ritenuta','Contributo','Contributo soggetto a ritenuta','Spesa bollo','Data fine validità'];
 const FW_IVA={22:['22','22%-GENERICO'],10:['10','10%-GENERICO'],4:['04','4%-GENERICO']};
 const fwTxt=s=>String(s||'').replace(/[–—−·•]/g,'-').replace(/[‘’‚]/g,"'").replace(/[“”„]/g,'"').replace(/…/g,'...').replace(/[^ -~ -ÿ]/g,'').replace(/\s+/g,' ').trim();
-const fwDescr=p=>fwTxt([p.nome,fname(p.produttore_id),p.annata,fmtLbl(p.formato).split(' L')[0].replace('.',',')+' L'].filter(Boolean).join(' - '));
+const fwDescr=p=>fwTxt([p.nome,prodNome(p.produttore_id),p.annata,fmtLbl(p.formato).split(' L')[0].replace('.',',')+' L'].filter(Boolean).join(' - '));
 function fwExport(){const oggi=today().split('-').reverse().join('/'),ps=DB.all('prodotti').filter(p=>p.canale!=='Mandato agenzia'),senza=ps.filter(p=>!p.sku),noIva=[];
   const rows=ps.filter(p=>p.sku).sort((a,b)=>a.sku.localeCompare(b.sku)).map(p=>{const iv=FW_IVA[+(p.iva??22)];if(!iv)noIva.push(p.sku);
     return[fwTxt(p.sku),fwDescr(p),'','BT',+p.prezzo>0?r2(+p.prezzo):'','',1,iv?.[0]||'',iv?.[1]||'','','','','','','','','','',p.attivo===false?oggi:'']});
@@ -481,7 +483,7 @@ function invView(sm,tb){const f=st.inv,rows=invRows(sm),all=DB.all('prodotti'),u
 /* Scheda vino: tutte le informazioni della referenza in una finestra sola, modificabile.
    Gli allegati vanno sulla private label collegata, se esiste, altrimenti sulla referenza (campo files, nella colonna extra). */
 const plOf=p=>p&&DB.all('pl').find(x=>x.prodotto_id===p.id);
-const labVPA=p=>[p.nome,fname(p.produttore_id),p.annata,parseFloat(p.formato)&&parseFloat(p.formato)!==0.75&&fmtLbl(p.formato)].filter(Boolean).join(' · ');
+const labVPA=p=>[p.nome,prodNome(p.produttore_id),p.annata,parseFloat(p.formato)&&parseFloat(p.formato)!==0.75&&fmtLbl(p.formato)].filter(Boolean).join(' · ');
 const vinoLnk=(p,txt)=>`<button type="button" class="lnk" data-act="vino" data-id="${p.id}" title="Apri la scheda del vino">${txt}</button>`;
 function invScheda(p){if(!p)return;const sm=stockMap(),s=sm[p.id],o=przSet(),C=avgCost(p,s),pl=plOf(p),kv=(k,v)=>v||v===0?`<div><span class="muted" style="font-size:12px">${k}</span><br>${v}</div>`:'';
   const mov=DB.all('movimenti').filter(m=>m.prodotto_id===p.id).sort((a,b)=>b.data.localeCompare(a.data)||b.created_at.localeCompare(a.created_at)).slice(0,40);
@@ -501,7 +503,7 @@ function invScheda(p){if(!p)return;const sm=stockMap(),s=sm[p.id],o=przSet(),C=a
     <h4>File ed etichette</h4><div class="grid">${fieldHTML(['cat','Categoria','sel',0,PLCAT],PLCAT[0])}<label class="full"><span>Aggiungi file (anche più di uno, massimo 25 MB ciascuno): si salvano subito</span><input type="file" name="up" multiple></label></div><div id="sv-files">${fTbl()}</div>
     ${acq.length?`<h4>Acquisti</h4>${tbl([{h:'Ordine',v:x=>esc(x.numero)},{h:'Data',v:x=>dIT(x.data)},{h:'Fornitore',v:x=>esc(fname(x.fornitore_id))},{h:'Stato',v:x=>esc(x.stato)},{h:'Q.tà',n:1,v:x=>num(x.righe.filter(r=>r.prodotto_id===p.id).reduce((a,r)=>a+(+r.qta||0),0))},{h:'Rif.',v:x=>esc(x.rif_esterno)}],acq)}`:''}
     <h4>Lotti in giacenza (FIFO)</h4>${tbl([{h:'Lotto',v:L=>esc(L.l)||'—'},{h:'Residuo',n:1,v:L=>num(L.q)},{h:'Costo u.',n:1,v:L=>eur(L.c)}],s?.lots||[])}
-    <h4>Ultimi movimenti</h4>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Rif.',v:m=>esc(m.rif)}],mov)}`,
+    <h4>Ultimi movimenti</h4>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Da / A',v:movCp},{h:'Rif.',v:m=>esc(m.rif)}],mov)}`,
     f=>{const x={...DB.get('prodotti',p.id)},prev={...x};readForm(f,S.prodotti.f,x);if(S.prodotti.onSave?.(x,prev)===false)return false;DB.upsert('prodotti',x);toast('Scheda salvata')});
   let dirty=false;f.addEventListener('input',e=>{if(e.target.name!=='up'&&e.target.name!=='cat')dirty=true});
   const refresh=()=>{$('#sv-files',f).innerHTML=fTbl()};
@@ -574,8 +576,8 @@ ordini(){const rows=DB.all('ordini').filter(o=>(!st.otipo||o.tipo===st.otipo)&&(
       +B('o-del',I('del'),o.id,'sm','','Elimina')}}],rows)}`},
 
 magazzino(){const sm=stockMap(),tb=tabs('mtab',[['giac','Giacenze'],['lotti','Lotti FIFO'],['mov','Movimenti']]);
-  if(st.mtab==='mov'){const rows=DB.all('movimenti').filter(m=>match('mov',{...m,p:label('prodotti',DB.get('prodotti',m.prodotto_id))})).sort((a,b)=>b.data.localeCompare(a.data)||b.created_at.localeCompare(a.created_at));
-    return `<div class="bar"><h2>Magazzino</h2>${tb}${search('mov')}${B('csv',I('dl')+'CSV','','',`data-c="movimenti"`)}${B('new',I('plus')+'Movimento','','pri','data-c="movimenti"')}</div>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Referenza',v:m=>esc(label('prodotti',DB.get('prodotti',m.prodotto_id)))},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Lotto',v:m=>esc(m.lotto)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Prezzo u.',n:1,v:m=>m.prezzo_unit!=null?eur(m.prezzo_unit):''},{h:'Rif.',v:m=>esc(m.rif)},{h:'e-AD/DAS',v:m=>esc(m.das)},{h:'',a:1,v:m=>B('edit',I('edit'),m.id,'sm','data-c="movimenti"','Modifica')+B('del',I('del'),m.id,'sm','data-c="movimenti"','Annulla movimento')}],rows)}`}
+  if(st.mtab==='mov'){const rows=DB.all('movimenti').filter(m=>match('mov',{...m,p:label('prodotti',DB.get('prodotti',m.prodotto_id)),cp:movCp(m).replace(/<[^>]*>/g,'')})).sort((a,b)=>b.data.localeCompare(a.data)||b.created_at.localeCompare(a.created_at));
+    return `<div class="bar"><h2>Magazzino</h2>${tb}${search('mov')}${B('csv',I('dl')+'CSV','','',`data-c="movimenti"`)}${B('new',I('plus')+'Movimento','','pri','data-c="movimenti"')}</div>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Referenza',v:m=>esc(label('prodotti',DB.get('prodotti',m.prodotto_id)))},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Lotto',v:m=>esc(m.lotto)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Prezzo u.',n:1,v:m=>m.prezzo_unit!=null?eur(m.prezzo_unit):''},{h:'Da / A',v:movCp},{h:'Rif.',v:m=>esc(m.rif)},{h:'e-AD/DAS',v:m=>esc(m.das)},{h:'',a:1,v:m=>B('edit',I('edit'),m.id,'sm','data-c="movimenti"','Modifica')+B('del',I('del'),m.id,'sm','data-c="movimenti"','Annulla movimento')}],rows)}`}
   if(st.mtab==='lotti'){const rows=DB.all('prodotti').filter(p=>sm[p.id]?.lots.length&&match('giac',p)).sort(somCmp).flatMap(p=>sm[p.id].lots.map(L=>({p,L})));
     return `<div class="bar"><h2>Magazzino</h2>${tb}${search('giac')}</div>${tbl([{h:'Referenza',v:x=>vinoLnk(x.p,esc(label('prodotti',x.p)))},{h:'Lotto',v:x=>esc(x.L.l)||'<span class="muted">—</span>'},{h:'Residuo',n:1,v:x=>num(x.L.q)},{h:'Costo u.',n:1,v:x=>eur(x.L.c)},{h:'Valore',n:1,v:x=>eur(x.L.q*x.L.c)}],rows,()=>'',x=>grpOf(x.p))}`}
   return invView(sm,tb)},
@@ -617,6 +619,8 @@ impostazioni(){const a=DB.settings().azienda||{};
   ${B('backup',I('dl')+'Esporta backup JSON','','')} <label class="btn">${I('ul')}Ripristina backup<input type="file" accept=".json" id="restore" hidden></label> ${B('reset',I('x')+'Svuota la copia locale','','','','Ricarica tutto dal server')}</div>`}
 };
 const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP'],['citta','Città'],['piva','P.IVA'],['cf','Codice fiscale'],['rea','REA (ufficio e numero, es. MI-2789012)'],['regime','Regime fiscale','sel',0,['RF01 · Ordinario','RF19 · Forfettario','RF02 · Contribuenti minimi']],['sdi','Codice SDI'],['pec','PEC'],['email','Email'],['tel','Telefono'],['iban','IBAN'],['banca','Banca'],['capitale','Capitale sociale € (stampato sui documenti)'],['socio','Compagine sociale','sel',0,['Socio unico','Più soci']],['accisa','Codice accisa / destinatario registrato'],['logo','URL logo'],['elabel_base','Indirizzo base e-label (es. https://growingliquids.github.io/e-label/)'],['footer','Note a piè di documento','area']];
+/* movimento -> fornitore (carichi) o cliente (scarichi) dell'ordine collegato */
+const movCp=m=>{const o=m.ordine_id&&DB.get('ordini',m.ordine_id);return o?counterpart(o):''};
 function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
 
 /* testi d'aiuto: statici, nessun dato */
