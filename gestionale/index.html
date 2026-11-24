@@ -525,9 +525,9 @@ function plRange(){const T=today(),y=+T.slice(0,4),m=+T.slice(5,7);
   switch(st.per){case'mesep':return[iso(y,m-1,1),iso(y,m,0)];case'trim':{const q=Math.floor((m-1)/3)*3+1;return[iso(y,q,1),iso(y,q+3,0)]}case'anno':return[iso(y,1,1),iso(y,12,31)];case'custom':return[st.pda||iso(y,m,1),st.pa||T];default:return[iso(y,m,1),iso(y,m+1,0)]}}
 function prevRange([da,a]){const ms=new Date(a+'T12:00')-new Date(da+'T12:00'),pa=addDays(da,-1);return[new Date(new Date(pa+'T12:00')-ms).toLocaleDateString('sv'),pa]}
 function stats(da,a){const inR=d=>d&&d>=da&&d<=a,s={ven:0,bt:0,acq:0,ag:0,cogs:0,tip:{},grp:{},forn:{},prod:{},agt:{}};
-  for(const o of DB.all('ordini')){if(o.stato!=='Evaso'||!inR(o.data_evasione||o.data))continue;const t=totals(o.righe).imp;
+  for(const o of DB.all('ordini')){if(o.tipo==='agenzia'?!['Confermato','Evaso'].includes(o.stato)||!inR(o.data):o.stato!=='Evaso'||!inR(o.data_evasione||o.data))continue;const t=totals(o.righe).imp;
     if(o.tipo==='acquisto'){const e=t*(+o.cambio||1)+(+o.costi_acc||0);s.acq+=e;const n=DB.get('fornitori',o.fornitore_id)?.rag_soc||'?';s.forn[n]=(s.forn[n]||0)+e;continue}
-    if(o.tipo==='vendita'){s.ven+=t;const g=DB.get('clienti',o.cliente_id)?.gruppo||'Esterno';s.grp[g]=(s.grp[g]||0)+t}else s.ag+=t;if(o.agente_id){const n=DB.get('agenti',o.agente_id)?.nome||'?';s.agt[n]=(s.agt[n]||0)+t}
+    if(o.tipo==='vendita'){s.ven+=t;const g=DB.get('clienti',o.cliente_id)?.gruppo||'Esterno';s.grp[g]=(s.grp[g]||0)+t}else s.ag+=t;{const n=DB.get('agenti',o.agente_id)?.nome||o.wa_agente||(o.tipo==='agenzia'?'Agente CRM da collegare':'');if(n)s.agt[n]=(s.agt[n]||0)+t}
     for(const r of o.righe){const p=DB.get('prodotti',r.prodotto_id),q=+r.qta||0;if(o.tipo==='vendita')s.bt+=q;const tp=p?.tipologia||'Altro';s.tip[tp]=(s.tip[tp]||0)+q;const pn=p?.produttore_id?DB.get('fornitori',p.produttore_id)?.rag_soc:null;if(pn)s.prod[pn]=(s.prod[pn]||0)+lineTot(r)}}
   for(const m of DB.all('movimenti'))if(m.tipo==='Scarico'&&m.ordine_id&&inR(m.data))s.cogs+=(+m.costo_unit||0)*(+m.qta||0);
   s.pv=provvRows({da,a}).reduce((x,r)=>x+r.pv,0);s.marg=s.ven-s.cogs;return s}
@@ -1190,11 +1190,11 @@ async function waSync(manual){const cfg=waCfg();if(WA.busy||!WA.ok||!DB.ready())
         :items.filter(i=>i.order_id===o.id).flatMap(i=>{const w=wines.get(i.wine_id)||{},d=[w.produttore,w.nome,w.annata].filter(Boolean).join(' ')||'Referenza WA',om=+i.qty_omaggio||0,paid=(+i.qty||0)-om,out=[];
           if(paid>0)out.push({descr:d,qta:paid,prezzo:+(i.prezzo_unitario??w.prezzo_listino)||0,sconto:Math.round((1-(1-(+i.sconto_pct||0)/100)*fp)*1e6)/1e4,iva:22});if(om>0)out.push({descr:d+' (omaggio)',qta:om,prezzo:0,sconto:0,iva:22});return out});
       const cli=waCliente(clis.get(o.client_id),o.client_id),data=String(o.inviato_at||o.created_at||today()).slice(0,10),agente_id=cfg.map?.[o.agent_id]||cli.agente_id||null;
-      const wa_pagato=X.pagato_at?String(X.pagato_at).slice(0,10):X.pagamento==='anticipato'?data:null,liq=X.provvigione_pagata_at?String(X.provvigione_pagata_at).slice(0,10):null,sig=JSON.stringify([stato,righe,cli.id,agente_id,data,wa_pagato,liq]);
-      if(ex){if(ex.wa_sig===sig&&ex.ext_id===eid)continue;ex.ext_id=eid;ex.wa_pagato=wa_pagato;if(liq&&!ex.provv_liq)ex.provv_liq=liq;
+      const wa_pagato=X.pagato_at?String(X.pagato_at).slice(0,10):X.pagamento==='anticipato'?data:null,liq=X.provvigione_pagata_at?String(X.provvigione_pagata_at).slice(0,10):null,wa_agente=WA.agents.find(a=>a.id===o.agent_id)?.nome||'',sig=JSON.stringify([stato,righe,cli.id,agente_id,data,wa_pagato,liq,wa_agente]);
+      if(ex){if(ex.wa_sig===sig&&ex.ext_id===eid)continue;ex.ext_id=eid;ex.wa_pagato=wa_pagato;ex.wa_agente=wa_agente;if(liq&&!ex.provv_liq)ex.provv_liq=liq;
         if(ex.provv_liq){ex.stato=stato}else Object.assign(ex,{stato,righe,cliente_id:cli.id,agente_id,data,rif_esterno:o.numero});
         if(stato==='Evaso'&&!ex.data_evasione)ex.data_evasione=data;ex.wa_sig=sig;DB.upsert('ordini',ex);nUpd++}
-      else if(stato!=='Annullato'){const y=data.slice(0,4);DB.upsert('ordini',{tipo:'agenzia',numero:`AG-${y}-${String(DB.nextNum('ordagenzia',y)).padStart(4,'0')}`,data,data_evasione:stato==='Evaso'?data:null,stato,cliente_id:cli.id,mandato_id:cfg.mandato_id,agente_id,righe,fonte:'CRM Wine Alchemist',ext_id:eid,rif_esterno:o.numero,wa_sig:sig,wa_pagato,provv_liq:liq});nNew++}}
+      else if(stato!=='Annullato'){const y=data.slice(0,4);DB.upsert('ordini',{tipo:'agenzia',numero:`AG-${y}-${String(DB.nextNum('ordagenzia',y)).padStart(4,'0')}`,data,data_evasione:stato==='Evaso'?data:null,stato,cliente_id:cli.id,mandato_id:cfg.mandato_id,agente_id,wa_agente,righe,fonte:'CRM Wine Alchemist',ext_id:eid,rif_esterno:o.numero,wa_sig:sig,wa_pagato,provv_liq:liq});nNew++}}
     cfg.last=new Date().toISOString();WA.err='';DB.saveSettings();
     if(nNew||nUpd){toast(`CRM Wine Alchemist: ${nNew} nuovi, ${nUpd} aggiornati`);if(!$('#dlg').open)render()}else if(manual)toast('CRM Wine Alchemist: tutto allineato')}
   catch(e){WA.err=e.message||String(e)}finally{WA.busy=false;waStatus()}}
