@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="gl-build" content="b85a83f">
+<meta name="gl-build" content="34a3c95">
 <script>try{if(localStorage.getItem('gl_tema')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- Sicurezza: il browser può collegarsi solo a Supabase (gestionale e CRM) e caricare script solo dai CDN indicati; pagina esclusa dai motori di ricerca -->
@@ -156,12 +156,27 @@ html[data-theme=dark] input,html[data-theme=dark] select,html[data-theme=dark] t
 html[data-theme=dark] th,html[data-theme=dark] th.act{background:#232321}html[data-theme=dark] .tabs{background:#2a2926}html[data-theme=dark] dialog{background:var(--card);color:var(--ink)}html[data-theme=dark] #toast{color:#151514}
 html[data-theme=dark] .badge{background:#2e2d2a;color:#dcdad4}html[data-theme=dark] .badge.b-ok,html[data-theme=dark] .b-ok{background:#1f3a2a;color:var(--ok)}html[data-theme=dark] .badge.b-warn,html[data-theme=dark] .b-warn{background:#3d2f17;color:var(--warn)}html[data-theme=dark] .badge.b-bad,html[data-theme=dark] .b-bad{background:#43201c;color:var(--bad)}
 html[data-theme=dark] .warnrow td{background:#2f2a1d}html[data-theme=dark] .lines tr.under td{background:#43201c}html[data-theme=dark] .rem{background:#3d2f17;border-color:#6b5320;color:#f3d9a8}html[data-theme=dark] .rem.bad{background:#43201c;border-color:#7a2f27;color:#f6c2bb}
+#pistack{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(20,20,18,.28);backdrop-filter:blur(2px);animation:pis-on .3s ease-out}#pistack.via{animation:pis-off .35s ease-in forwards}
+@keyframes pis-on{from{opacity:0}}@keyframes pis-off{to{opacity:0}}
+.pis-in{position:relative;width:min(340px,86vw);height:min(340px,86vw)}
+.pi{position:absolute;inset:0;padding:30px 24px 18px;color:#2a2a26;border-radius:2px 2px 4px 18px/2px 2px 4px 30px;box-shadow:0 18px 28px -14px rgba(0,0,0,.45),0 2px 0 rgba(0,0,0,.04);transform:translate(var(--d),var(--d)) rotate(var(--r));display:flex;flex-direction:column;gap:8px;overflow:visible}.pi p{max-height:46%;overflow:auto}
+.pi.sotto{filter:brightness(.96)}
+.pi.top{animation:pi-attacca .55s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pi-attacca{0%{opacity:0;transform:translateY(-40px) scale(1.12) rotate(calc(var(--r) - 6deg))}70%{opacity:1}100%{transform:rotate(var(--r))}}
+.pi.stacca{animation:pi-stacca .42s cubic-bezier(.5,0,.8,.4) forwards;transform-origin:0 0}
+@keyframes pi-stacca{0%{transform:rotate(var(--r))}35%{transform:rotate(calc(var(--r) + 6deg)) translate(4px,-6px)}100%{opacity:0;transform:rotate(calc(var(--r) + 24deg)) translate(120px,-160px) scale(.9)}}
+.pi .nastro{position:absolute;top:-12px;left:50%;width:110px;height:28px;margin-left:-55px;background:rgba(255,255,255,.55);border:1px solid rgba(0,0,0,.05);transform:rotate(-3deg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pi h3{margin:0;font-family:var(--serif,serif);font-weight:400;font-size:24px;line-height:1.15}.pi p{margin:0;font-size:15px;line-height:1.45}.pi small{color:#5d5a50;font-size:12px}
+.pi-x{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.6)!important;border-color:rgba(0,0,0,.1)!important;color:#2a2a26!important;padding:5px 7px}
+.pi-a{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}.pi-a button{background:rgba(255,255,255,.7)!important;border-color:rgba(0,0,0,.12)!important;color:#2a2a26!important}
+.pis-n{margin:0;color:#fff;font-size:13px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion:reduce){.pi.top,.pi.stacca,#pistack{animation:none}}
 /* bacheca */
 h3.sez{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-family:inherit;margin:18px 0 8px;font-weight:600}.card h3 button{float:right}
 .postits{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:4px 0 18px}
 .postit{color:#2a2a26;padding:12px 14px 10px;border-radius:4px;box-shadow:0 6px 14px -8px #0006;display:flex;flex-direction:column;gap:4px;transform:rotate(-.6deg);font-size:13px}.postit:nth-child(2n){transform:rotate(.7deg)}
 .postit b{font-size:15px;font-family:var(--serif,serif);font-weight:400}.postit p{margin:2px 0}.postit small{color:#5d5a50}.postit span{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}.postit button{background:#ffffffb0;border-color:#0002;color:#2a2a26}
-#bkpop{position:fixed;top:16px;right:16px;z-index:20;display:flex;flex-direction:column;gap:10px;width:min(300px,90vw)}#bkpop .postit{transform:none;animation:pin .25s ease-out}@keyframes pin{from{opacity:0;transform:translateY(-8px)}}
+#bkpop{position:fixed;top:16px;right:16px;z-index:31;display:flex;flex-direction:column;gap:10px;width:min(300px,90vw)}#bkpop .postit{transform:none;animation:pin .25s ease-out}@keyframes pin{from{opacity:0;transform:translateY(-8px)}}
 .todo{display:flex;flex-direction:column;gap:6px}.ti{display:grid;grid-template-columns:22px 1fr auto auto auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}.ti input{width:18px;height:18px}.ti.done b{text-decoration:line-through;color:var(--mut)}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.ch{font-size:12px;color:var(--mut);text-align:center;padding:4px}.cd{min-height:92px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:5px;display:flex;flex-direction:column;gap:3px;cursor:pointer;overflow:hidden;min-width:0}.cd.vuoto{background:none;border:0;cursor:default}.cd.oggi{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}.cd b{font-size:12px;font-weight:600}
 .ce{display:block;font-size:11px;padding:2px 6px;border-radius:6px;background:var(--acc2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.ce-evento{background:#cfe6fb;color:#123}.ce-todo{background:#fff3a8;color:#332}.ce-postit{background:#ffd1dc;color:#311}.ce-pag{background:#f8e3df;color:#7a1a12}.ce-inc{background:#e5f1e9;color:#1d4d31}.ce-auto{background:#efeeea;color:#2b2b29}.ce.done{text-decoration:line-through;opacity:.6}
@@ -1354,15 +1369,28 @@ VIEWS.bacheca=()=>{if(!PEOPLE)bkPeople().then(()=>st.view==='bacheca'&&render())
       <form class="chatin" data-bkchat="${esc(con)}"><textarea name="t" rows="2" placeholder="${con?'Scrivi a '+esc(pNome(con))+'… (Invio per mandare, Maiusc+Invio per andare a capo)':'Nessun altro utente'}"${con?'':' disabled'}></textarea><button class="pri"${con?'':' disabled'}>Invia</button></form>`}
   return `<div class="bar"><h2>Bacheca</h2>${tabs('btab',[['todo',`Da fare (${bkTodoMiei().length})`],['cal','Calendario'],['chat',`Messaggi${nm?` (${nm})`:''}`]])}${B('bk-new',I('plus')+'Nuovo','','pri')}${typeof Notification!=='undefined'&&Notification.permission==='default'?B('bk-notif','Attiva notifiche del browser'):''}</div>
     ${miei.length||inviati.length?`<div class="postits">${miei.map(x=>bkPostitHTML(x,false)).join('')}${inviati.map(x=>bkPostitHTML(x,true)).join('')}</div>`:''}${body}`};
-/* notifiche: post-it a schermo per promemoria e messaggi nuovi (una volta per elemento), notifica del browser se la scheda non è in primo piano */
+/* post-it all'apertura: appiccicati sullo schermo, uno sopra l'altro, si leggono uno alla volta e si staccano con la X
+   (restano in Bacheca finché non si preme Fatto). Chiusi in questa sessione del browser: non ricompaiono ricaricando la pagina. */
+const PIQ=[],PIKEY='gl_postit_chiusi';const piChiusi=()=>{try{return new Set(JSON.parse(sessionStorage.getItem(PIKEY)||'[]'))}catch{return new Set()}};
+const piChiudi=id=>{try{const c=piChiusi();c.add(id);sessionStorage.setItem(PIKEY,JSON.stringify([...c]))}catch{}};
+function piShow(){let ov=$('#pistack');if(!PIQ.length){if(ov){ov.classList.add('via');setTimeout(()=>ov.remove(),350)}return}
+  if(!ov){ov=document.body.appendChild(Object.assign(document.createElement('div'),{id:'pistack'}));ov.innerHTML='<div class="pis-in"></div><p class="pis-n"></p>'}
+  const box=ov.querySelector('.pis-in');box.innerHTML=PIQ.slice(0,3).reverse().map((x,k,a)=>{const top=k===a.length-1,r=((x.id.charCodeAt(0)+x.id.charCodeAt(1))%7-3)*0.8;
+    return`<div class="pi${top?' top':' sotto'}" style="--r:${r}deg;--d:${(a.length-1-k)*10}px;background:${POSTIT[x.colore]||POSTIT.giallo}"><i class="nastro"></i>${top?`<button class="pi-x" data-pi="x" title="Stacca (resta in Bacheca)">${I('x')}</button><small>Promemoria da ${esc(pNome(x.da))}${x.data?' · '+dIT(x.data):''}</small><h3>${esc(x.titolo)}</h3>${x.testo?`<p>${esc(x.testo).replace(/\n/g,'<br>')}</p>`:''}<div class="pi-a"><button class="sm" data-pi="fatto">${I('ok')}Fatto</button><button class="sm" data-pi="apri">Apri la Bacheca</button></div>`:''}</div>`}).join('');
+  ov.querySelector('.pis-n').textContent=PIQ.length>1?`${PIQ.length} promemoria · chiudi con la X per leggere il successivo`:'Chiudi con la X: resta in Bacheca finché non premi Fatto';
+  ov.onclick=e=>{const b=e.target.closest('[data-pi]');if(!b)return;const x=PIQ[0],el=box.querySelector('.pi.top');if(!x||el.classList.contains('stacca'))return;
+    if(b.dataset.pi==='fatto')bkVisto(x.id);if(b.dataset.pi==='apri'){st.view='bacheca';st.btab='todo';location.hash='bacheca'}
+    piChiudi(x.id);el.classList.add('stacca');setTimeout(()=>{PIQ.shift();if(b.dataset.pi==='apri'){PIQ.length=0}piShow();render()},420)}}
+/* notifiche: post-it appiccicati per i promemoria, bigliettino in alto a destra per i messaggi nuovi, notifica del browser se la scheda non è in primo piano */
 const BKSEEN=new Set();let bkPrimo=true;
-function bkNotify(){if(!AUTH.prof||!DB.ready?.())return;const nuovi=[...bkPostitMiei().map(x=>({id:'a'+x.id,c:x.colore,t:x.titolo,s:`Promemoria da ${pNome(x.da)}`,x})),...bkMsgNuovi().map(m=>({id:'m'+m.id,c:'azzurro',t:m.testo,s:`Messaggio da ${pNome(m.da)}`,m}))].filter(n=>!BKSEEN.has(n.id));
-  for(const n of nuovi)BKSEEN.add(n.id);if(!nuovi.length)return;
+function bkNotify(){if(!AUTH.prof||!DB.ready?.())return;const ch=piChiusi(),pis=bkPostitMiei().filter(x=>!BKSEEN.has('a'+x.id)&&!ch.has(x.id)),msg=bkMsgNuovi().filter(m=>!BKSEEN.has('m'+m.id));
+  for(const x of pis)BKSEEN.add('a'+x.id);for(const m of msg)BKSEEN.add('m'+m.id);if(!pis.length&&!msg.length)return;
+  if(pis.length){PIQ.push(...pis);piShow()}
   const box=$('#bkpop')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'bkpop'}));
-  for(const n of nuovi.slice(0,4)){const el=document.createElement('div');el.className='postit pop';el.style.background=POSTIT[n.c]||POSTIT.giallo;
-    el.innerHTML=`<small>${esc(n.s)}</small><b>${esc(String(n.t).slice(0,140))}</b><span>${n.x?`<button class="sm" data-bkp="visto">${I('ok')}Fatto</button>`:''}<button class="sm" data-bkp="apri">Apri</button><button class="sm" data-bkp="x" title="Chiudi">${I('x')}</button></span>`;
-    el.onclick=e=>{const b=e.target.closest('[data-bkp]');if(!b)return;const a=b.dataset.bkp;if(a==='visto')bkVisto(n.x.id);if(a==='apri'){st.view='bacheca';st.btab=n.m?'chat':'todo';if(n.m)st.bkc=n.m.da;location.hash='bacheca'}el.remove();render()};box.appendChild(el)}
-  if(!bkPrimo&&document.hidden&&typeof Notification!=='undefined'&&Notification.permission==='granted')for(const n of nuovi.slice(0,3))try{new Notification(n.s,{body:String(n.t).slice(0,140)})}catch{}
+  for(const m of msg.slice(0,3)){const el=document.createElement('div');el.className='postit pop';el.style.background=POSTIT.azzurro;
+    el.innerHTML=`<small>Messaggio da ${esc(pNome(m.da))}</small><b>${esc(String(m.testo).slice(0,140))}</b><span><button class="sm" data-bkp="apri">Rispondi</button><button class="sm" data-bkp="x" title="Chiudi">${I('x')}</button></span>`;
+    el.onclick=e=>{const b=e.target.closest('[data-bkp]');if(!b)return;if(b.dataset.bkp==='apri'){st.view='bacheca';st.btab='chat';st.bkc=m.da;location.hash='bacheca'}el.remove();render()};box.appendChild(el)}
+  if(!bkPrimo&&document.hidden&&typeof Notification!=='undefined'&&Notification.permission==='granted')for(const n of [...pis.map(x=>[`Promemoria da ${pNome(x.da)}`,x.titolo]),...msg.map(m=>[`Messaggio da ${pNome(m.da)}`,m.testo])].slice(0,3))try{new Notification(n[0],{body:String(n[1]).slice(0,140)})}catch{}
   bkPrimo=false}
 setInterval(bkNotify,4000);
 document.addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(b){const a=b.dataset.bk,id=b.dataset.id;
