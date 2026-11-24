@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="gl-build" content="17c400f">
+<meta name="gl-build" content="e270d80">
 <script>try{if(localStorage.getItem('gl_tema')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- Sicurezza: il browser può collegarsi solo a Supabase (gestionale e CRM) e caricare script solo dai CDN indicati; pagina esclusa dai motori di ricerca -->
@@ -1401,11 +1401,19 @@ function piShow(){let ov=$('#pistack');if(!PIQ.length){if(ov){ov.classList.add('
 const BKSEEN=new Set();let bkPrimo=true;
 function bkNotify(){if(!AUTH.prof||!DB.ready?.())return;const ch=piChiusi(),pis=bkPostitMiei().filter(x=>!BKSEEN.has('a'+x.id)&&!ch.has(x.id)),msg=bkMsgNuovi().filter(m=>!BKSEEN.has('m'+m.id));
   for(const x of pis)BKSEEN.add('a'+x.id);for(const m of msg)BKSEEN.add('m'+m.id);if(!pis.length&&!msg.length)return;
-  if(pis.length){PIQ.push(...pis);piShow()}
+  if(pis.length){PIQ.push(...pis.filter(x=>!PIQ.some(y=>y.id===x.id)));piShow()}
   if(msg.length)chatFab(msg[msg.length-1]);
   if(!bkPrimo&&document.hidden&&typeof Notification!=='undefined'&&Notification.permission==='granted')for(const n of [...pis.map(x=>[`Promemoria da ${pNome(x.da)}`,x.titolo]),...msg.map(m=>[`Messaggio da ${pNome(m.da)}`,m.testo])].slice(0,3))try{new Notification(n[0],{body:String(n[1]).slice(0,140)})}catch{}
   bkPrimo=false}
 setInterval(bkNotify,4000);
+/* da telefono "riaprire l'app" è quasi sempre riprendere la stessa scheda: niente ricarica, sessionStorage intatto e connessione
+   realtime caduta in background. Al ritorno in primo piano si riallineano i dati e, dopo una pausa lunga, si conta come nuova apertura. */
+let bkHidAt=0,bkRip=false;
+async function bkRiprendi(){if(bkRip||!AUTH.prof||!DB.ready?.())return;bkRip=true;
+  try{if(bkHidAt&&Date.now()-bkHidAt>10*60e3){try{sessionStorage.removeItem(PIKEY)}catch{}for(const k of [...BKSEEN])if(k[0]==='a')BKSEEN.delete(k)}
+    await DB.ricarica();if(!$('#dlg').open)render();bkNotify()}catch(e){console.warn('Riallineamento non riuscito',e)}finally{bkRip=false;bkHidAt=0}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)bkHidAt=Date.now();else bkRiprendi()});
+addEventListener('pageshow',e=>{if(e.persisted){bkHidAt||=1;bkRiprendi()}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(b){const a=b.dataset.bk,id=b.dataset.id;
     if(a==='edit')return bkForm(DB.get('attivita',id));
     if(a==='visto'){bkVisto(id);return render()}
