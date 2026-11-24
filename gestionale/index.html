@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<meta name="gl-build" content="b85a83f">
 <script>try{if(localStorage.getItem('gl_tema')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- Sicurezza: il browser può collegarsi solo a Supabase (gestionale e CRM) e caricare script solo dai CDN indicati; pagina esclusa dai motori di ricerca -->
@@ -155,6 +156,21 @@ html[data-theme=dark] input,html[data-theme=dark] select,html[data-theme=dark] t
 html[data-theme=dark] th,html[data-theme=dark] th.act{background:#232321}html[data-theme=dark] .tabs{background:#2a2926}html[data-theme=dark] dialog{background:var(--card);color:var(--ink)}html[data-theme=dark] #toast{color:#151514}
 html[data-theme=dark] .badge{background:#2e2d2a;color:#dcdad4}html[data-theme=dark] .badge.b-ok,html[data-theme=dark] .b-ok{background:#1f3a2a;color:var(--ok)}html[data-theme=dark] .badge.b-warn,html[data-theme=dark] .b-warn{background:#3d2f17;color:var(--warn)}html[data-theme=dark] .badge.b-bad,html[data-theme=dark] .b-bad{background:#43201c;color:var(--bad)}
 html[data-theme=dark] .warnrow td{background:#2f2a1d}html[data-theme=dark] .lines tr.under td{background:#43201c}html[data-theme=dark] .rem{background:#3d2f17;border-color:#6b5320;color:#f3d9a8}html[data-theme=dark] .rem.bad{background:#43201c;border-color:#7a2f27;color:#f6c2bb}
+/* bacheca */
+h3.sez{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-family:inherit;margin:18px 0 8px;font-weight:600}.card h3 button{float:right}
+.postits{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:4px 0 18px}
+.postit{color:#2a2a26;padding:12px 14px 10px;border-radius:4px;box-shadow:0 6px 14px -8px #0006;display:flex;flex-direction:column;gap:4px;transform:rotate(-.6deg);font-size:13px}.postit:nth-child(2n){transform:rotate(.7deg)}
+.postit b{font-size:15px;font-family:var(--serif,serif);font-weight:400}.postit p{margin:2px 0}.postit small{color:#5d5a50}.postit span{display:flex;gap:6px;justify-content:flex-end;margin-top:4px}.postit button{background:#ffffffb0;border-color:#0002;color:#2a2a26}
+#bkpop{position:fixed;top:16px;right:16px;z-index:20;display:flex;flex-direction:column;gap:10px;width:min(300px,90vw)}#bkpop .postit{transform:none;animation:pin .25s ease-out}@keyframes pin{from{opacity:0;transform:translateY(-8px)}}
+.todo{display:flex;flex-direction:column;gap:6px}.ti{display:grid;grid-template-columns:22px 1fr auto auto auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}.ti input{width:18px;height:18px}.ti.done b{text-decoration:line-through;color:var(--mut)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.ch{font-size:12px;color:var(--mut);text-align:center;padding:4px}.cd{min-height:92px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:5px;display:flex;flex-direction:column;gap:3px;cursor:pointer;overflow:hidden;min-width:0}.cd.vuoto{background:none;border:0;cursor:default}.cd.oggi{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}.cd b{font-size:12px;font-weight:600}
+.ce{display:block;font-size:11px;padding:2px 6px;border-radius:6px;background:var(--acc2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.ce-evento{background:#cfe6fb;color:#123}.ce-todo{background:#fff3a8;color:#332}.ce-postit{background:#ffd1dc;color:#311}.ce-pag{background:#f8e3df;color:#7a1a12}.ce-inc{background:#e5f1e9;color:#1d4d31}.ce-auto{background:#efeeea;color:#2b2b29}.ce.done{text-decoration:line-through;opacity:.6}
+.cal-list{margin-top:18px}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:58vh;overflow:auto;padding:6px 2px}.msg{max-width:72%;background:var(--card);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:8px 12px}.msg.mio{align-self:flex-end;background:var(--ink);color:var(--bg);border-color:var(--ink);border-radius:14px 14px 4px 14px}.msg p{margin:0 0 2px}.msg small{opacity:.65;font-size:11px}
+.chatin{display:flex;gap:8px;margin-top:10px;align-items:flex-end}.chatin textarea{flex:1;resize:vertical}
+#verbar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);box-shadow:0 6px 20px -10px #0005;border-radius:999px;padding:6px 8px 6px 16px;display:flex;gap:8px;align-items:center;font-size:13px;z-index:15;max-width:94vw}
+@media (max-width:760px){.cal{gap:2px}.cd{min-height:58px;padding:3px}.ce{font-size:9px;padding:1px 3px}.ti{grid-template-columns:22px 1fr auto}.ti>span:nth-of-type(1){display:none}.msg{max-width:88%}.tw td:empty{display:none}}
+html[data-theme=dark] .ce-auto{background:#2e2d2a;color:#dcdad4}
 </style>
 </head>
 <body>
@@ -195,7 +211,7 @@ function xlsx(rows,sheet='Foglio1'){const x=s=>String(s).replace(/[\u0000-\u0008
     ['xl/workbook.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${x(sheet)}" sheetId="1" r:id="rId1"/></sheets></workbook>`],
     ['xl/_rels/workbook.xml.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'],
     ['xl/worksheets/sheet1.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${sd}</sheetData></worksheet>`]])}
-const IC={moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',ord:'<path d="M9 3h6v3H9zM7 4.5H5V21h14V4.5h-2M8.5 11h7M8.5 15h7"/>',box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/>',doc:'<path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8"/>',eur:'<path d="M17 6a7 7 0 1 0 0 12M4 10h9M4 14h9"/>',wal:'<path d="M3 6h17v14H3zM3 6l13-3v3M15.5 13h4.5"/>',btl:'<path d="M10 2h4v4l2 4v12H8V10l2-4zM8 14h8"/>',usr:'<path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a7 7 0 0 1 14 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a6 6 0 0 0-4-5.6"/>',trk:'<path d="M1 4h14v12H1zM15 9h4l4 4v3h-8M5 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM18 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>',ctr:'<path d="M6 2h12v20H6zM9 7h6M9 11h6M9 15h3"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',del:'<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>',prt:'<path d="M6 9V3h12v6M6 18H3v-8h18v8h-3M6 14h12v7H6z"/>',ok:'<path d="M4 12l5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',dl:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',ul:'<path d="M12 15V3M7 8l5-5 5 5M4 21h16"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',inb:'<path d="M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6H3v-6z"/>',tag:'<path d="M3 3h8l10 10-8 8L3 11zM7.5 7.5h.01"/>',qr:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 18v3"/>',agt:'<path d="M3 7h18v13H3zM9 7V4h6v3M3 12h18"/>',flag:'<path d="M5 21V4h11l-1.5 4L16 12H5"/>',warn:'<path d="M12 3 2 21h20zM12 10v5M12 18h.01"/>',calc:'<path d="M5 2h14v20H5zM8 5.5h8v3.5H8zM8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',chev:'<path d="M6 9l6 6 6-6"/>',out:'<path d="M15 4h4v16h-4M10 17l5-5-5-5M15 12H3"/>'};
+const IC={note:'<path d="M5 3h14v12l-6 6H5z"/><path d="M13 21v-6h6M8 8h8M8 12h5"/>',moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',ord:'<path d="M9 3h6v3H9zM7 4.5H5V21h14V4.5h-2M8.5 11h7M8.5 15h7"/>',box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"/>',doc:'<path d="M6 2h9l5 5v15H6zM14 2v6h6M9 13h8M9 17h8"/>',eur:'<path d="M17 6a7 7 0 1 0 0 12M4 10h9M4 14h9"/>',wal:'<path d="M3 6h17v14H3zM3 6l13-3v3M15.5 13h4.5"/>',btl:'<path d="M10 2h4v4l2 4v12H8V10l2-4zM8 14h8"/>',usr:'<path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a7 7 0 0 1 14 0v1M17 11a3 3 0 1 0 0-6M22 21v-1a6 6 0 0 0-4-5.6"/>',trk:'<path d="M1 4h14v12H1zM15 9h4l4 4v3h-8M5 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM18 19.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/>',ctr:'<path d="M6 2h12v20H6zM9 7h6M9 11h6M9 15h3"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',del:'<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14"/>',prt:'<path d="M6 9V3h12v6M6 18H3v-8h18v8h-3M6 14h12v7H6z"/>',ok:'<path d="M4 12l5 5L20 6"/>',plus:'<path d="M12 5v14M5 12h14"/>',dl:'<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',ul:'<path d="M12 15V3M7 8l5-5 5 5M4 21h16"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',inb:'<path d="M3 13h5l2 3h4l2-3h5M5 5h14l2 8v6H3v-6z"/>',tag:'<path d="M3 3h8l10 10-8 8L3 11zM7.5 7.5h.01"/>',qr:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 18v3"/>',agt:'<path d="M3 7h18v13H3zM9 7V4h6v3M3 12h18"/>',flag:'<path d="M5 21V4h11l-1.5 4L16 12H5"/>',warn:'<path d="M12 3 2 21h20zM12 10v5M12 18h.01"/>',calc:'<path d="M5 2h14v20H5zM8 5.5h8v3.5H8zM8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',chev:'<path d="M6 9l6 6 6-6"/>',out:'<path d="M15 4h4v16h-4M10 17l5-5-5-5M15 12H3"/>'};
 const I=n=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
 
 /* ================= DATA LAYER =================
@@ -216,7 +232,8 @@ const DB=(()=>{const LEDGER=new Set(['movimenti']),TB={pl:'private_label'},CATCH
     documenti:C_('id:u,tipo:t,numero:n,anno:n,data:d,cliente_id:u,ordine_id:u,righe:j,pagamento:t,scadenza:d,pagata:b,data_incasso:d,created_at:ts'),
     passive:C_('id:u,fornitore_id:u,numero:t,data:d,rif_ordine:t,ordine_id:u,valuta:t,imponibile:n,iva:n,totale:n,pagamento:t,scadenza:d,pagata:b,data_pag:d,note:t,created_at:ts'),
     pl:C_('id:u,nome:t,prodotto_id:u,slug:t,qr_stampato:b,created_at:ts'),
-    fallate:C_('id:u,num:t,data:d,cliente_id:u,prodotto_id:u,fornitore_id:u,lotto:t,qta:n,difetto:t,descr:t,rif:t,stato:t,stato_forn:t,data_segn:d,credito:n,note:t,created_at:ts')};
+    fallate:C_('id:u,num:t,data:d,cliente_id:u,prodotto_id:u,fornitore_id:u,lotto:t,qta:n,difetto:t,descr:t,rif:t,stato:t,stato_forn:t,data_segn:d,credito:n,note:t,created_at:ts'),
+    attivita:C_('id:u,tipo:t,titolo:t,testo:t,data:d,ora:t,per:t,da:t,colore:t,fatto:b,letto:b,created_at:ts'),messaggi:C_('id:u,da:t,a:t,testo:t,letto:b,created_at:ts')};
   const COLL=Object.keys(COLS),SHARED=['azienda','pricing'],WASH=['mandato_id','da','agenti','map'];
   /* ts: updated_at visto sul server per ogni record (chiave tabella:id). Le modifiche a record esistenti partono con quel valore
      e il server le accetta solo se nel frattempo nessun'altra postazione ha cambiato il record (revisione CM, punto 4) */
@@ -427,7 +444,7 @@ function inUse(c,id){const fk={agenti:['agente_id'],clienti:['cliente_id'],forni
 
 /* ================= STATO / ROUTER ================= */
 /* menù a gruppi: il lavoro di tutti i giorni in alto, l'amministrazione raccolta, le anagrafiche in fondo */
-const NAVG=[[null,[['dashboard','Plancia','dash'],['ordini','Ordini','ord']]],
+const NAVG=[[null,[['dashboard','Plancia','dash'],['bacheca','Bacheca','note'],['ordini','Ordini','ord']]],
   ['Vini',[['magazzino','Magazzino','box'],['privatelabel','Private label','tag'],['prezzi','Calcolo prezzi','calc'],['fallate','Fallate','flag']]],
   ['Amministrazione',[['amministrazione','Scadenze','wal'],['documenti','Fatture e DDT','doc'],['provvigioni','Provvigioni','eur']]],
   ['Contatti',[['clienti','Clienti','usr'],['fornitori','Fornitori e contratti','trk'],['agenti','Agenti','agt']]]];
@@ -437,10 +454,10 @@ const navOpen=(()=>{try{return JSON.parse(localStorage.getItem(_lsKey('nav')))||
 /* sezioni facoltative nascondibili da Impostazioni (preferenza di questo browser) */
 const NAVOPT=[['privatelabel','Private label'],['prezzi','Calcolo prezzi'],['fallate','Fallate'],['agenti','Agenti']];
 const navHide=(()=>{try{return new Set(JSON.parse(localStorage.getItem(_lsKey('navhide')))||[])}catch{return new Set()}})();
-const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',ofase:'',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori',ptab:'mandati'};
+const st={view:location.hash.slice(1)||'dashboard',inv:{sort:'tipologia'},agtab:'anag',af:{},q:{},otipo:'',ostato:'',ofase:'',btab:'todo',bkf:'miei',mtab:'giac',dtipo:'',atab:'aperte',pf:{},per:'mese',pda:'',pa:'',fotab:'fornitori',ptab:'mandati'};
 function render(){if(!AUTH.prof)return;
   if(st.view==='mandati')st.fotab='mandati';if(VALIAS[st.view])st.view=VALIAS[st.view];
-  const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length,badge={amministrazione:nUrg,fallate:nFl};
+  const SC=scad(),nUrg=SC.items.filter(i=>i.b==='scad'||i.b==='w').length,nFl=DB.all('fallate').filter(x=>x.stato_forn==='Da segnalare').length,badge={amministrazione:nUrg,fallate:nFl,bacheca:bkBadge()};
   const item=([k,l,ic])=>`<button data-view="${k}" class="${st.view===k?'on':''}">${I(ic)}<span>${l}</span>${badge[k]?`<span class="nb">${badge[k]}</span>`:''}</button>`;
   $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`
     +`<button class="pri navnew" data-act="q-new">${I('plus')}<span>Nuovo</span></button>`+NAVG.map(([g,all])=>{const items=all.filter(x=>!navHide.has(x[0]));if(!items.length)return'';if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
@@ -565,11 +582,9 @@ dashboard(){const R=plRange(),P=prevRange(R),s=stats(...R),p=stats(...P),T=today
   const mScad=DB.all('mandati').filter(m=>m.data_fine&&m.data_fine<=addDays(T,60)).sort((a,b)=>a.data_fine.localeCompare(b.data_fine));
   const mp=s.ven?s.marg/s.ven*100:0;
   return `<div class="bar"><h2>Plancia</h2>${tabs('per',[['mese','Mese'],['mesep','Mese scorso'],['trim','Trimestre'],['anno','Anno'],['custom','Personalizzato']])}${st.per==='custom'?`<input type="date" data-s="pda" value="${st.pda}" style="width:auto"><input type="date" data-s="pa" value="${st.pa}" style="width:auto">`:''}<span class="muted">${dIT(R[0])} – ${dIT(R[1])}</span></div>
-  <div class="kpis">${K(eur(s.ven),'Venduto diretto (imponibile)',dl(s.ven,p.ven))}${K(eur(s.marg),`Margine lordo · ${mp.toFixed(1)}%`,dl(s.marg,p.marg))}${K(num(s.bt),'Bottiglie vendute',dl(s.bt,p.bt))}${K(eur(s.ag),'Venduto in agenzia',dl(s.ag,p.ag))}${K(eur(s.pv),'Provvigioni su ordini del periodo',dl(s.pv,p.pv))}${K(eur(s.acq),'Acquisti (landed, €)',dl(s.acq,p.acq,1))}</div>
+  ${plOggi()}<h3 class="sez">Numeri del periodo</h3><div class="kpis">${K(eur(s.ven),'Venduto diretto (imponibile)',dl(s.ven,p.ven))}${K(eur(s.marg),`Margine lordo · ${mp.toFixed(1)}%`,dl(s.marg,p.marg))}${K(num(s.bt),'Bottiglie vendute',dl(s.bt,p.bt))}${K(eur(s.ag),'Venduto in agenzia',dl(s.ag,p.ag))}${K(eur(s.pv),'Provvigioni su ordini del periodo',dl(s.pv,p.pv))}${K(eur(s.acq),'Acquisti (landed, €)',dl(s.acq,p.acq,1))}</div>
   ${cashBoxes()}<div class="kpis">${K(eur(val),'Valore magazzino (FIFO)')}${K(low.length,'Referenze sotto scorta')}${K(eur(daInc),'Crediti aperti totali')}${K(eur(daPag),'Debiti aperti totali')}</div>
-  <div class="cols"><div class="card"><h3>Ordini da ricevere dai produttori</h3>${ordAperTbl('acquisto')}<p>${B('o-fase','Vedi in Ordini','ric','sm')}</p></div>
-  <div class="card"><h3>Ordini da spedire ai clienti</h3>${ordAperTbl('vendita')}<p>${B('o-fase','Vedi in Ordini','spe','sm')}</p></div>
-  <div class="card"><h3>Bottiglie per tipologia</h3>${pie(s.tip)}</div>
+  <div class="cols"><div class="card"><h3>Bottiglie per tipologia</h3>${pie(s.tip)}</div>
   <div class="card"><h3>Venduto per gruppo cliente</h3>${bars(s.grp)}</div>
   <div class="card"><h3>Venduto per agente</h3>${bars(s.agt)}</div>
   <div class="card"><h3>Spesa per fornitore</h3>${bars(s.forn)}</div>
@@ -639,7 +654,15 @@ const AZF=[['rag_soc','Ragione sociale'],['indirizzo','Indirizzo'],['cap','CAP']
 const ordAperti=t=>DB.all('ordini').filter(o=>o.tipo===t&&!o.mov&&['Bozza','Confermato'].includes(o.stato)).sort((a,b)=>(a.consegna||a.data).localeCompare(b.consegna||b.data));
 const ggDa=d=>Math.round((new Date(today())-new Date(d))/864e5);
 const ordBt=o=>(o.righe||[]).reduce((s,r)=>s+(+r.qta||0),0);
-function ordAperTbl(t){const T=today();return tbl([{h:'N°',v:o=>B('o-edit',`<b>${esc(o.numero)}</b>`,o.id,'lnk','','Apri ordine')},{h:t==='acquisto'?'Fornitore':'Cliente',v:counterpart},{h:'Bottiglie',n:1,v:o=>num(ordBt(o))},{h:'Ordinato',v:o=>`${dIT(o.data)} <span class="muted">${ggDa(o.data)} gg fa</span>`},{h:t==='acquisto'?'Arrivo previsto':'Consegna prevista',v:o=>o.consegna?`<span class="${o.consegna<T?'d-dn':''}">${dIT(o.consegna)}</span>`:'<span class="muted">—</span>'}],ordAperti(t))}
+/* Plancia, in alto: cosa fare oggi (compiti, ordini da ricevere e da spedire, pagamenti e incassi dei prossimi 7 giorni) */
+function plOggi(){const T=today(),L7=addDays(T,7),td=bkTodoMiei().filter(x=>!x.data||x.data<=L7).sort((a,b)=>(a.data||'9999').localeCompare(b.data||'9999')).slice(0,6);
+  const pg=[...DB.all('passive').filter(x=>!x.pagata&&x.scadenza&&x.scadenza<=L7).map(x=>({t:'Pagare',c:prodNome(x.fornitore_id)||DB.get('fornitori',x.fornitore_id)?.rag_soc,s:x.scadenza,v:+x.totale||0})),...DB.all('documenti').filter(d=>d.tipo==='fattura'&&!d.pagata&&d.scadenza&&d.scadenza<=L7).map(d=>({t:'Incassare',c:d.cli?.rag_soc,s:d.scadenza,v:docTot(d)}))].sort((a,b)=>a.s.localeCompare(b.s));
+  return `<h3 class="sez">Da fare oggi</h3><div class="cols oggi">
+  <div class="card"><h3>Compiti ${B('bk-new',I('plus'),'','sm','','Nuovo compito')}</h3>${td.length?`<div class="todo">${td.map(x=>`<div class="ti"><input type="checkbox" data-bk="fatto" data-id="${x.id}" title="Segna come fatto"><div><b>${esc(x.titolo)}</b></div>${x.data?`<span class="${x.data<T?'d-dn':'muted'}">${dIT(x.data)}</span>`:'<span></span>'}</div>`).join('')}</div>`:'<p class="muted">Nessun compito in scadenza.</p>'}<p>${B('nav-bacheca','Apri la Bacheca','','sm','data-view="bacheca"')}</p></div>
+  <div class="card"><h3>Ordini da ricevere dai produttori</h3>${ordAperTbl('acquisto')}<p>${B('o-fase','Vedi in Ordini','ric','sm')}</p></div>
+  <div class="card"><h3>Ordini da spedire ai clienti</h3>${ordAperTbl('vendita')}<p>${B('o-fase','Vedi in Ordini','spe','sm')}</p></div>
+  <div class="card"><h3>Pagamenti e incassi entro 7 giorni</h3>${tbl([{h:'',v:x=>`<span class="badge ${x.t==='Incassare'?'b-ok':'b-warn'}">${x.t}</span>`},{h:'Chi',w:1,v:x=>esc(x.c||'')},{h:'Scadenza',v:x=>`<span class="${x.s<T?'d-dn':''}">${dIT(x.s)}</span>`},{h:'Importo',n:1,v:x=>eur(x.v)}],pg)}<p>${B('nav-scad','Apri Scadenze','','sm','data-view="amministrazione"')}</p></div></div>`}
+function ordAperTbl(t){const T=today();return tbl([{h:'N°',v:o=>B('o-edit',`<b>${esc(o.numero)}</b>`,o.id,'lnk','','Apri ordine')},{h:t==='acquisto'?'Fornitore':'Cliente',w:1,v:counterpart},{h:'Bt',n:1,v:o=>num(ordBt(o))},{h:t==='acquisto'?'Arrivo':'Consegna',v:o=>o.consegna?`<span class="${o.consegna<T?'d-dn':''}">${dIT(o.consegna)}</span>`:`<span class="muted">ordinato ${ggDa(o.data)} gg fa</span>`}],ordAperti(t))}
 /* movimento -> fornitore (carichi) o cliente (scarichi) dell'ordine collegato */
 const movCp=m=>{const o=m.ordine_id&&DB.get('ordini',m.ordine_id);return o?counterpart(o):''};
 function counterpart(o){return esc(o.tipo==='acquisto'?DB.get('fornitori',o.fornitore_id)?.rag_soc:DB.get('clienti',o.cliente_id)?.rag_soc)+(o.tipo==='agenzia'?` <span class="muted">per ${esc(DB.get('fornitori',DB.get('mandati',o.mandato_id)?.mandante_id)?.rag_soc||'?')}</span>`:'')}
@@ -661,6 +684,7 @@ VIEWS.guida=()=>`<div class="bar"><h2>Guida rapida</h2></div><div class="card gu
 <h3>Fatture elettroniche su FattureWeb</h3><p>Le fatture elettroniche si emettono da FattureWeb (Sistemi). Lì gli articoli hanno lo stesso codice delle referenze del gestionale (SKU, per esempio GL-0007) e la descrizione vino - produttore - annata - formato: in fattura scrivi il codice o parte del nome e scegli la riga.</p>
 <ol><li>Ogni volta che aggiungi o modifichi referenze, in Magazzino premi Esporta per FattureWeb: scarichi un file Excel con tutte le referenze, escluse quelle su mandato (le fattura il mandante).</li><li>In FattureWeb apri Anagrafiche, Articoli, Importa Articoli e scegli il file appena scaricato.</li><li>Spunta «Ricopri codici già esistenti»: così si aggiornano anche nomi e prezzi degli articoli già presenti. Senza la spunta vengono aggiunti solo gli articoli nuovi.</li><li>Premi Importa e leggi il report finale: tutte le righe devono risultare acquisite. Se segnala anomalie, correggi la referenza nel gestionale ed esporta di nuovo.</li></ol>
 <p>Per evitare errori:</p><ul><li>Carica il file così come esce dal gestionale: non aprirlo e risalvarlo con Excel o Numbers, che possono cambiare codici, date e decimali.</li><li>Il gestionale è la fonte: non creare né rinominare a mano in FattureWeb articoli con codice GL-. Per cambiare un nome, cambialo qui ed esporta di nuovo.</li><li>FattureWeb non permette di cancellare articoli già usati in fattura. Per togliere un vino dalla scelta, disattiva la referenza qui: esce con la data di fine validità e non compare più nelle nuove fatture.</li><li>Nella descrizione la fattura elettronica non accetta trattini lunghi, virgolette curve ed emoji: il file li converte da solo, ma se scrivi a mano in FattureWeb usa solo caratteri semplici.</li><li>Il prezzo esportato è il listino HoReCa e in fattura si può cambiare riga per riga; se il listino è vuoto l'articolo arriva a 0,00. L'IVA è quella della referenza: per aliquote diverse da 4, 10 e 22% il gestionale avvisa e va scelta a mano.</li><li>Se FattureWeb mostra «Pagina non trovata o sessione scaduta», rientra con le tue credenziali e ripeti l'importazione: con la spunta non si creano doppioni.</li></ul>
+<h3>Bacheca</h3><p>La Bacheca è condivisa tra te e Antonio. Da fare: compiti per te, per lui o per entrambi, con una data entro cui farli. Calendario: eventi e promemoria, più arrivi, consegne e scadenze di pagamento che compaiono da soli; clicca un giorno per aggiungere un evento. Messaggi: chat tra voi due, con il pallino rosso nel menù quando c'è qualcosa da leggere. Post-it: un promemoria per l'altro compare come post-it colorato alla sua prossima apertura del gestionale (o dalla data che scegli) finché non preme Fatto. Con «Attiva notifiche del browser» arrivano anche quando il gestionale è aperto in un'altra scheda.</p>
 <h3>Importare una fattura elettronica (XML)</h3><p>In Ordini premi Importa fattura XML e scegli uno o più file scaricati dal cassetto fiscale (.xml o .p7m). Il gestionale capisce da solo se la fattura è emessa da Growing Liquids o ricevuta da un fornitore e mostra una finestra di controllo prima di registrare.</p>
 <ol><li>Controlla il cliente o il fornitore: viene riconosciuto dalla partita IVA; se manca in rubrica viene creato.</li><li>Se c'è un ordine aperto (da spedire o da ricevere) della stessa controparte, viene proposto: la fattura lo completa invece di crearne uno nuovo.</li><li>Ogni riga viene abbinata alla referenza dal codice articolo (SKU) o dal nome: controlla l'abbinamento, oppure scegli «nessuna» per righe che non sono a magazzino (trasporto, servizi).</li><li>Premi Registra. Fattura emessa: ordine di vendita evaso, scarico dal magazzino, fattura con lo stesso numero, provvigione dell'agente del cliente. Fattura ricevuta: ordine d'acquisto ricevuto, carico a magazzino al prezzo netto, fattura ricevuta in Scadenze.</li></ol>
 <p>Le note di credito (TD04) registrano solo il documento, senza movimenti di magazzino. Una fattura già importata viene segnalata, per non registrarla due volte. Se la fattura non è intestata a Growing Liquids (per esempio intestata per errore a un cliente), scegli tu se registrarla come acquisto o come vendita.</p>
@@ -1270,6 +1294,94 @@ document.addEventListener('submit',async e=>{if(e.target.id!=='authf')return;e.p
     const{error}=await sb.auth.updateUser({password:pw});if(error)throw error;AUTH.mode='login';toast('Password salvata');return authReady()}
   catch(x){AUTH.err=authMsg(x);authScreen()}});
 
+/* ================= BACHECA (da fare, calendario, post-it, messaggi) =================
+   Condivisa tra le persone del gestionale (gl.profili). attivita: todo / evento / postit; per = email del destinatario
+   (vuoto = tutti); un post-it con data compare da quel giorno. visto = email di chi l'ha già letto (per i post-it a tutti).
+   Notifiche: post-it a schermo per i promemoria non letti e i messaggi nuovi; notifica del browser se la pagina è in un'altra scheda. */
+const POSTIT={giallo:'#fff3a8',rosa:'#ffd1dc',verde:'#cdeccd',azzurro:'#cfe6fb',arancio:'#ffd9a8'};
+let PEOPLE=null;
+async function bkPeople(){if(PEOPLE)return PEOPLE;try{const{data}=await AUTH.sb.from('profili').select('email,nome').eq('attivo',true);PEOPLE=(data||[]).filter(p=>p.email)}catch{PEOPLE=[]}
+  if(AUTH.user?.email&&!PEOPLE.some(p=>p.email===AUTH.user.email))PEOPLE.push({email:AUTH.user.email,nome:AUTH.prof?.nome||AUTH.user.email});return PEOPLE}
+const ME=()=>AUTH.user?.email||'';
+const pNome=e=>!e?'Tutti':e===ME()?'Io':((PEOPLE||[]).find(p=>p.email===e)?.nome||e).split(' ')[0];
+const pOpts=(v,tutti=true)=>`${tutti?`<option value="">Tutti</option>`:''}${(PEOPLE||[]).map(p=>`<option value="${esc(p.email)}"${p.email===v?' selected':''}>${esc(p.email===ME()?(p.nome||p.email)+' (io)':p.nome||p.email)}</option>`).join('')}`;
+const perMe=x=>!x.per||x.per===ME();
+/* post-it da mostrare a me: non miei, per me o per tutti, non ancora visti, già "in data" */
+const bkPostitMiei=()=>DB.all('attivita').filter(x=>x.tipo==='postit'&&!x.fatto&&perMe(x)&&!(x.visto||[]).includes(ME())&&!(x.da===ME()&&!x.per)&&(!x.data||x.data<=today()));
+const bkMsgNuovi=()=>DB.all('messaggi').filter(m=>m.a===ME()&&!m.letto);
+const bkTodoMiei=()=>DB.all('attivita').filter(x=>x.tipo==='todo'&&!x.fatto&&perMe(x));
+const bkBadge=()=>bkPostitMiei().length+bkMsgNuovi().length;
+function bkForm(x){x={tipo:'todo',per:'',da:ME(),colore:'giallo',...x};const nuovo=!x.id,k={todo:'compito',evento:'evento',postit:'post-it'}[x.tipo];
+  modal(`${nuovo?'Nuovo':'Modifica'} ${k}`,`<div class="grid">
+    <label><span>Tipo</span><select name="tipo">${[['todo','Da fare'],['evento','Evento in calendario'],['postit','Post-it / promemoria']].map(([v,l])=>`<option value="${v}"${x.tipo===v?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label><span>Per</span><select name="per">${pOpts(x.per)}</select></label>
+    <label class="full"><span>Titolo *</span><input name="titolo" required value="${esc(x.titolo||'')}"></label>
+    <label class="full"><span>Note</span><textarea name="testo">${esc(x.testo||'')}</textarea></label>
+    <label><span data-dl>${x.tipo==='postit'?'Mostra dal (facoltativo)':x.tipo==='evento'?'Data *':'Entro il (facoltativo)'}</span><input type="date" name="data" value="${esc(x.data||'')}"></label>
+    <label data-ora><span>Ora</span><input type="time" name="ora" value="${esc(x.ora||'')}"></label>
+    <label data-col><span>Colore</span><select name="colore">${Object.keys(POSTIT).map(c=>`<option${x.colore===c?' selected':''}>${c}</option>`).join('')}</select></label></div>
+    ${nuovo?'':`<p><button type="button" data-bkdel class="sm">${I('del')}Elimina</button></p>`}`,f=>{const E=f.elements;if(E.tipo.value==='evento'&&!E.data.value)return alert('Per un evento serve la data'),false;
+      Object.assign(x,{tipo:E.tipo.value,per:E.per.value||null,titolo:E.titolo.value.trim(),testo:E.testo.value.trim(),data:E.data.value||null,ora:E.ora.value||null,colore:E.colore.value});
+      if(nuovo){x.created_at=new Date().toISOString();x.da=ME()}DB.upsert('attivita',x);toast(nuovo?(x.per&&x.per!==ME()?`Inviato a ${pNome(x.per)}`:'Salvato'):'Salvato');return true});
+  const f=$('#dlg form'),E=f.elements,vis=()=>{const t=E.tipo.value;f.querySelector('[data-ora]').hidden=t!=='evento';f.querySelector('[data-col]').hidden=t!=='postit';f.querySelector('[data-dl]').textContent=t==='postit'?'Mostra dal (facoltativo)':t==='evento'?'Data *':'Entro il (facoltativo)'};
+  E.tipo.addEventListener('change',vis);vis();f.querySelector('[data-bkdel]')?.addEventListener('click',()=>{if(!confirm('Eliminare?'))return;DB.remove('attivita',x.id);$('#dlg').close();render()})}
+function bkVisto(id){const x=DB.get('attivita',id);if(!x)return;if(x.per)x.fatto=true;else x.visto=[...new Set([...(x.visto||[]),ME()])];DB.upsert('attivita',x)}
+/* eventi del calendario: attività + date dagli altri archivi (arrivi, consegne, scadenze) */
+function bkEventi(da,a){const inR=d=>d&&d>=da&&d<=a,L=[];
+  for(const x of DB.all('attivita'))if(x.data&&inR(x.data)&&(x.tipo!=='postit'||perMe(x)||x.da===ME()))L.push({d:x.data,t:(x.ora?x.ora+' ':'')+x.titolo,k:x.tipo,id:x.id,fatto:x.fatto,per:x.per});
+  for(const o of ordAperti('acquisto'))if(inR(o.consegna))L.push({d:o.consegna,t:'Arrivo '+o.numero+' · '+(prodNome(o.fornitore_id)||''),k:'auto',oid:o.id});
+  for(const o of ordAperti('vendita'))if(inR(o.consegna))L.push({d:o.consegna,t:'Consegna '+o.numero+' · '+(DB.get('clienti',o.cliente_id)?.rag_soc||''),k:'auto',oid:o.id});
+  for(const p of DB.all('passive'))if(!p.pagata&&inR(p.scadenza))L.push({d:p.scadenza,t:'Paga '+(prodNome(p.fornitore_id)||'')+' '+p.numero,k:'pag'});
+  for(const d of DB.all('documenti'))if(d.tipo==='fattura'&&!d.pagata&&inR(d.scadenza))L.push({d:d.scadenza,t:`Incasso FT ${d.numero}/${d.anno} · ${d.cli?.rag_soc||''}`,k:'inc'});
+  return L.sort((x,y)=>x.d.localeCompare(y.d)||x.t.localeCompare(y.t))}
+const bkPostitHTML=(x,mio)=>`<div class="postit" style="background:${POSTIT[x.colore]||POSTIT.giallo}"><b>${esc(x.titolo)}</b>${x.testo?`<p>${esc(x.testo).replace(/\n/g,'<br>')}</p>`:''}<small>${mio?`per ${esc(pNome(x.per))}`:`da ${esc(pNome(x.da))}`}${x.data?' · dal '+dIT(x.data):''}</small><span>${mio?`<button class="sm" data-bk="edit" data-id="${x.id}">${I('edit')}</button>`:`<button class="sm" data-bk="visto" data-id="${x.id}">${I('ok')}Fatto</button>`}</span></div>`;
+VIEWS.bacheca=()=>{if(!PEOPLE)bkPeople().then(()=>st.view==='bacheca'&&render());const T=today(),tab=st.btab||'todo',nm=bkMsgNuovi().length;
+  const miei=bkPostitMiei(),inviati=DB.all('attivita').filter(x=>x.tipo==='postit'&&!x.fatto&&x.da===ME()&&x.per&&x.per!==ME());
+  let body='';
+  if(tab==='todo'){const f=st.bkf||'miei',L=DB.all('attivita').filter(x=>x.tipo==='todo'&&(f==='fatti'?x.fatto:!x.fatto)&&(f!=='miei'||perMe(x))).sort((a,b)=>(a.data||'9999').localeCompare(b.data||'9999')||(a.created_at||'').localeCompare(b.created_at||''));
+    body=`<div class="bar">${tabs('bkf',[['miei','Per me'],['tutti','Tutti'],['fatti','Completati']])}</div><div class="todo">${L.length?L.map(x=>`<div class="ti${x.fatto?' done':''}"><input type="checkbox" data-bk="fatto" data-id="${x.id}"${x.fatto?' checked':''} title="Segna come fatto"><div><b>${esc(x.titolo)}</b>${x.testo?`<br><span class="muted">${esc(x.testo)}</span>`:''}</div><span class="muted">${esc(pNome(x.per))}</span>${x.data?`<span class="${!x.fatto&&x.data<T?'d-dn':'muted'}">${x.data<T&&!x.fatto?'scaduto ':'entro '}${dIT(x.data)}</span>`:'<span></span>'}<button class="sm" data-bk="edit" data-id="${x.id}" title="Modifica">${I('edit')}</button></div>`).join(''):`<p class="muted">${f==='fatti'?'Nessun compito completato.':'Niente da fare. Aggiungi un compito con «Nuovo».'}</p>`}</div>`}
+  else if(tab==='cal'){const m=st.bkm||T.slice(0,7),[y,mo]=m.split('-').map(Number),first=`${m}-01`,dow=(new Date(first+'T12:00').getDay()+6)%7,days=new Date(y,mo,0).getDate(),last=`${m}-${String(days).padStart(2,'0')}`,ev=bkEventi(first,last);
+    const nome=new Date(first+'T12:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'}),sh=n=>{const d=new Date(y,mo-1+n,1);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+    let cells='';for(let i=0;i<dow;i++)cells+='<div class="cd vuoto"></div>';
+    for(let g=1;g<=days;g++){const d=`${m}-${String(g).padStart(2,'0')}`,E=ev.filter(e=>e.d===d);cells+=`<div class="cd${d===T?' oggi':''}" data-bkday="${d}"><b>${g}</b>${E.map(e=>`<span class="ce ce-${e.k}${e.fatto?' done':''}"${e.id?` data-bk="edit" data-id="${e.id}"`:e.oid?` data-act="o-edit" data-id="${e.oid}"`:''} title="${esc(e.t)}">${esc(e.t)}</span>`).join('')}</div>`}
+    body=`<div class="bar"><button data-bk="mese" data-id="${sh(-1)}">‹</button><h3 style="margin:0;min-width:170px;text-align:center;text-transform:capitalize">${esc(nome)}</h3><button data-bk="mese" data-id="${sh(1)}">›</button>${m!==T.slice(0,7)?`<button data-bk="mese" data-id="${T.slice(0,7)}">Oggi</button>`:''}<span class="muted">Clicca un giorno per aggiungere un evento. Arrivi, consegne e scadenze compaiono da soli.</span></div>
+      <div class="cal">${['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].map(d=>`<div class="ch">${d}</div>`).join('')}${cells}</div>
+      <div class="cal-list"><h3>Nel mese</h3>${ev.length?tbl([{h:'Giorno',v:e=>dIT(e.d)},{h:'',v:e=>`<span class="ce ce-${e.k}">${{todo:'Da fare',evento:'Evento',postit:'Post-it',auto:'Ordine',pag:'Pagamento',inc:'Incasso'}[e.k]}</span>`},{h:'Cosa',w:1,v:e=>esc(e.t)}],ev):'<p class="muted">Niente in questo mese.</p>'}</div>`}
+  else{const altri=(PEOPLE||[]).filter(p=>p.email!==ME()),con=st.bkc&&altri.some(p=>p.email===st.bkc)?st.bkc:altri[0]?.email||'',T2=DB.all('messaggi').filter(m=>(m.da===ME()&&m.a===con)||(m.da===con&&m.a===ME())||(!m.a&&con==='')).sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
+    for(const m of T2)if(m.a===ME()&&!m.letto){m.letto=true;DB.upsert('messaggi',m)}
+    body=`${altri.length>1?`<div class="bar">${altri.map(p=>`<button data-bk="chat" data-id="${esc(p.email)}" class="${p.email===con?'pri':''}">${esc(p.nome||p.email)}</button>`).join('')}</div>`:''}
+      <div class="chat" id="bkchat">${T2.length?T2.map(m=>`<div class="msg${m.da===ME()?' mio':''}"><p>${esc(m.testo).replace(/\n/g,'<br>')}</p><small>${esc(pNome(m.da))} · ${m.created_at?new Date(m.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}${m.da===ME()?(m.letto?' · letto':' · inviato'):''}</small></div>`).join(''):`<p class="muted">Nessun messaggio${con?' con '+esc(pNome(con)):''}. Scrivi qui sotto.</p>`}</div>
+      <form class="chatin" data-bkchat="${esc(con)}"><textarea name="t" rows="2" placeholder="${con?'Scrivi a '+esc(pNome(con))+'… (Invio per mandare, Maiusc+Invio per andare a capo)':'Nessun altro utente'}"${con?'':' disabled'}></textarea><button class="pri"${con?'':' disabled'}>Invia</button></form>`}
+  return `<div class="bar"><h2>Bacheca</h2>${tabs('btab',[['todo',`Da fare (${bkTodoMiei().length})`],['cal','Calendario'],['chat',`Messaggi${nm?` (${nm})`:''}`]])}${B('bk-new',I('plus')+'Nuovo','','pri')}${typeof Notification!=='undefined'&&Notification.permission==='default'?B('bk-notif','Attiva notifiche del browser'):''}</div>
+    ${miei.length||inviati.length?`<div class="postits">${miei.map(x=>bkPostitHTML(x,false)).join('')}${inviati.map(x=>bkPostitHTML(x,true)).join('')}</div>`:''}${body}`};
+/* notifiche: post-it a schermo per promemoria e messaggi nuovi (una volta per elemento), notifica del browser se la scheda non è in primo piano */
+const BKSEEN=new Set();let bkPrimo=true;
+function bkNotify(){if(!AUTH.prof||!DB.ready?.())return;const nuovi=[...bkPostitMiei().map(x=>({id:'a'+x.id,c:x.colore,t:x.titolo,s:`Promemoria da ${pNome(x.da)}`,x})),...bkMsgNuovi().map(m=>({id:'m'+m.id,c:'azzurro',t:m.testo,s:`Messaggio da ${pNome(m.da)}`,m}))].filter(n=>!BKSEEN.has(n.id));
+  for(const n of nuovi)BKSEEN.add(n.id);if(!nuovi.length)return;
+  const box=$('#bkpop')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'bkpop'}));
+  for(const n of nuovi.slice(0,4)){const el=document.createElement('div');el.className='postit pop';el.style.background=POSTIT[n.c]||POSTIT.giallo;
+    el.innerHTML=`<small>${esc(n.s)}</small><b>${esc(String(n.t).slice(0,140))}</b><span>${n.x?`<button class="sm" data-bkp="visto">${I('ok')}Fatto</button>`:''}<button class="sm" data-bkp="apri">Apri</button><button class="sm" data-bkp="x" title="Chiudi">${I('x')}</button></span>`;
+    el.onclick=e=>{const b=e.target.closest('[data-bkp]');if(!b)return;const a=b.dataset.bkp;if(a==='visto')bkVisto(n.x.id);if(a==='apri'){st.view='bacheca';st.btab=n.m?'chat':'todo';if(n.m)st.bkc=n.m.da;location.hash='bacheca'}el.remove();render()};box.appendChild(el)}
+  if(!bkPrimo&&document.hidden&&typeof Notification!=='undefined'&&Notification.permission==='granted')for(const n of nuovi.slice(0,3))try{new Notification(n.s,{body:String(n.t).slice(0,140)})}catch{}
+  bkPrimo=false}
+setInterval(bkNotify,4000);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(b){const a=b.dataset.bk,id=b.dataset.id;
+    if(a==='edit')return bkForm(DB.get('attivita',id));
+    if(a==='visto'){bkVisto(id);return render()}
+    if(a==='mese'){st.bkm=id;return render()}
+    if(a==='chat'){st.bkc=id;return render()}
+    if(a==='fatto'){const x=DB.get('attivita',id);x.fatto=b.checked;DB.upsert('attivita',x);return render()}}
+  const d=e.target.closest('[data-bkday]');if(d&&!e.target.closest('.ce'))bkForm({tipo:'evento',data:d.dataset.bkday});
+  if(e.target.closest('[data-act="bk-new"]'))bkPeople().then(()=>bkForm({tipo:st.btab==='cal'?'evento':'todo'}));
+  if(e.target.closest('[data-act="bk-notif"]'))Notification.requestPermission().then(()=>render())});
+document.addEventListener('submit',e=>{const f=e.target.closest('[data-bkchat]');if(!f)return;e.preventDefault();const t=f.elements.t.value.trim(),a=f.dataset.bkchat;if(!t||!a)return;
+  DB.upsert('messaggi',{da:ME(),a,testo:t,letto:false,created_at:new Date().toISOString()});f.elements.t.value='';render();setTimeout(()=>{const c=$('#bkchat');if(c)c.scrollTop=c.scrollHeight;$('[data-bkchat] textarea')?.focus()},0)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target.matches('[data-bkchat] textarea')){e.preventDefault();e.target.form.requestSubmit()}});
+/* avviso di nuova versione: confronta la versione caricata con quella pubblicata (ogni 5 minuti e al ritorno sulla scheda) */
+const BUILD=document.querySelector('meta[name="gl-build"]')?.content||'dev';
+async function verCheck(){if(BUILD==='dev'||$('#verbar'))return;try{const t=await(await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'})).text(),b=t.match(/name="gl-build" content="([^"]+)"/)?.[1];
+  if(b&&b!==BUILD){const el=Object.assign(document.createElement('div'),{id:'verbar'});el.innerHTML=`<span>È disponibile una versione aggiornata del gestionale.</span><button class="sm pri" onclick="location.reload()">Ricarica</button><button class="sm" onclick="this.parentNode.remove()" title="Più tardi">${I('x')}</button>`;document.body.appendChild(el)}}catch{}}
+setInterval(verCheck,5*60e3);document.addEventListener('visibilitychange',()=>{if(!document.hidden)verCheck()});setTimeout(verCheck,15e3);
 /* ================= EVENTI ================= */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[data-act]');if(!b||b.closest('dialog'))return;
   if(b.dataset.view){st.view=b.dataset.view;location.hash=st.view;return render()}
