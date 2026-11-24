@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="gl-build" content="5c17de7">
+<meta name="gl-build" content="17c400f">
 <script>try{if(localStorage.getItem('gl_tema')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- Sicurezza: il browser può collegarsi solo a Supabase (gestionale e CRM) e caricare script solo dai CDN indicati; pagina esclusa dai motori di ricerca -->
@@ -183,6 +183,9 @@ html[data-theme=dark] .warnrow td{background:#2f2a1d}html[data-theme=dark] .line
 #chatpan .chat{flex:1;max-height:none;padding:12px}#chatpan .msg{max-width:82%}#chatpan .chatin{margin:0;padding:10px;border-top:1px solid var(--line)}#chatpan .chatin textarea{min-height:40px}
 #toast{bottom:18px!important;right:336px!important}#app{padding-bottom:70px}
 @media (max-width:760px){#chatpan{right:0;left:0;width:auto;height:min(75vh,560px)}#chatfab{right:10px}.cf-btn{width:220px;height:48px}#toast{right:12px!important;bottom:60px!important}}
+.tabsel,.navsel{display:none}
+@media (max-width:760px){.tabs{display:none!important}.tabsel{display:block;width:auto;flex:1 1 45%;font-weight:600;border-radius:999px;padding:8px 14px;font-size:16px}
+#nav{overflow:visible!important;align-items:center;gap:8px!important}#nav>button:not(.navnew),#nav .gh,#nav .gi,#nav .gi.closed,#nav .foot{display:none!important}#nav .navsel{display:block;flex:1;font-size:16px;font-weight:600;border-radius:999px;padding:9px 14px}}
 /* bacheca */
 h3.sez{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-family:inherit;margin:18px 0 8px;font-weight:600}.card h3 button{float:right}
 .postits{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:4px 0 18px}
@@ -489,6 +492,7 @@ function render(){if(!AUTH.prof)return;
   $('#nav').innerHTML=`<div class="brand"><img src="${esc(CONFIG.logo||LOGO)}" alt="${esc(CONFIG.nome)}"><small>${esc(CONFIG.sub)}</small></div>`
     +`<button class="pri navnew" data-act="q-new">${I('plus')}<span>Nuovo</span></button>`+NAVG.map(([g,all])=>{const items=all.filter(x=>!navHide.has(x[0]));if(!items.length)return'';if(!g)return items.map(item).join('');const act=items.some(x=>x[0]===st.view),open=act||navOpen[g]!==false,n=items.reduce((s,x)=>s+(badge[x[0]]||0),0);
       return `<button class="gh${open?' open':''}" data-navg="${g}" aria-expanded="${open}"><span>${g}</span>${!open&&n?`<span class="nb">${n}</span>`:''}${I('chev')}</button><div class="gi${open?'':' closed'}">${items.map(item).join('')}</div>`}).join('')
+    +(()=>{const o=([k,l])=>`<option value="${k}"${st.view===k?' selected':''}>${esc(l)}${badge[k]?` (${badge[k]})`:''}</option>`;return`<select class="navsel" data-navsel aria-label="Sezione">${NAVG.map(([g,all])=>{const it=all.filter(x=>!navHide.has(x[0]));return!it.length?'':g?`<optgroup label="${esc(g)}">${it.map(o).join('')}</optgroup>`:it.map(o).join('')}).join('')}<optgroup label="Altro">${o(['guida','Guida'])}${o(['impostazioni','Impostazioni'])}<option value="act:tema">${document.documentElement.dataset.theme==='dark'?'Tema chiaro':'Tema scuro'}</option><option value="act:logout">Esci</option></optgroup></select>`})()
     +`<div class="foot">${item(['guida','Guida','doc'])}${item(['impostazioni','Impostazioni','gear'])}${(d=>`<button data-act="tema">${I(d?'sun':'moon')}<span>${d?'Tema chiaro':'Tema scuro'}</span></button>`)(document.documentElement.dataset.theme==='dark')}<button data-act="logout">${I('out')}<span>Esci</span></button><div class="who" title="${esc(AUTH.user?.email)}">${esc(AUTH.prof.nome||AUTH.user?.email)}<br><span data-dbst data-act="sospese" style="cursor:pointer"></span></div></div>`;
   const v=VIEWS[st.view]||(S[st.view]?()=>crudView(st.view):VIEWS.dashboard);tblHint=st.view==='magazzino'&&st.mtab!=='giac'?'':EMPTY[st.view]||'';$('#app').innerHTML=remBanner(SC)+v()+(st.view==='dashboard'?PLANCIA_AIUTO:'');tblHint='';if(st.view==='prezzi')pcUpdate();DB.status()}
 /* pagine vuote: la prima tabella della pagina spiega cosa fare invece di "Nessun dato" */
@@ -499,7 +503,8 @@ const search=k=>`<input type="search" placeholder="Cerca…" value="${esc(st.q[k
 const match=(k,o)=>{const q=(st.q[k]||'').toLowerCase();return!q||JSON.stringify(o).toLowerCase().includes(q)};
 const przIn=(p,k)=>`<input class="przin" data-prz="${k}" data-id="${p.id}" type="number" step="0.01" min="0" inputmode="decimal" value="${p[k]??''}" placeholder="—" title="Modifica prezzo">`;
 const B=(act,html,id='',cls='sm',extra='',title='')=>{title=title||String(html).replace(/<[^>]*>/g,'').trim();return`<button class="${cls}" data-act="${act}" data-id="${id}" ${extra}${title&&title.length>1?` title="${esc(title)}"`:''}>${html}</button>`};
-const tabs=(key,items)=>`<div class="tabs">${items.map(([k,l])=>`<button data-act="tab" data-c="${key}" data-id="${k}" class="${st[key]===k?'on':''}">${l}</button>`).join('')}</div>`;
+/* schede: pillole su schermo largo, menù a tendina sul telefono (niente scorrimento laterale) */
+const tabs=(key,items)=>`<div class="tabs">${items.map(([k,l])=>`<button data-act="tab" data-c="${key}" data-id="${k}" class="${st[key]===k?'on':''}">${l}</button>`).join('')}</div><select class="tabsel" data-tabsel="${key}" aria-label="Scegli">${items.map(([k,l])=>`<option value="${esc(k)}"${st[key]===k?' selected':''}>${esc(String(l).replace(/<[^>]*>/g,''))}</option>`).join('')}</select>`;
 const grpOf=p=>[p.paese,p.regione].filter(Boolean).join(' · ')||'Senza origine';
 
 /* ================= INVENTARIO (impostato come il Cantina Manager) ================= */
@@ -1522,6 +1527,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
   })[b.dataset.act]?.()});
 document.addEventListener('input',e=>{if(e.target.closest('#pcalc'))return pcUpdate();if(e.target.matches('#pcout [data-pl]'))return pcEdit(e.target);const k=e.target.dataset.q;if(k===undefined)return;st.q[k]=e.target.value;const pos=e.target.selectionStart;render();const n=$(`[data-q="${k}"]`);n.focus();n.setSelectionRange(pos,pos)});
 document.addEventListener('change',e=>{const t=e.target;if(t.closest('dialog'))return;
+  if(t.dataset.tabsel){st[t.dataset.tabsel]=t.value;return render()}
+  if(t.matches('[data-navsel]')){const v=t.value;if(v.startsWith('act:')){document.querySelector(`#nav [data-act="${v.slice(4)}"]`)?.click();return render()}st.view=v;location.hash=v;window.scrollTo(0,0);return render()}
   if(t.dataset.prz){const p=DB.get('prodotti',t.dataset.id),k=t.dataset.prz,v=t.value===''?null:r2(t.value);if(!p)return;
     if(v!=null&&!(v>=0)){toast('Prezzo non valido');t.value=p[k]??'';return}
     if(v!==(p[k]??null)){p[k]=v;DB.upsert('prodotti',p);toast('Prezzo aggiornato')}return t.closest('#pcout')?pcUpdate():st.view==='prezzi'?render():undefined}
