@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="gl-build" content="d890953">
+<meta name="gl-build" content="cd7628a">
 <script>try{if(localStorage.getItem('gl_tema')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- Sicurezza: il browser può collegarsi solo a Supabase (gestionale e CRM) e caricare script solo dai CDN indicati; pagina esclusa dai motori di ricerca -->
@@ -171,16 +171,18 @@ html[data-theme=dark] .warnrow td{background:#2f2a1d}html[data-theme=dark] .line
 .pi-a{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}.pi-a button{background:rgba(255,255,255,.7)!important;border-color:rgba(0,0,0,.12)!important;color:#2a2a26!important}
 .pis-n{margin:0;color:#fff;font-size:13px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 @media (prefers-reduced-motion:reduce){.pi.top,.pi.stacca,#pistack{animation:none}}
-#chatfab{position:fixed;right:18px;bottom:18px;z-index:25;display:flex;align-items:flex-end;gap:10px;flex-direction:row-reverse}
-.cf-btn{width:56px;height:56px;border-radius:50%!important;padding:0!important;display:flex;align-items:center;justify-content:center;background:var(--ink)!important;color:var(--bg)!important;border:0!important;box-shadow:0 10px 24px -10px rgba(0,0,0,.55);position:relative}.cf-btn .ic{width:24px;height:24px;stroke:var(--bg)}.cf-btn .nb{position:absolute;top:-2px;right:-2px;margin:0}
-#chatfab.salta .cf-btn{animation:cf-salta .9s cubic-bezier(.3,1.6,.5,1) 2}@keyframes cf-salta{0%,100%{transform:translateY(0)}35%{transform:translateY(-12px)}60%{transform:translateY(0)}75%{transform:translateY(-5px)}}
-.cf-prev{background:var(--card);border:1px solid var(--line);border-radius:16px 16px 4px 16px;padding:9px 30px 9px 13px;max-width:240px;box-shadow:0 8px 22px -12px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px;font-size:13px;position:relative;cursor:pointer;animation:cf-prev .3s ease-out}.cf-prev .x{position:absolute;top:6px;right:6px;cursor:pointer;opacity:.5}.cf-prev .x .ic{width:14px;height:14px}@keyframes cf-prev{from{opacity:0;transform:translateX(12px)}}
-#chatpan{position:fixed;right:18px;bottom:86px;width:min(360px,calc(100vw - 24px));height:min(480px,calc(100vh - 120px));z-index:26;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px -16px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden;animation:cp-on .22s ease-out;transform-origin:bottom right}#chatpan.via{animation:cp-off .22s ease-in forwards}
-@keyframes cp-on{from{opacity:0;transform:scale(.92) translateY(10px)}}@keyframes cp-off{to{opacity:0;transform:scale(.92) translateY(10px)}}
-#chatpan header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}#chatpan header b,#chatpan header select{flex:1}#chatpan .av{width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif,serif);font-size:16px}
+#chatfab{position:fixed;right:18px;bottom:0;z-index:25;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:8px}#chatfab.aperta{display:none}
+.cf-btn{width:300px;height:54px;border-radius:14px 14px 0 0!important;padding:0 14px!important;display:flex;align-items:center;gap:10px;background:var(--card)!important;color:var(--ink)!important;border:1px solid var(--line)!important;border-bottom:0!important;box-shadow:0 -6px 22px -12px rgba(0,0,0,.45);text-align:left}
+.cf-btn:hover{background:var(--acc2)!important}.cf-btn .av{width:32px;height:32px;flex:none;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif,serif);font-size:16px}
+.cf-l{flex:1;display:flex;flex-direction:column;min-width:0}.cf-l b{font-size:14px}.cf-l small{color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cf-btn .nb{margin:0}.cf-btn>.ic{opacity:.6}
+#chatfab.salta .cf-btn{animation:cf-salta .9s cubic-bezier(.3,1.6,.5,1) 2}@keyframes cf-salta{0%,100%{transform:translateY(0)}35%{transform:translateY(-10px)}60%{transform:translateY(0)}75%{transform:translateY(-4px)}}
+.cf-prev{background:var(--card);border:1px solid var(--line);border-radius:16px 16px 4px 16px;padding:9px 30px 9px 13px;max-width:280px;box-shadow:0 8px 22px -12px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px;font-size:13px;position:relative;cursor:pointer;animation:cf-prev .3s ease-out}.cf-prev .x{position:absolute;top:6px;right:6px;cursor:pointer;opacity:.5}.cf-prev .x .ic{width:14px;height:14px}@keyframes cf-prev{from{opacity:0;transform:translateY(8px)}}
+#chatpan{position:fixed;right:18px;bottom:0;width:min(340px,calc(100vw - 24px));height:min(480px,calc(100vh - 80px));z-index:26;background:var(--card);border:1px solid var(--line);border-bottom:0;border-radius:14px 14px 0 0;box-shadow:0 -10px 34px -14px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden;animation:cp-on .22s ease-out;transform-origin:bottom right}#chatpan.via{animation:cp-off .2s ease-in forwards}
+@keyframes cp-on{from{transform:translateY(100%)}}@keyframes cp-off{to{transform:translateY(100%)}}
+#chatpan header{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;background:var(--card)}#chatpan header b,#chatpan header select{flex:1}#chatpan .av{width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif,serif);font-size:16px}
 #chatpan .chat{flex:1;max-height:none;padding:12px}#chatpan .msg{max-width:82%}#chatpan .chatin{margin:0;padding:10px;border-top:1px solid var(--line)}#chatpan .chatin textarea{min-height:40px}
-#toast{bottom:86px!important}
-@media (max-width:760px){#chatpan{right:6px;left:6px;width:auto;bottom:80px;height:min(70vh,520px)}#chatfab{right:12px;bottom:12px}}
+#toast{bottom:18px!important;right:336px!important}#app{padding-bottom:70px}
+@media (max-width:760px){#chatpan{right:0;left:0;width:auto;height:min(75vh,560px)}#chatfab{right:10px}.cf-btn{width:220px;height:48px}#toast{right:12px!important;bottom:60px!important}}
 /* bacheca */
 h3.sez{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-family:inherit;margin:18px 0 8px;font-weight:600}.card h3 button{float:right}
 .postits{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:4px 0 18px}
@@ -1360,7 +1362,7 @@ function bkEventi(da,a){const inR=d=>d&&d>=da&&d<=a,L=[];
   for(const d of DB.all('documenti'))if(d.tipo==='fattura'&&!d.pagata&&inR(d.scadenza))L.push({d:d.scadenza,t:`Incasso FT ${d.numero}/${d.anno} · ${d.cli?.rag_soc||''}`,k:'inc'});
   return L.sort((x,y)=>x.d.localeCompare(y.d)||x.t.localeCompare(y.t))}
 const bkPostitHTML=(x,mio)=>`<div class="postit" style="background:${POSTIT[x.colore]||POSTIT.giallo}"><b>${esc(x.titolo)}</b>${x.testo?`<p>${esc(x.testo).replace(/\n/g,'<br>')}</p>`:''}<small>${mio?`per ${esc(pNome(x.per))}`:`da ${esc(pNome(x.da))}`}${x.data?' · dal '+dIT(x.data):''}</small><span>${mio?`<button class="sm" data-bk="edit" data-id="${x.id}">${I('edit')}</button>`:`<button class="sm" data-bk="visto" data-id="${x.id}">${I('ok')}Fatto</button>`}</span></div>`;
-VIEWS.bacheca=()=>{if(!PEOPLE)bkPeople().then(()=>st.view==='bacheca'&&render());const T=today(),tab=st.btab||'todo',nm=bkMsgNuovi().length;
+VIEWS.bacheca=()=>{if(!PEOPLE)bkPeople().then(()=>st.view==='bacheca'&&render());if(!['todo','cal','postit'].includes(st.btab))st.btab='todo';const T=today(),tab=st.btab,nm=bkMsgNuovi().length;
   const miei=bkPostitMiei(),inviati=DB.all('attivita').filter(x=>x.tipo==='postit'&&!x.fatto&&x.da===ME()&&x.per&&x.per!==ME());
   let body='';
   if(tab==='todo'){const f=st.bkf||'miei',L=DB.all('attivita').filter(x=>x.tipo==='todo'&&(f==='fatti'?x.fatto:!x.fatto)&&(f!=='miei'||perMe(x))).sort((a,b)=>(a.data||'9999').localeCompare(b.data||'9999')||(a.created_at||'').localeCompare(b.created_at||''));
@@ -1372,13 +1374,10 @@ VIEWS.bacheca=()=>{if(!PEOPLE)bkPeople().then(()=>st.view==='bacheca'&&render())
     body=`<div class="bar"><button data-bk="mese" data-id="${sh(-1)}">‹</button><h3 style="margin:0;min-width:170px;text-align:center;text-transform:capitalize">${esc(nome)}</h3><button data-bk="mese" data-id="${sh(1)}">›</button>${m!==T.slice(0,7)?`<button data-bk="mese" data-id="${T.slice(0,7)}">Oggi</button>`:''}<span class="muted">Clicca un giorno per aggiungere un evento. Arrivi, consegne e scadenze compaiono da soli.</span></div>
       <div class="cal">${['Lun','Mar','Mer','Gio','Ven','Sab','Dom'].map(d=>`<div class="ch">${d}</div>`).join('')}${cells}</div>
       <div class="cal-list"><h3>Nel mese</h3>${ev.length?tbl([{h:'Giorno',v:e=>dIT(e.d)},{h:'',v:e=>`<span class="ce ce-${e.k}">${{todo:'Da fare',evento:'Evento',postit:'Post-it',auto:'Ordine',pag:'Pagamento',inc:'Incasso'}[e.k]}</span>`},{h:'Cosa',w:1,v:e=>esc(e.t)}],ev):'<p class="muted">Niente in questo mese.</p>'}</div>`}
-  else{const altri=(PEOPLE||[]).filter(p=>p.email!==ME()),con=st.bkc&&altri.some(p=>p.email===st.bkc)?st.bkc:altri[0]?.email||'',T2=DB.all('messaggi').filter(m=>(m.da===ME()&&m.a===con)||(m.da===con&&m.a===ME())||(!m.a&&con==='')).sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
-    for(const m of T2)if(m.a===ME()&&!m.letto){m.letto=true;DB.upsert('messaggi',m)}
-    body=`${altri.length>1?`<div class="bar">${altri.map(p=>`<button data-bk="chat" data-id="${esc(p.email)}" class="${p.email===con?'pri':''}">${esc(p.nome||p.email)}</button>`).join('')}</div>`:''}
-      <div class="chat" id="bkchat">${T2.length?T2.map(m=>`<div class="msg${m.da===ME()?' mio':''}"><p>${esc(m.testo).replace(/\n/g,'<br>')}</p><small>${esc(pNome(m.da))} · ${m.created_at?new Date(m.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}${m.da===ME()?(m.letto?' · letto':' · inviato'):''}</small></div>`).join(''):`<p class="muted">Nessun messaggio${con?' con '+esc(pNome(con)):''}. Scrivi qui sotto.</p>`}</div>
-      <form class="chatin" data-bkchat="${esc(con)}"><textarea name="t" rows="2" placeholder="${con?'Scrivi a '+esc(pNome(con))+'… (Invio per mandare, Maiusc+Invio per andare a capo)':'Nessun altro utente'}"${con?'':' disabled'}></textarea><button class="pri"${con?'':' disabled'}>Invia</button></form>`}
-  return `<div class="bar"><h2>Bacheca</h2>${tabs('btab',[['todo',`Da fare (${bkTodoMiei().length})`],['cal','Calendario'],['chat',`Messaggi${nm?` (${nm})`:''}`]])}${B('bk-new',I('plus')+'Nuovo','','pri')}${typeof Notification!=='undefined'&&Notification.permission==='default'?B('bk-notif','Attiva notifiche del browser'):''}</div>
-    ${miei.length||inviati.length?`<div class="postits">${miei.map(x=>bkPostitHTML(x,false)).join('')}${inviati.map(x=>bkPostitHTML(x,true)).join('')}</div>`:''}${body}`};
+  else{const tutti=DB.all('attivita').filter(x=>x.tipo==='postit'&&!x.fatto&&(perMe(x)||x.da===ME())).sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
+    body=tutti.length?`<div class="postits">${tutti.map(x=>bkPostitHTML(x,x.da===ME()&&x.per!==ME())).join('')}</div>`:'<p class="muted">Nessun post-it. Creane uno con «Nuovo»: compare appiccicato sullo schermo a chi lo riceve, alla sua prossima apertura del gestionale.</p>'}
+  return `<div class="bar"><h2>Bacheca</h2>${tabs('btab',[['todo',`Da fare (${bkTodoMiei().length})`],['cal','Calendario'],['postit',`Post-it${miei.length?` (${miei.length})`:''}`]])}${B('bk-new',I('plus')+'Nuovo','','pri')}${typeof Notification!=='undefined'&&Notification.permission==='default'?B('bk-notif','Attiva notifiche del browser'):''}</div>
+    ${body}`};
 /* post-it all'apertura: appiccicati sullo schermo, uno sopra l'altro, si leggono uno alla volta e si staccano con la X
    (restano in Bacheca finché non si preme Fatto). Chiusi in questa sessione del browser: non ricompaiono ricaricando la pagina. */
 const PIQ=[],PIKEY='gl_postit_chiusi';const piChiusi=()=>{try{return new Set(JSON.parse(sessionStorage.getItem(PIKEY)||'[]'))}catch{return new Set()}};
@@ -1389,7 +1388,7 @@ function piShow(){let ov=$('#pistack');if(!PIQ.length){if(ov){ov.classList.add('
     return`<div class="pi${top?' top':' sotto'}" style="--r:${r}deg;--d:${(a.length-1-k)*10}px;background:${POSTIT[x.colore]||POSTIT.giallo}"><i class="nastro"></i>${top?`<button class="pi-x" data-pi="x" title="Stacca (resta in Bacheca)">${I('x')}</button><small>Promemoria da ${esc(pNome(x.da))}${x.data?' · '+dIT(x.data):''}</small><h3>${esc(x.titolo)}</h3>${x.testo?`<p>${esc(x.testo).replace(/\n/g,'<br>')}</p>`:''}<div class="pi-a"><button class="sm" data-pi="fatto">${I('ok')}Fatto</button><button class="sm" data-pi="apri">Apri la Bacheca</button></div>`:''}</div>`}).join('');
   ov.querySelector('.pis-n').textContent=PIQ.length>1?`${PIQ.length} promemoria · chiudi con la X per leggere il successivo`:'Chiudi con la X: resta in Bacheca finché non premi Fatto';
   ov.onclick=e=>{const b=e.target.closest('[data-pi]');if(!b)return;const x=PIQ[0],el=box.querySelector('.pi.top');if(!x||el.classList.contains('stacca'))return;
-    if(b.dataset.pi==='fatto')bkVisto(x.id);if(b.dataset.pi==='apri'){st.view='bacheca';st.btab='todo';location.hash='bacheca'}
+    if(b.dataset.pi==='fatto')bkVisto(x.id);if(b.dataset.pi==='apri'){st.view='bacheca';st.btab='postit';location.hash='bacheca'}
     piChiudi(x.id);el.classList.add('stacca');setTimeout(()=>{PIQ.shift();if(b.dataset.pi==='apri'){PIQ.length=0}piShow();render()},420)}}
 /* notifiche: post-it appiccicati per i promemoria, bigliettino in alto a destra per i messaggi nuovi, notifica del browser se la scheda non è in primo piano */
 const BKSEEN=new Set();let bkPrimo=true;
@@ -1407,7 +1406,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-bk]');if(b
     if(a==='chat'){st.bkc=id;return render()}
     if(a==='fatto'){const x=DB.get('attivita',id);x.fatto=b.checked;DB.upsert('attivita',x);return render()}}
   const d=e.target.closest('[data-bkday]');if(d&&!e.target.closest('.ce'))bkForm({tipo:'evento',data:d.dataset.bkday});
-  if(e.target.closest('[data-act="bk-new"]'))bkPeople().then(()=>bkForm({tipo:st.btab==='cal'?'evento':'todo'}));
+  if(e.target.closest('[data-act="bk-new"]'))bkPeople().then(()=>bkForm({tipo:st.view==='bacheca'&&st.btab==='cal'?'evento':st.view==='bacheca'&&st.btab==='postit'?'postit':'todo'}));
   if(e.target.closest('[data-act="bk-notif"]'))Notification.requestPermission().then(()=>render())});
 document.addEventListener('submit',e=>{const f=e.target.closest('[data-bkchat]');if(!f)return;e.preventDefault();const t=f.elements.t.value.trim(),a=f.dataset.bkchat;if(!t||!a)return;
   DB.upsert('messaggi',{da:ME(),a,testo:t,letto:false,created_at:new Date().toISOString()});f.elements.t.value='';const inPan=!!f.closest('#chatpan');render();if(inPan)chatPan();setTimeout(()=>{const c=inPan?$('#chatpan .chat'):$('#bkchat');if(c)c.scrollTop=c.scrollHeight;(inPan?$('#chatpan textarea'):$('#app [data-bkchat] textarea'))?.focus()},0)});
@@ -1419,7 +1418,7 @@ const chatAltri=()=>(PEOPLE||[]).filter(p=>p.email!==ME());
 function chatFab(nuovo){if(!AUTH.prof)return;if(!PEOPLE){bkPeople().then(()=>chatFab(nuovo));return}let f=$('#chatfab');
   if(!chatAltri().length){f?.remove();return}
   if(!f){f=document.body.appendChild(Object.assign(document.createElement('div'),{id:'chatfab'}));f.onclick=e=>{if(e.target.closest('.cf-prev .x')){e.target.closest('.cf-prev').remove();return}CP.open=!CP.open;if(CP.open&&nuovo?.da)CP.con=CP.con||nuovo.da;chatPan();chatFab()}}
-  const n=bkMsgNuovi().length;f.innerHTML=`<button class="cf-btn" title="Messaggi">${I('chat')}${n?`<span class="nb">${n}</span>`:''}</button>`+(nuovo&&!CP.open?`<div class="cf-prev"><b>${esc(pNome(nuovo.da))}</b><span>${esc(String(nuovo.testo).slice(0,90))}</span><i class="x" title="Chiudi">${I('x')}</i></div>`:'');
+  const n=bkMsgNuovi().length,al=chatAltri(),ul=DB.all('messaggi').filter(m=>m.da===ME()||m.a===ME()).sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''))[0];f.innerHTML=`<button class="cf-btn" title="Apri la chat"><span class="av">${esc((al.length===1?pNome(al[0].email):'M').slice(0,1))}</span><span class="cf-l"><b>${al.length===1?esc(al[0].nome||al[0].email):'Messaggi'}</b><small>${ul?esc((ul.da===ME()?'Tu: ':'')+String(ul.testo).slice(0,40)):'Scrivi un messaggio'}</small></span>${n?`<span class="nb">${n}</span>`:''}${I('chat')}</button>`+(nuovo&&!CP.open?`<div class="cf-prev"><b>${esc(pNome(nuovo.da))}</b><span>${esc(String(nuovo.testo).slice(0,90))}</span><i class="x" title="Chiudi">${I('x')}</i></div>`:'');
   f.classList.toggle('aperta',CP.open);if(nuovo&&!CP.open){f.classList.remove('salta');void f.offsetWidth;f.classList.add('salta');if(nuovo.da)CP.con=nuovo.da;setTimeout(()=>f.querySelector('.cf-prev')?.remove(),9000)}}
 function chatPan(){let p=$('#chatpan');if(!CP.open){if(p){p.classList.add('via');setTimeout(()=>p.remove(),220)}return}
   const altri=chatAltri();if(!altri.some(x=>x.email===CP.con))CP.con=altri[0]?.email||'';const con=CP.con;
@@ -1427,11 +1426,11 @@ function chatPan(){let p=$('#chatpan');if(!CP.open){if(p){p.classList.add('via')
   for(const m of L)if(m.a===ME()&&!m.letto){m.letto=true;DB.upsert('messaggi',m)}
   const fresh=!p;if(!p)p=document.body.appendChild(Object.assign(document.createElement('div'),{id:'chatpan'}));p.classList.remove('via');
   const sc=p.querySelector('.chat'),fondo=!sc||sc.scrollTop+sc.clientHeight>=sc.scrollHeight-20,bozza=p.querySelector('textarea')?.value||'',foc=document.activeElement===p.querySelector('textarea');
-  p.innerHTML=`<header><span class="av">${esc((pNome(con)||'?').slice(0,1))}</span>${altri.length>1?`<select data-cpcon>${altri.map(x=>`<option value="${esc(x.email)}"${x.email===con?' selected':''}>${esc(x.nome||x.email)}</option>`).join('')}</select>`:`<b>${esc(altri[0]?.nome||'')}</b>`}<button class="sm" data-cp="bacheca" title="Apri in Bacheca">${I('note')}</button><button class="sm" data-cp="x" title="Chiudi">${I('x')}</button></header>
+  p.innerHTML=`<header><span class="av">${esc((pNome(con)||'?').slice(0,1))}</span>${altri.length>1?`<select data-cpcon>${altri.map(x=>`<option value="${esc(x.email)}"${x.email===con?' selected':''}>${esc(x.nome||x.email)}</option>`).join('')}</select>`:`<b>${esc(altri[0]?.nome||'')}</b>`}<button class="sm" data-cp="x" title="Chiudi">${I('x')}</button></header>
     <div class="chat">${L.length?L.map(m=>`<div class="msg${m.da===ME()?' mio':''}"><p>${esc(m.testo).replace(/\n/g,'<br>')}</p><small>${m.created_at?new Date(m.created_at).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}${m.da===ME()?(m.letto?' · letto':' · inviato'):''}</small></div>`).join(''):`<p class="muted">Nessun messaggio con ${esc(pNome(con))}. Scrivi qui sotto.</p>`}</div>
     <form class="chatin" data-bkchat="${esc(con)}"><textarea name="t" rows="2" placeholder="Scrivi a ${esc(pNome(con))}…"></textarea><button class="pri" title="Invia (Invio)">${I('send')}</button></form>`;
   const ta=p.querySelector('textarea');ta.value=bozza;const c=p.querySelector('.chat');if(fresh||fondo)c.scrollTop=c.scrollHeight;if(fresh||foc)ta.focus();
-  p.onclick=e=>{const b=e.target.closest('[data-cp]');if(!b)return;if(b.dataset.cp==='bacheca'){st.view='bacheca';st.btab='chat';st.bkc=con;location.hash='bacheca';render()}CP.open=false;chatPan();chatFab()};
+  p.onclick=e=>{const b=e.target.closest('[data-cp]')||(e.target.closest('header')&&!e.target.closest('select')?{dataset:{cp:'x'}}:null);if(!b)return;if(b.dataset.cp==='bacheca'){st.view='bacheca';st.btab='chat';st.bkc=con;location.hash='bacheca';render()}CP.open=false;chatPan();chatFab()};
   p.onchange=e=>{if(e.target.matches('[data-cpcon]')){CP.con=e.target.value;chatPan()}};chatFab()}
 /* aggiorna bolla e pannello quando cambiano i dati (nuovi messaggi in tempo reale, letto dall'altro) */
 let CPSIG='';setInterval(()=>{if(!AUTH.prof||!DB.ready?.())return;const sig=DB.all('messaggi').map(m=>m.id+(m.letto?1:0)).join();if(sig===CPSIG&&$('#chatfab'))return;CPSIG=sig;chatFab();if(CP.open)chatPan()},2000);
