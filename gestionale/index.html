@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="gl-build" content="e270d80">
+<meta name="gl-build" content="747cd23">
 <script>try{if(localStorage.getItem('gl_tema')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <!-- Sicurezza: il browser può collegarsi solo a Supabase (gestionale e CRM) e caricare script solo dai CDN indicati; pagina esclusa dai motori di ricerca -->
@@ -406,7 +406,12 @@ S.fallate={t:'Fallate & segnalazioni',t1:'segnalazione',f:[['data','Data segnala
 S.agenti={t:'Agenti',t1:'agente',f:[['nome','Nome e cognome / ragione sociale','text',1],['tipo','Tipo','sel',0,['Agente plurimandatario','Agente monomandatario','Segnalatore / procacciatore']],['zona','Zona'],['piva','P.IVA'],['cf','Codice fiscale'],['email','Email'],['tel','Telefono'],['indirizzo','Indirizzo'],['iban','IBAN'],['pct_vendita','Provvigione su vendite dirette %','num'],['quota_mandati','Quota della nostra provvigione sui mandati %','num'],['maturazione','Maturazione','sel',0,["All'incasso","All'evasione"]],['liquidazione','Liquidazione','sel',0,['Mensile','Trimestrale','Semestrale']],['enasarco','Iscritto Enasarco','chk'],['enasarco_pct','Aliquota Enasarco totale %','num'],['ritenuta_pct',"Ritenuta d'acconto effettiva %",'num'],['data_inizio','Inizio contratto','date'],['data_fine','Scadenza contratto','date'],['attivo','Attivo','chk'],['doc_url','Link contratto'],['note','Note','area']],list:[]};
 S.movimenti.onSave=o=>{if(o.tipo==='Carico')autoSoglia(o.prodotto_id,+o.qta)};
 const autoSoglia=(pid,q)=>{const p=DB.get('prodotti',pid);if(p&&p.scorta_min==null&&q>0){p.scorta_min=q>=12?6:q>=6?3:1;DB.upsert('prodotti',p)}};
-S.prodotti.onSave=o=>{o.formato=o.formato?fmtNorm(o.formato):o.formato;if(!o.sku)o.sku=CONFIG.skuPrefix+String(DB.nextNum('sku')).padStart(4,'0');if(!o.paese&&o.regione)o.paese=REG2P[o.regione.toLowerCase()]||''};
+S.prodotti.onSave=(o,prev)=>{o.formato=o.formato?fmtNorm(o.formato):o.formato;
+  /* nuova annata = nuova referenza: se la vecchia ha già movimenti, il suo storico (costi, lotti, vendite) resta sull'annata giusta */
+  if(prev?.id&&prev.annata&&o.annata&&o.annata!==prev.annata&&DB.all('movimenti').some(m=>m.prodotto_id===prev.id)&&confirm(`${prev.nome} ${prev.annata} ha già movimenti di magazzino.\n\nOK = crea una nuova referenza per l'annata ${o.annata} (la ${prev.annata} resta com'è, con il suo storico).\nAnnulla = correggi l'annata su questa referenza.`)){
+    const n={...o,annata:o.annata,sku:CONFIG.skuPrefix+String(DB.nextNum('sku')).padStart(4,'0'),files:[],alias_annata:null,scorta_min:null};for(const k of ['id','created_at','updated_at'])delete n[k];
+    DB.upsert('prodotti',n);o.annata=prev.annata;toast(`Creata ${n.sku}: ${n.nome} ${n.annata}`)}
+  if(!o.sku)o.sku=CONFIG.skuPrefix+String(DB.nextNum('sku')).padStart(4,'0');if(!o.paese&&o.regione)o.paese=REG2P[o.regione.toLowerCase()]||''};
 /* referenze sempre come nome vino · produttore · annata (· formato se non 0,75) */
 const prodNome=id=>{const f=id&&DB.get('fornitori',id);return f?f.cantina||f.rag_soc:''};
 const label=(c,o)=>!o?'':c==='prodotti'?[o.nome,prodNome(o.produttore_id),o.annata,parseFloat(o.formato)&&parseFloat(o.formato)!==0.75&&fmtLbl(o.formato)].filter(Boolean).join(' · '):c==='mandati'?`${DB.get('fornitori',o.mandante_id)?.rag_soc||'?'} — ${o.tipo||''}`:o.rag_soc||o.nome||'';
@@ -445,9 +450,26 @@ function stockMap(){const by={},m={};for(const x of DB.all('movimenti'))(by[x.pr
   for(const [pid,arr] of Object.entries(by)){const p=DB.get('prodotti',pid);arr.sort((a,b)=>a.data.localeCompare(b.data)||(SIGN[b.tipo]?1:0)-(SIGN[a.tipo]?1:0)||a.created_at.localeCompare(b.created_at));
     /* over = scoperto ancora aperto: bottiglie scaricate oltre la giacenza. Il carico successivo lo copre prima di creare un lotto,
        così la somma dei lotti resta sempre uguale a max(q, 0) e il valore di magazzino non si gonfia */
-    const lots=[];let q=0,over=0;
-    for(const x of arr){const n=+x.qta||0;if(SIGN[x.tipo]){const cop=Math.min(over,n);over-=cop;if(n-cop>0)lots.push({q:n-cop,c:x.costo_unit??(+p?.costo||0),l:x.lotto||''});q+=n}else{q-=n;let r=n;while(r>0&&lots.length){const L=lots[0],t=Math.min(r,L.q);L.q-=t;r-=t;if(!L.q)lots.shift()}over+=r}}
-    m[pid]={q,lots,over,val:lots.reduce((s,L)=>s+L.q*L.c,0)}}return m}
+    /* pend = scarichi con bottiglie scoperte: quando arriva il carico (fattura registrata dopo la vendita) si calcola il costo giusto,
+       e se diverso da quello fotografato lo scarico va in fix, da aggiornare in Magazzino > Costi da aggiornare */
+    const lots=[],pend=[],fix=[];let q=0,over=0;
+    for(const x of arr){const n=+x.qta||0;if(SIGN[x.tipo]){const cop=Math.min(over,n),c=x.costo_unit??(+p?.costo||0);over-=cop;
+        let k=cop;while(k>0&&pend.length){const P=pend[0],t=Math.min(k,P.r);P.cov+=t*c;P.r-=t;k-=t;P.da.add(x.rif||dIT(x.data));
+          if(!P.r){pend.shift();const nc=Math.round(P.cov/(+P.x.qta)*1e4)/1e4;if(Math.abs(nc-(+P.x.costo_unit||0))>0.004)fix.push({m:P.x,c:nc,da:[...P.da].join(', ')})}}
+        if(n-cop>0)lots.push({q:n-cop,c,l:x.lotto||'',r:x.rif||dIT(x.data)});q+=n}
+      else{q-=n;let r=n,cov=0;const da=new Set();while(r>0&&lots.length){const L=lots[0],t=Math.min(r,L.q);cov+=t*L.c;da.add(L.r);L.q-=t;r-=t;if(!L.q)lots.shift()}over+=r;
+        if(x.tipo==='Scarico'&&n>0){if(r>0)pend.push({x,r,cov,da});
+          /* coperto da un carico con data precedente ma registrato dopo la vendita: il costo fotografato non è quello FIFO */
+          else{const nc=Math.round(cov/n*1e4)/1e4;if(Math.abs(nc-(+x.costo_unit||0))>0.004)fix.push({m:x,c:nc,da:[...da].join(', ')})}}}}
+    m[pid]={q,lots,over,fix,val:lots.reduce((s,L)=>s+L.q*L.c,0)}}return m}
+document.addEventListener('input',e=>{const t=e.target;if(t.dataset?.invc!=null)(st.invc||={})[t.dataset.invc]=t.value;else if(t.id==='inv-d')st.invd=t.value});
+/* lotti che uno scarico di qty bottiglie prende in ordine FIFO (prima di fifoTake, che li consuma) */
+const fifoLots=(s,qty)=>{let r=qty;const L=[];for(const x of s?.lots||[]){if(r<=0)break;r-=Math.min(r,x.q);if(x.l&&!L.includes(x.l))L.push(x.l)}return L.join(', ')};
+/* costi da aggiornare: lo scarico non si modifica, si annulla e si registra uguale con il costo del carico arrivato dopo */
+function costiFix(sm){return Object.values(sm).flatMap(x=>x.fix||[])}
+function costiApplica(L){for(const f of L){const o=DB.get('movimenti',f.m.id);if(!o)continue;const n={...o};delete n.id;delete n.created_at;delete n.updated_at;
+  n.costo_unit=f.c;n.note=[o.note,`Costo da ${eur(+o.costo_unit||0)} a ${eur(f.c)} dopo il carico ${f.da} (registrato dopo la vendita).`].filter(Boolean).join(' ');
+  DB.remove('movimenti',o.id);DB.upsert('movimenti',n)}}
 const avgCost=(p,s)=>s&&s.q>0?s.val/s.q:(+p?.costo||0);
 function fifoTake(s,qty,p){let r=qty,c=0;for(const L of s?.lots||[]){if(r<=0)break;const t=Math.min(r,L.q);c+=t*L.c;L.q-=t;r-=t}if(s)s.lots=s.lots.filter(L=>L.q>0);c+=r*(+p?.costo||0);return qty?Math.round(c/qty*1e4)/1e4:0}
 function provvRows(f={}){return DB.all('ordini').filter(o=>o.tipo==='agenzia'&&['Confermato','Evaso'].includes(o.stato)&&(!f.m||o.mandato_id===f.m)&&(!f.da||o.data>=f.da)&&(!f.a||o.data<=f.a)&&(!f.st||(f.st==='liq')===!!o.provv_liq))
@@ -638,7 +660,14 @@ ordini(){const fase=st.ofase==='ric'?new Set(ordAperti('acquisto').map(o=>o.id))
       +(o.tipo==='acquisto'&&o.stato!=='Annullato'?B('o-ftric',I('inb')+'Fatt. ricevuta',o.id):'')
       +B('o-del',I('del'),o.id,'sm','','Elimina')}}],rows)}`},
 
-magazzino(){const sm=stockMap(),tb=tabs('mtab',[['giac','Giacenze'],['lotti','Lotti FIFO'],['mov','Movimenti']]);
+magazzino(){const sm=stockMap(),fx=costiFix(sm),tb=tabs('mtab',[['giac','Giacenze'],['lotti','Lotti FIFO'],['mov','Movimenti'],['inv','Inventario'],...(fx.length||st.mtab==='costi'?[['costi',`Costi da aggiornare (${fx.length})`]]:[])]);
+  if(st.mtab==='costi'){tblHint='Nessun costo da aggiornare: ogni vendita ha il costo del suo carico.';
+    return `<div class="bar"><h2>Magazzino</h2>${tb}${fx.length?B('mc-ok',I('ok')+'Aggiorna tutti','','pri'):''}</div><p class="muted">Vendite registrate prima del carico (per esempio la fattura del produttore arrivata dopo): avevano preso il costo standard. Aggiornando, lo scarico viene annullato e registrato di nuovo, uguale, con il costo del carico.</p>
+    ${tbl([{h:'Data',v:f=>dIT(f.m.data)},{h:'Referenza',w:1,v:f=>esc(label('prodotti',DB.get('prodotti',f.m.prodotto_id)))},{h:'Bt',n:1,v:f=>num(f.m.qta)},{h:'Rif.',v:f=>esc(f.m.rif)},{h:'Costo registrato',n:1,v:f=>eur(+f.m.costo_unit||0)},{h:'Costo giusto',n:1,v:f=>`<b>${eur(f.c)}</b>`},{h:'Dal carico',v:f=>esc(f.da)}],fx)}`}
+  if(st.mtab==='inv'){const T=st.invd||today(),rows=DB.all('prodotti').filter(p=>p.attivo!==false||sm[p.id]?.q).filter(p=>match('giac',p)).sort(somCmp);
+    return `<div class="bar"><h2>Magazzino</h2>${tb}${search('giac')}</div><p class="muted">Conta le bottiglie e scrivi il numero accanto a ogni referenza (lascia vuoto quelle non contate). Le differenze diventano rettifiche alla data scelta, con il costo FIFO.</p>
+    <div class="bar"><label style="width:auto"><span>Data inventario</span><input type="date" id="inv-d" value="${T}"></label>${B('inv-go',I('ok')+'Registra differenze','','pri')}</div>
+    ${tbl([{h:'Referenza',w:1,v:p=>vinoLnk(p,esc(label('prodotti',p)))},{h:'Teorica',n:1,v:p=>num(sm[p.id]?.q||0)},{h:'Contate',n:1,v:p=>`<input type="number" min="0" step="1" inputmode="numeric" data-invc="${p.id}" value="${st.invc?.[p.id]??''}" style="width:90px">`}],rows,()=>'',p=>grpOf(p))}`}
   if(st.mtab==='mov'){const rows=DB.all('movimenti').filter(m=>match('mov',{...m,p:label('prodotti',DB.get('prodotti',m.prodotto_id)),cp:movCp(m).replace(/<[^>]*>/g,'')})).sort((a,b)=>b.data.localeCompare(a.data)||b.created_at.localeCompare(a.created_at));
     return `<div class="bar"><h2>Magazzino</h2>${tb}${search('mov')}${B('csv',I('dl')+'CSV','','',`data-c="movimenti"`)}${B('new',I('plus')+'Movimento','','pri','data-c="movimenti"')}</div>${tbl([{h:'Data',v:m=>dIT(m.data)},{h:'Referenza',v:m=>esc(label('prodotti',DB.get('prodotti',m.prodotto_id)))},{h:'Tipo',v:m=>`<span class="badge ${SIGN[m.tipo]?'b-ok':'b-warn'}">${m.tipo}</span>`},{h:'Q.tà',n:1,v:m=>(SIGN[m.tipo]?'+':'−')+num(m.qta)},{h:'Lotto',v:m=>esc(m.lotto)},{h:'Costo u.',n:1,v:m=>m.costo_unit!=null?eur(m.costo_unit):''},{h:'Prezzo u.',n:1,v:m=>m.prezzo_unit!=null?eur(m.prezzo_unit):''},{h:'Da / A',v:movCp},{h:'Rif.',v:m=>esc(m.rif)},{h:'e-AD/DAS',v:m=>esc(m.das)},{h:'',a:1,v:m=>B('edit',I('edit'),m.id,'sm','data-c="movimenti"','Modifica')+B('del',I('del'),m.id,'sm','data-c="movimenti"','Annulla movimento')}],rows)}`}
   if(st.mtab==='lotti'){const rows=DB.all('prodotti').filter(p=>sm[p.id]?.lots.length&&match('giac',p)).sort(somCmp).flatMap(p=>sm[p.id].lots.map(L=>({p,L})));
@@ -768,12 +797,12 @@ function orderForm(o){o=structuredClone(o||{tipo:st.otipo||'vendita',data:today(
 function evadi(o){if(o.mov)return toast('Movimenti già generati');const T=today();
   if(o.tipo!=='agenzia'){const sm=stockMap();
     if(o.tipo==='vendita'){const need={};for(const r of o.righe)if(r.prodotto_id)need[r.prodotto_id]=(need[r.prodotto_id]||0)+r.qta;const miss=Object.entries(need).filter(([p,q])=>(sm[p]?.q||0)<q);
-      if(miss.length&&!confirm(`Giacenza insufficiente per ${miss.length} referenze: l'eccedenza verrà valorizzata a costo standard e segnalata come scoperto. Procedere?`))return}
+      if(miss.length&&!confirm(`Giacenza insufficiente per ${miss.length} referenze (carico non ancora registrato?). Le bottiglie mancanti prendono il costo standard; quando registri il carico, il costo giusto si aggiorna da Magazzino > Costi da aggiornare. Procedere?`))return}
     let lotto='';if(o.tipo==='acquisto'){lotto=prompt('Lotto (opzionale):','');if(lotto===null)return}
     const cambio=+o.cambio||1,base=o.righe.reduce((s,r)=>s+lineTot(r),0),acc=+o.costi_acc||0;
     for(const r of o.righe){if(!r.prodotto_id)continue;const lt=lineTot(r),m={data:T,prodotto_id:r.prodotto_id,qta:r.qta,rif:o.numero,ordine_id:o.id};
       if(o.tipo==='acquisto'){m.tipo='Carico';autoSoglia(r.prodotto_id,r.qta);m.costo_unit=Math.round((lt*cambio+(base?acc*lt/base:0))/r.qta*1e4)/1e4;m.lotto=lotto}
-      else{m.tipo='Scarico';m.costo_unit=fifoTake(sm[r.prodotto_id],r.qta,DB.get('prodotti',r.prodotto_id));m.prezzo_unit=Math.round(lt/r.qta*1e4)/1e4}
+      else{m.tipo='Scarico';m.lotto=fifoLots(sm[r.prodotto_id],r.qta)||null;m.costo_unit=fifoTake(sm[r.prodotto_id],r.qta,DB.get('prodotti',r.prodotto_id));m.prezzo_unit=Math.round(lt/r.qta*1e4)/1e4}
       DB.upsert('movimenti',m)}o.mov=true}
   o.stato='Evaso';o.data_evasione=T;DB.upsert('ordini',o);toast(o.numero+' evaso');render()}
 
@@ -1518,6 +1547,14 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-view],[dat
     'wa-save':()=>{const c=waCfg(),r=$('#app');c.mandato_id=r.querySelector('[name=wa_mandato]').value;c.da=r.querySelector('[name=wa_da]').value;c.agenti=[...r.querySelectorAll('[data-waag]:checked')].map(x=>x.dataset.waag);c.map={};r.querySelectorAll('[data-wamap]').forEach(s=>{if(s.value)c.map[s.dataset.wamap]=s.value});c.enabled=true;DB.saveSettings();if(!c.mandato_id)return alert('Scegli il mandato a cui attribuire gli ordini');toast('Impostazioni salvate');waSync(true)},
     'wa-logout':()=>{if(!confirm('Scollegare il CRM? Gli ordini già importati restano.'))return;WA.sb?.auth.signOut();WA.ok=false;waCfg().enabled=false;DB.saveSettings();render()},
     'inv-scheda':()=>invScheda(DB.get('prodotti',id)),'vino':()=>invScheda(DB.get('prodotti',id)),'pl-vino':()=>{const x=DB.get('pl',id),p=DB.get('prodotti',x?.prodotto_id);p?invScheda(p):crudForm('pl',x)},'inv-reset':()=>{st.inv={sort:st.inv.sort};render()},
+    'mc-ok':()=>{const L=costiFix(stockMap());if(!L.length||!confirm(`Aggiornare il costo di ${L.length} scarichi? Ognuno viene annullato e registrato di nuovo con il costo del carico.`))return;costiApplica(L);toast(L.length+' costi aggiornati');render()},
+    'inv-go':()=>{const d=$('#inv-d')?.value||today(),sm=stockMap(),c=st.invc||{},L=[];
+      for(const [pid,v] of Object.entries(c)){if(v===''||v==null)continue;const p=DB.get('prodotti',pid),diff=+v-(sm[pid]?.q||0);if(p&&diff)L.push({p,diff})}
+      if(!L.length)return toast('Nessuna differenza da registrare');
+      if(!confirm(`Inventario del ${dIT(d)}:\n\n${L.map(x=>`${label('prodotti',x.p)}: ${x.diff>0?'+':''}${x.diff}`).join('\n')}\n\nRegistrare queste rettifiche?`))return;
+      for(const x of L){const s=sm[x.p.id],m={data:d,prodotto_id:x.p.id,qta:Math.abs(x.diff),rif:'Inventario '+dIT(d),note:'Differenza da inventario fisico'};
+        if(x.diff>0){m.tipo='Rettifica +';m.costo_unit=Math.round(avgCost(x.p,s)*1e4)/1e4}else{m.tipo='Rettifica −';m.lotto=fifoLots(s,m.qta)||null;m.costo_unit=fifoTake(s,m.qta,x.p)}DB.upsert('movimenti',m)}
+      st.invc={};toast(L.length+' rettifiche registrate');render()},
     'mv-new':()=>crudForm('movimenti',{data:today(),prodotto_id:id,tipo:b.dataset.t}),
     'rem-x':()=>{st.hideRem=true;render()},
     'q-new':()=>{const Q=[['ov','Ordine di vendita','ord'],['oa','Ordine d\'acquisto','trk'],['doc','Fattura o DDT','doc'],['pas','Fattura ricevuta','wal'],['mov','Movimento di magazzino','box'],['prod','Referenza (vino)','btl'],['cli','Cliente','usr'],['for','Fornitore o mandante','trk'],['fal','Fallata','flag']].filter(q=>!(q[0]==='fal'&&navHide.has('fallate')));
